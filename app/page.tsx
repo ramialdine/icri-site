@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -147,58 +148,58 @@ export default function Page() {
               Contact
             </a>
           </nav>
-          <Button className="rounded-2xl">Donate</Button>
+          <Button asChild className="rounded-2xl bg-emerald-700 hover:bg-emerald-800">
+            <Link href="/donate">Donate</Link>
+          </Button>
         </div>
       </header>
 
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(16,185,129,0.16),transparent_35%),radial-gradient(circle_at_left,rgba(20,184,166,0.12),transparent_30%)]" />
-        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
+      <section className="relative overflow-hidden bg-gradient-to-br from-emerald-50 via-teal-50 to-lime-50">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(16,185,129,0.18),transparent_40%),radial-gradient(circle_at_left,rgba(20,184,166,0.14),transparent_34%)]" />
+        <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:px-8 lg:py-14">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="relative z-10 max-w-3xl"
+            transition={{ duration: 0.45 }}
+            className="relative z-10"
           >
-            <p className="mb-4 text-sm font-semibold uppercase tracking-[0.28em] text-emerald-700">
-              Islamic Center of Rhode Island
+            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-emerald-700">
+              Quick Actions
             </p>
-            <h2 className="max-w-xl text-4xl font-bold leading-tight sm:text-5xl">
-              A clean, modern home online for Masjid Al Kareem in Providence.
+            <h2 className="mt-3 text-3xl font-bold leading-tight sm:text-4xl">
+              What do you need today? 🌿
             </h2>
-            <p className="mt-5 max-w-xl text-base leading-7 text-stone-600 sm:text-lg">
-              Built for prayer times, announcements, donations, classes, and
-              community connection without the usual clutter people keep putting
-              on mosque websites like it is still 2009.
+            <p className="mt-4 max-w-2xl text-base leading-7 text-stone-700">
+              Jump straight to prayer times or support the masjid in one click.
             </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Button className="rounded-2xl px-6">View Prayer Times</Button>
-              <Button variant="outline" className="rounded-2xl px-6">
-                Upcoming Events
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Button asChild className="rounded-2xl bg-emerald-700 px-6 py-5 text-base hover:bg-emerald-800">
+                <a href="#prayers">🕰️ View Prayer Schedule</a>
+              </Button>
+              <Button asChild variant="outline" className="rounded-2xl border-emerald-300 bg-white/90 px-6 py-5 text-base text-emerald-800 hover:bg-emerald-50">
+                <Link href="/donate">💚 Donate to the Masjid</Link>
               </Button>
             </div>
-            <div className="mt-8 grid gap-4 sm:grid-cols-2">
-              <div className="rounded-2xl border border-stone-200 bg-white p-4 shadow-sm">
-                <div className="flex items-start gap-3">
-                  <MapPin className="mt-1 h-5 w-5 text-emerald-700" />
-                  <div>
-                    <p className="font-semibold">39 Haskins St, Providence, RI</p>
-                    <p className="text-sm text-stone-600">
-                      Serving the local Muslim community in Providence
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div className="rounded-2xl border border-stone-200 bg-white p-4 shadow-sm">
-                <div className="flex items-start gap-3">
-                  <Phone className="mt-1 h-5 w-5 text-emerald-700" />
-                  <div>
-                    <p className="font-semibold">(401) 274-3986</p>
-                    <p className="text-sm text-stone-600">
-                      Call for programs, events, and general questions
-                    </p>
-                  </div>
-                </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="relative z-10"
+          >
+            <div className="relative h-full min-h-[220px] overflow-hidden rounded-[28px] border border-emerald-200/80 shadow-lg">
+              <Image
+                src="/masjidExterior.png"
+                alt="Masjid exterior"
+                fill
+                sizes="(max-width: 1024px) 100vw, 520px"
+                className="object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-emerald-950/60 via-emerald-900/20 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-5 text-white">
+                <p className="text-sm uppercase tracking-[0.2em] text-emerald-100">ICRI</p>
+                <p className="mt-1 text-xl font-semibold">Masjid Al Kareem</p>
               </div>
             </div>
           </motion.div>
@@ -295,23 +296,70 @@ export default function Page() {
         id="about"
         className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-16"
       >
-        <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-          <Card className="rounded-[28px] border-stone-200 shadow-sm">
-            <CardContent className="p-8">
+        <Card className="rounded-[32px] border-stone-200 shadow-sm">
+          <CardContent className="grid gap-8 p-8 lg:grid-cols-[1.15fr_0.85fr] lg:p-10">
+            <div>
               <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-700">
                 About the Masjid
               </p>
-              <h3 className="mt-3 text-3xl font-bold">
-                Simple, welcoming, and built for the community.
+              <h3 className="mt-3 text-3xl font-bold sm:text-4xl">
+                A long-standing mosque serving Providence since 1976.
               </h3>
-              <p className="mt-4 max-w-3xl text-base leading-7 text-stone-600">
-                This concept keeps the same general spirit as the reference
-                site: a strong hero section, prayer times, donation CTA, program
-                highlights, and clean contact details. The difference is that
-                this version is more modern, easier to scan on mobile, and less
-                likely to make visitors rage-quit after two clicks.
-              </p>
-              <div className="mt-6 grid gap-3 sm:grid-cols-3">
+              <div className="mt-6 space-y-5 text-base leading-8 text-stone-600">
+                <p>
+                  Masjid Al Kareem, also known as the Islamic Center of Rhode
+                  Island, is a Sunni mosque that has been an integral part of
+                  the Providence community since its establishment in 1976. This
+                  welcoming Islamic center offers a range of services and
+                  amenities for worshippers and community members.
+                </p>
+                <p>
+                  One of the main highlights of Masjid Al Kareem is its
+                  commitment to inclusivity. The mosque provides a kid-friendly
+                  environment, ensuring that families can comfortably worship
+                  together. Additionally, the presence of wheelchair amenities,
+                  such as accessible prayer spaces and parking, ensures that
+                  individuals with mobility needs can easily navigate the
+                  premises.
+                </p>
+                <p>
+                  The mosque offers a variety of services to cater to the needs
+                  of the community. Five daily prayers are held, providing a
+                  spiritual space for worshippers to connect with their faith
+                  throughout the day. Jumu&apos;ah prayers, the congregational
+                  Friday prayers, bring the community together in a special way.
+                  The mosque also hosts a weekend school for children in a
+                  dedicated classroom, providing an opportunity for them to
+                  learn about Islam and their cultural heritage. During
+                  Ramadan, the mosque organizes Iftar gatherings, which allow
+                  the community to come together and break their fasts during
+                  the holy month.
+                </p>
+                <p>
+                  There is a spacious and dedicated women&apos;s section with a separate entrance directly to it. The mosque also offers many dedicated parking spaces close to the building for women.
+                </p>
+                <p>
+                  Situated in the heart of Providence, Rhode Island, Masjid Al
+                  Kareem is a vital hub for the Muslim community, offering a
+                  peaceful and welcoming environment for worshippers of all ages
+                  and backgrounds. With its long-standing presence and
+                  commitment to providing necessary facilities and services,
+                  this mosque plays a crucial role in fostering a strong and
+                  unified community.
+                </p>
+              </div>
+            </div>
+            <div className="space-y-6">
+              <div className="relative aspect-[4/3] overflow-hidden rounded-3xl border border-stone-200">
+                <Image
+                  src="/masjidExterior.png"
+                  alt="Exterior of Masjid Al Kareem"
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 480px"
+                  className="object-cover"
+                />
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
                 {quickLinks.map((item) => (
                   <div
                     key={item}
@@ -321,125 +369,61 @@ export default function Page() {
                   </div>
                 ))}
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </CardContent>
+        </Card>
+      </section>
 
-          <Card className="rounded-[28px] border-stone-200 shadow-sm">
-            <CardContent className="p-8">
-              <div className="relative mb-6 aspect-[16/9] overflow-hidden rounded-3xl border border-stone-200">
+      <section
+        id="support"
+        className="bg-gradient-to-br from-white via-emerald-50/50 to-teal-50/40 py-8 sm:py-10 lg:py-14"
+      >
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <Card className="rounded-[32px] border-stone-200 shadow-sm">
+            <CardContent className="grid gap-8 p-8 lg:grid-cols-[0.9fr_1.1fr] lg:p-10">
+              <div className="relative aspect-[16/9] overflow-hidden rounded-3xl border border-stone-200">
                 <Image
                   src="/masjidExterior.png"
                   alt="Exterior of Masjid Al Kareem"
                   fill
-                  sizes="(max-width: 1024px) 100vw, 420px"
+                  sizes="(max-width: 1024px) 100vw, 520px"
                   className="object-cover"
                 />
               </div>
-              <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-700">
-                Support the Mission
-              </p>
-              <h3 className="mt-3 text-2xl font-bold">
-                Make donating ridiculously easy
-              </h3>
-              <p className="mt-4 text-base leading-7 text-stone-600">
-                Add one-tap donations, Ramadan campaigns, sadaqah, zakat, and
-                masjid expansion support with a clear payment flow.
-              </p>
-              <div className="mt-6 rounded-3xl bg-emerald-50 p-5">
-                <div className="flex items-center gap-3">
-                  <Heart className="h-6 w-6 text-emerald-700" />
-                  <div>
-                    <p className="font-semibold">Featured appeal</p>
-                    <p className="text-sm text-stone-600">
-                      General masjid support and community programming
-                    </p>
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-700">
+                  Support the Mission
+                </p>
+                <h3 className="mt-3 text-3xl font-bold">
+                  Help sustain worship, learning, and community care.
+                </h3>
+                <p className="mt-4 text-base leading-7 text-stone-600">
+                  Support daily operations, educational programming, Ramadan
+                  iftars, youth development, and the ongoing needs of a masjid
+                  that has served Providence for decades.
+                </p>
+                <div className="mt-6 rounded-3xl bg-emerald-50 p-6">
+                  <div className="flex items-center gap-3">
+                    <Heart className="h-6 w-6 text-emerald-700" />
+                    <div>
+                      <p className="font-semibold">Featured appeal</p>
+                      <p className="text-sm text-stone-600">
+                        General masjid support, classes, and community
+                        programming
+                      </p>
+                    </div>
                   </div>
+                  <Button asChild className="mt-5 w-full rounded-2xl bg-emerald-700 hover:bg-emerald-800 sm:w-auto">
+                    <Link href="/donate">Donate Now</Link>
+                  </Button>
                 </div>
-                <Button className="mt-5 w-full rounded-2xl">
-                  Donate Now
-                </Button>
               </div>
             </CardContent>
           </Card>
         </div>
       </section>
 
-      <section
-        id="prayers"
-        className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-16"
-      >
-        <div className="mb-8 flex items-end justify-between gap-4">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-700">
-              Prayer Times
-            </p>
-            <h3 className="mt-2 text-3xl font-bold">
-              Fast access to the info people actually came for
-            </h3>
-          </div>
-          <Button variant="outline" className="hidden rounded-2xl md:inline-flex">
-            Embed live timetable
-          </Button>
-        </div>
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-          {prayerTimes.map((prayer) => (
-            <Card
-              key={prayer.name}
-              className="rounded-[24px] border-stone-200 shadow-sm"
-            >
-              <CardContent className="p-6">
-                <p className="text-sm uppercase tracking-[0.2em] text-stone-500">
-                  {prayer.name}
-                </p>
-                <p className="mt-4 text-3xl font-bold">{prayer.adhan}</p>
-                <p className="mt-2 text-sm text-stone-600">
-                  Iqamah: {prayer.iqamah}
-                </p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </section>
-
-      <section
-        id="programs"
-        className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-16"
-      >
-        <div className="mb-8 max-w-2xl">
-          <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-700">
-            Programs
-          </p>
-          <h3 className="mt-2 text-3xl font-bold">
-            Show the masjid as a living community, not just a timetable.
-          </h3>
-        </div>
-        <div className="grid gap-6 lg:grid-cols-3">
-          {programs.map((program) => {
-            const Icon = program.icon;
-            return (
-              <Card
-                key={program.title}
-                className="rounded-[28px] border-stone-200 shadow-sm transition hover:-translate-y-1"
-              >
-                <CardContent className="p-8">
-                  <div className="mb-5 inline-flex rounded-2xl bg-emerald-50 p-3 text-emerald-700">
-                    <Icon className="h-6 w-6" />
-                  </div>
-                  <h4 className="text-xl font-bold">{program.title}</h4>
-                  <p className="mt-3 leading-7 text-stone-600">
-                    {program.text}
-                  </p>
-                  <button className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-emerald-700">
-                    Learn more <ChevronRight className="h-4 w-4" />
-                  </button>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      </section>
-
-      <section id="events" className="bg-white py-16">
+      <section id="events" className="bg-gradient-to-b from-white to-emerald-50/30 py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <Card className="rounded-[30px] border-stone-200 shadow-sm">
             <CardContent className="grid gap-8 p-8 lg:grid-cols-[0.9fr_1.1fr] lg:p-10">
@@ -507,6 +491,44 @@ export default function Page() {
               </div>
             </CardContent>
           </Card>
+        </div>
+      </section>
+
+      <section
+        id="programs"
+        className="mx-auto max-w-7xl bg-gradient-to-br from-stone-50 to-emerald-50/30 px-4 py-8 sm:px-6 lg:px-8 lg:py-16"
+      >
+        <div className="mb-8 max-w-2xl">
+          <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-700">
+            Programs
+          </p>
+          <h3 className="mt-2 text-3xl font-bold">
+            Show the masjid as a living community, not just a timetable.
+          </h3>
+        </div>
+        <div className="grid gap-6 lg:grid-cols-3">
+          {programs.map((program) => {
+            const Icon = program.icon;
+            return (
+              <Card
+                key={program.title}
+                className="rounded-[28px] border-stone-200 shadow-sm transition hover:-translate-y-1"
+              >
+                <CardContent className="p-8">
+                  <div className="mb-5 inline-flex rounded-2xl bg-emerald-50 p-3 text-emerald-700">
+                    <Icon className="h-6 w-6" />
+                  </div>
+                  <h4 className="text-xl font-bold">{program.title}</h4>
+                  <p className="mt-3 leading-7 text-stone-600">
+                    {program.text}
+                  </p>
+                  <button className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-emerald-700">
+                    Learn more <ChevronRight className="h-4 w-4" />
+                  </button>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       </section>
 
@@ -586,9 +608,9 @@ export default function Page() {
             <a href="#" className="hover:text-emerald-700">
               YouTube
             </a>
-            <a href="#" className="hover:text-emerald-700">
+            <Link href="/donate" className="hover:text-emerald-700">
               Donate
-            </a>
+            </Link>
           </div>
         </div>
       </footer>
