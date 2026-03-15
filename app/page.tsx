@@ -20,6 +20,7 @@ import {
   Sunset,
   MoonStar,
 } from "lucide-react";
+import Map from "@/components/Map";
 
 const prayerTimes = [
   { name: "Fajr", adhan: "5:24 AM", iqamah: "5:45 AM" },
