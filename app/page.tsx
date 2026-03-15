@@ -612,6 +612,26 @@ export default function Page() {
         </div>
       </motion.section>
 
+      <section id="map" className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <Card className="rounded-[20px] border-stone-200 shadow-sm overflow-hidden">
+          <CardContent className="p-0">
+            <div className="relative h-[320px] w-full sm:h-[420px]">
+              <iframe
+                title="Masjid Al Kareem — Google Maps"
+                src="https://www.google.com/maps?q=39+Haskins+St,+Providence,+RI+02903&output=embed"
+                className="absolute inset-0 h-full w-full border-0"
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              />
+            </div>
+            <div className="border-t border-stone-200 bg-white px-6 py-4 text-sm text-stone-600">
+              <p className="font-semibold">Visit Us</p>
+              <p>39 Haskins St, Providence, RI 02903 — <a href="https://www.google.com/maps/search/?api=1&query=39+Haskins+St,+Providence,+RI+02903" className="text-emerald-700 underline">Open in Google Maps</a></p>
+            </div>
+          </CardContent>
+        </Card>
+      </section>
+
       <motion.footer {...revealInView} className="border-t border-stone-200 bg-white">
         <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-8 text-sm text-stone-600 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
           <div>
