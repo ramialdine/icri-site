@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -91,25 +91,44 @@ const prayerVisuals = {
 
 export default function Page() {
   const [isScrolled, setIsScrolled] = useState(false);
+  const heroRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 8);
+      if (!heroRef.current) {
+        setIsScrolled(false);
+        return;
+      }
+
+      const heroBottom = heroRef.current.getBoundingClientRect().bottom;
+      setIsScrolled(heroBottom <= 88);
     };
 
-    handleScroll();
+    const rafId = window.requestAnimationFrame(handleScroll);
     window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", handleScroll);
 
     return () => {
+      window.cancelAnimationFrame(rafId);
       window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleScroll);
     };
   }, []);
+
+  const revealInView = {
+    initial: { opacity: 0, y: 34 },
+    whileInView: { opacity: 1, y: 0 },
+    transition: { duration: 0.55, ease: "easeOut" as const },
+    viewport: { once: true, amount: 0.14 },
+  };
 
   return (
     <div className="min-h-screen bg-stone-50 text-stone-900">
       <header
-        className={`sticky top-0 z-50 bg-white/90 backdrop-blur transition-shadow duration-200 ${
-          isScrolled ? "border-b border-stone-200/80 shadow-sm" : "border-b border-transparent"
+        className={`sticky top-0 z-50 transition-all duration-300 ${
+          isScrolled
+            ? "border-b border-stone-200/80 bg-white/90 backdrop-blur shadow-sm"
+            : "border-b border-transparent bg-transparent"
         }`}
       >
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
@@ -125,26 +144,40 @@ export default function Page() {
               />
             </div>
             <div>
-              <p className="hidden text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700 sm:block">
+              <p
+                className={`hidden text-xs font-semibold uppercase tracking-[0.2em] sm:block ${
+                  isScrolled ? "text-emerald-700" : "text-emerald-100"
+                }`}
+              >
                 ICRI
               </p>
-              <h1 className="text-base font-bold sm:text-lg">Masjid Al Kareem</h1>
+              <h1
+                className={`text-base font-bold sm:text-lg ${
+                  isScrolled ? "text-stone-900" : "text-white"
+                }`}
+              >
+                Masjid Al Kareem
+              </h1>
             </div>
           </div>
-          <nav className="hidden gap-6 md:flex text-sm font-medium text-stone-700">
-            <a href="#about" className="hover:text-emerald-700">
+          <nav
+            className={`hidden gap-6 text-sm font-medium md:flex ${
+              isScrolled ? "text-stone-700" : "text-white"
+            }`}
+          >
+            <a href="#about" className={isScrolled ? "hover:text-emerald-700" : "hover:text-emerald-200"}>
               About
             </a>
-            <a href="#prayers" className="hover:text-emerald-700">
+            <a href="#prayers" className={isScrolled ? "hover:text-emerald-700" : "hover:text-emerald-200"}>
               Prayer Times
             </a>
-            <a href="#programs" className="hover:text-emerald-700">
+            <a href="#programs" className={isScrolled ? "hover:text-emerald-700" : "hover:text-emerald-200"}>
               Programs
             </a>
-            <a href="#events" className="hover:text-emerald-700">
+            <a href="#events" className={isScrolled ? "hover:text-emerald-700" : "hover:text-emerald-200"}>
               Events
             </a>
-            <a href="#contact" className="hover:text-emerald-700">
+            <a href="#contact" className={isScrolled ? "hover:text-emerald-700" : "hover:text-emerald-200"}>
               Contact
             </a>
           </nav>
@@ -154,65 +187,46 @@ export default function Page() {
         </div>
       </header>
 
-      <section className="relative overflow-hidden bg-gradient-to-br from-emerald-50 via-teal-50 to-lime-50">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(16,185,129,0.18),transparent_40%),radial-gradient(circle_at_left,rgba(20,184,166,0.14),transparent_34%)]" />
-        <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:px-8 lg:py-14">
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.45 }}
-            className="relative z-10"
-          >
-            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-emerald-700">
-              Quick Actions
-            </p>
-            <h2 className="mt-3 text-3xl font-bold leading-tight sm:text-4xl">
-              What do you need today? 🌿
-            </h2>
-            <p className="mt-4 max-w-2xl text-base leading-7 text-stone-700">
-              Jump straight to prayer times or support the masjid in one click.
-            </p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <Button asChild className="rounded-2xl bg-emerald-700 px-6 py-5 text-base hover:bg-emerald-800">
-                <a href="#prayers">🕰️ View Prayer Schedule</a>
-              </Button>
-              <Button asChild variant="outline" className="rounded-2xl border-emerald-300 bg-white/90 px-6 py-5 text-base text-emerald-800 hover:bg-emerald-50">
-                <Link href="/donate">💚 Donate to the Masjid</Link>
-              </Button>
-            </div>
-          </motion.div>
+      <section ref={heroRef} className="relative flex min-h-[calc(100svh-88px)] items-center justify-center overflow-hidden">
+        <Image
+          src="/masjidExterior.png"
+          alt="Masjid exterior background"
+          fill
+          sizes="100vw"
+          className="object-cover"
+          priority
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-emerald-950/55 via-emerald-900/45 to-emerald-950/65" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(16,185,129,0.2),transparent_45%),radial-gradient(circle_at_left,rgba(20,184,166,0.18),transparent_38%)]" />
 
-          <motion.div
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="relative z-10"
-          >
-            <div className="relative h-full min-h-[220px] overflow-hidden rounded-[28px] border border-emerald-200/80 shadow-lg">
-              <Image
-                src="/masjidExterior.png"
-                alt="Masjid exterior"
-                fill
-                sizes="(max-width: 1024px) 100vw, 520px"
-                className="object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-emerald-950/60 via-emerald-900/20 to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-5 text-white">
-                <p className="text-sm uppercase tracking-[0.2em] text-emerald-100">ICRI</p>
-                <p className="mt-1 text-xl font-semibold">Masjid Al Kareem</p>
-              </div>
-            </div>
-          </motion.div>
-        </div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45 }}
+          className="relative z-10 mx-auto flex max-w-7xl flex-col items-center justify-center gap-5 px-4 py-12 sm:px-6 lg:px-8"
+        >
+          <div className="text-center text-white">
+            <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-100 sm:text-base">
+              Islamic Center of Rhode Island
+            </p>
+            <h2 className="mt-3 text-4xl font-bold sm:text-5xl md:text-6xl">
+              Masjid Al Kareem
+            </h2>
+            <p className="mt-3 text-base text-emerald-50 sm:text-lg md:text-xl">
+              The staple of the Islamic community in Rhode Island.
+            </p>
+          </div>
+          <Button asChild className="h-16 rounded-2xl bg-emerald-600 px-9 text-lg font-semibold shadow-lg shadow-emerald-900/25 hover:bg-emerald-700 sm:h-20 sm:px-12 sm:text-2xl">
+            <a href="#prayers">🕰️ View Prayer Schedule</a>
+          </Button>
+          <Button asChild variant="outline" className="h-16 rounded-2xl border-2 border-emerald-100/90 bg-white/95 px-9 text-lg font-semibold text-emerald-900 shadow-lg shadow-emerald-950/20 hover:bg-emerald-50 sm:h-20 sm:px-12 sm:text-2xl">
+            <Link href="/donate">💚 Donate to the Masjid</Link>
+          </Button>
+        </motion.div>
       </section>
 
-      <section id="prayers" className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className="relative z-10"
-        >
+      <motion.section {...revealInView} id="prayers" className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
+        <div className="relative z-10">
           <Card className="overflow-hidden rounded-[32px] border-stone-200 shadow-2xl">
             <CardContent className="p-0">
               <div className="flex flex-col gap-4 bg-emerald-800 px-6 py-8 text-white md:flex-row md:items-end md:justify-between md:px-8 md:py-10">
@@ -289,10 +303,11 @@ export default function Page() {
               </div>
             </CardContent>
           </Card>
-        </motion.div>
-      </section>
+        </div>
+      </motion.section>
 
-      <section
+      <motion.section
+        {...revealInView}
         id="about"
         className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-16"
       >
@@ -372,9 +387,10 @@ export default function Page() {
             </div>
           </CardContent>
         </Card>
-      </section>
+      </motion.section>
 
-      <section
+      <motion.section
+        {...revealInView}
         id="support"
         className="bg-gradient-to-br from-white via-emerald-50/50 to-teal-50/40 py-8 sm:py-10 lg:py-14"
       >
@@ -421,9 +437,9 @@ export default function Page() {
             </CardContent>
           </Card>
         </div>
-      </section>
+      </motion.section>
 
-      <section id="events" className="bg-gradient-to-b from-white to-emerald-50/30 py-16">
+      <motion.section {...revealInView} id="events" className="bg-gradient-to-b from-white to-emerald-50/30 py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <Card className="rounded-[30px] border-stone-200 shadow-sm">
             <CardContent className="grid gap-8 p-8 lg:grid-cols-[0.9fr_1.1fr] lg:p-10">
@@ -492,9 +508,10 @@ export default function Page() {
             </CardContent>
           </Card>
         </div>
-      </section>
+      </motion.section>
 
-      <section
+      <motion.section
+        {...revealInView}
         id="programs"
         className="mx-auto max-w-7xl bg-gradient-to-br from-stone-50 to-emerald-50/30 px-4 py-8 sm:px-6 lg:px-8 lg:py-16"
       >
@@ -530,9 +547,10 @@ export default function Page() {
             );
           })}
         </div>
-      </section>
+      </motion.section>
 
-      <section
+      <motion.section
+        {...revealInView}
         id="contact"
         className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8"
       >
@@ -591,9 +609,9 @@ export default function Page() {
             </CardContent>
           </Card>
         </div>
-      </section>
+      </motion.section>
 
-      <footer className="border-t border-stone-200 bg-white">
+      <motion.footer {...revealInView} className="border-t border-stone-200 bg-white">
         <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-8 text-sm text-stone-600 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
           <div>
             <p className="font-semibold text-stone-900">
@@ -613,7 +631,7 @@ export default function Page() {
             </Link>
           </div>
         </div>
-      </footer>
+      </motion.footer>
     </div>
   );
 }
