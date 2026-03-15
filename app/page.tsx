@@ -1,6 +1,7 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,10 @@ import {
   BookOpen,
   Users,
   ChevronRight,
+  Sunrise,
+  Sun,
+  Sunset,
+  MoonStar,
 } from "lucide-react";
 
 const prayerTimes = [
@@ -50,16 +55,80 @@ const quickLinks = [
   "Volunteer",
 ];
 
+const prayerVisuals = {
+  Fajr: {
+    icon: Sunrise,
+    label: "First light",
+    iconClassName: "text-sky-600",
+    backgroundClassName: "bg-sky-50",
+  },
+  Dhuhr: {
+    icon: Sun,
+    label: "Midday sun",
+    iconClassName: "text-amber-500",
+    backgroundClassName: "bg-amber-50",
+  },
+  Asr: {
+    icon: Sun,
+    label: "Afternoon light",
+    iconClassName: "text-orange-500",
+    backgroundClassName: "bg-orange-50",
+  },
+  Maghrib: {
+    icon: Sunset,
+    label: "Sunset glow",
+    iconClassName: "text-rose-500",
+    backgroundClassName: "bg-rose-50",
+  },
+  Isha: {
+    icon: MoonStar,
+    label: "Night prayer",
+    iconClassName: "text-violet-500",
+    backgroundClassName: "bg-violet-50",
+  },
+} as const;
+
 export default function Page() {
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 8);
+    };
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
   return (
     <div className="min-h-screen bg-stone-50 text-stone-900">
-      <header className="sticky top-0 z-50 border-b border-stone-200/80 bg-white/90 backdrop-blur">
+      <header
+        className={`sticky top-0 z-50 bg-white/90 backdrop-blur transition-shadow duration-200 ${
+          isScrolled ? "border-b border-stone-200/80 shadow-sm" : "border-b border-transparent"
+        }`}
+      >
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-700">
-              ICRI
-            </p>
-            <h1 className="text-lg font-bold sm:text-xl">Masjid Al Kareem</h1>
+          <div className="flex items-center gap-4">
+            <div className="relative h-14 w-[180px] overflow-hidden rounded-md border border-stone-200 bg-white shadow-sm sm:h-16 sm:w-[220px]">
+              <Image
+                src="/ICRI_logo.jpeg"
+                alt="Islamic Center of Rhode Island logo"
+                fill
+                sizes="(max-width: 640px) 180px, 220px"
+                className="object-contain p-1"
+                priority
+              />
+            </div>
+            <div>
+              <p className="hidden text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700 sm:block">
+                ICRI
+              </p>
+              <h1 className="text-base font-bold sm:text-lg">Masjid Al Kareem</h1>
+            </div>
           </div>
           <nav className="hidden gap-6 md:flex text-sm font-medium text-stone-700">
             <a href="#about" className="hover:text-emerald-700">
@@ -84,12 +153,12 @@ export default function Page() {
 
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(16,185,129,0.16),transparent_35%),radial-gradient(circle_at_left,rgba(20,184,166,0.12),transparent_30%)]" />
-        <div className="mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:px-8 lg:py-24">
+        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="relative z-10"
+            className="relative z-10 max-w-3xl"
           >
             <p className="mb-4 text-sm font-semibold uppercase tracking-[0.28em] text-emerald-700">
               Islamic Center of Rhode Island
@@ -133,62 +202,93 @@ export default function Page() {
               </div>
             </div>
           </motion.div>
+        </div>
+      </section>
 
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="relative z-10"
-          >
-            <Card className="overflow-hidden rounded-[28px] border-stone-200 shadow-xl">
-              <CardContent className="p-0">
-                <div className="bg-emerald-800 p-6 text-white">
+      <section id="prayers" className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+          className="relative z-10"
+        >
+          <Card className="overflow-hidden rounded-[32px] border-stone-200 shadow-2xl">
+            <CardContent className="p-0">
+              <div className="flex flex-col gap-4 bg-emerald-800 px-6 py-8 text-white md:flex-row md:items-end md:justify-between md:px-8 md:py-10">
+                <div>
                   <p className="text-sm uppercase tracking-[0.2em] text-emerald-100">
                     Today at the Masjid
                   </p>
-                  <div className="mt-3 flex items-center gap-2 text-2xl font-bold">
-                    <Clock className="h-6 w-6" />
+                  <div className="mt-3 flex items-center gap-2 text-3xl font-bold sm:text-4xl">
+                    <Clock className="h-7 w-7" />
                     Prayer Schedule
                   </div>
                 </div>
-                <div className="grid divide-y divide-stone-200 bg-white">
-                  {prayerTimes.map((prayer) => (
-                    <div
-                      key={prayer.name}
-                      className="flex items-center justify-between px-6 py-4"
-                    >
-                      <div>
-                        <p className="text-base font-semibold">{prayer.name}</p>
-                        <p className="text-sm text-stone-500">
-                          Adhan {prayer.adhan}
-                        </p>
+                <p className="max-w-xl text-base text-emerald-50/90">
+                  Daily prayer times and Jumu&apos;ah details in one dedicated section for quick scanning.
+                </p>
+              </div>
+              <div className="grid bg-white md:grid-cols-2 xl:grid-cols-5 xl:divide-x xl:divide-y-0">
+                {prayerTimes.map((prayer, index) => (
+                  (() => {
+                    const visual = prayerVisuals[prayer.name as keyof typeof prayerVisuals];
+                    const PrayerIcon = visual.icon;
+
+                    return (
+                      <div
+                        key={prayer.name}
+                        className={`px-6 py-7 md:px-7 md:py-8 xl:min-h-[220px] ${
+                          index < prayerTimes.length - 1 ? "border-b border-stone-200 md:border-b md:border-stone-200 xl:border-b-0" : ""
+                        }`}
+                      >
+                        <div className="flex h-full flex-col justify-between gap-6">
+                          <div className="flex items-start justify-between gap-4">
+                            <div>
+                              <p className="text-lg font-semibold">{prayer.name}</p>
+                              <p className="mt-1 text-sm text-stone-500">{visual.label}</p>
+                            </div>
+                            <div className={`flex h-14 w-14 items-center justify-center rounded-2xl ${visual.backgroundClassName}`}>
+                              <PrayerIcon className={`h-7 w-7 ${visual.iconClassName}`} />
+                            </div>
+                          </div>
+                          <div className="space-y-4">
+                            <div>
+                              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-stone-400">
+                                Adhan
+                              </p>
+                              <p className="mt-2 text-3xl font-bold text-stone-900">{prayer.adhan}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-stone-400">
+                                Iqamah
+                              </p>
+                              <p className="mt-1 text-lg font-semibold text-emerald-700">
+                                {prayer.iqamah}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <p className="text-sm text-stone-500">Iqamah</p>
-                        <p className="text-base font-semibold text-emerald-700">
-                          {prayer.iqamah}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="border-t border-stone-200 bg-stone-50 px-6 py-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-semibold">Jumu&apos;ah</p>
-                      <p className="text-sm text-stone-600">
-                        1st Khutbah 12:30 PM · 2nd Khutbah 1:15 PM
-                      </p>
-                    </div>
-                    <Button variant="outline" className="rounded-2xl">
-                      Full Timetable
-                    </Button>
+                    );
+                  })()
+                ))}
+              </div>
+              <div className="border-t border-stone-200 bg-stone-50 px-6 py-5 md:px-8">
+                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                  <div>
+                    <p className="text-base font-semibold">Jumu&apos;ah</p>
+                    <p className="text-sm text-stone-600 md:text-base">
+                      1st Khutbah 12:30 PM · 2nd Khutbah 1:15 PM
+                    </p>
                   </div>
+                  <Button variant="outline" className="rounded-2xl md:self-auto self-start">
+                    Full Timetable
+                  </Button>
                 </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
       </section>
 
       <section
@@ -226,6 +326,15 @@ export default function Page() {
 
           <Card className="rounded-[28px] border-stone-200 shadow-sm">
             <CardContent className="p-8">
+              <div className="relative mb-6 aspect-[16/9] overflow-hidden rounded-3xl border border-stone-200">
+                <Image
+                  src="/masjidExterior.png"
+                  alt="Exterior of Masjid Al Kareem"
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 420px"
+                  className="object-cover"
+                />
+              </div>
               <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-700">
                 Support the Mission
               </p>
@@ -335,6 +444,15 @@ export default function Page() {
           <Card className="rounded-[30px] border-stone-200 shadow-sm">
             <CardContent className="grid gap-8 p-8 lg:grid-cols-[0.9fr_1.1fr] lg:p-10">
               <div>
+                <div className="relative mb-5 aspect-[4/3] w-full max-w-xs overflow-hidden rounded-3xl border border-stone-200 shadow-sm">
+                  <Image
+                    src="/imamABL.jpeg"
+                    alt="Imam ABL"
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 320px"
+                    className="object-cover"
+                  />
+                </div>
                 <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-700">
                   Events
                 </p>
@@ -346,6 +464,10 @@ export default function Page() {
                   simple admin panel so the masjid can post Eid announcements,
                   fundraisers, classes, and youth events without needing to
                   summon the one cousin who knows web design.
+                </p>
+                <p className="mt-4 text-sm text-stone-500">
+                  Weekly reflections and reminders from Imam ABL can also be
+                  featured here.
                 </p>
               </div>
               <div className="grid gap-4">
