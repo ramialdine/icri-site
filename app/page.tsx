@@ -20,6 +20,7 @@ import {
   Sunset,
   MoonStar,
 } from "lucide-react";
+import Map from "@/components/Map";
 
 const prayerTimes = [
   { name: "Fajr", adhan: "5:24 AM", iqamah: "5:45 AM" },
@@ -591,6 +592,20 @@ export default function Page() {
             </CardContent>
           </Card>
         </div>
+      </section>
+
+      <section id="map" className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <Card className="rounded-[20px] border-stone-200 shadow-sm overflow-hidden">
+          <CardContent className="p-0">
+            <div className="relative h-[320px] w-full sm:h-[420px]">
+              <Map lat={41.835} lng={-71.397} zoom={16} />
+            </div>
+            <div className="border-t border-stone-200 bg-white px-6 py-4 text-sm text-stone-600">
+              <p className="font-semibold">Visit Us</p>
+              <p>39 Haskins St, Providence, RI 02903 — <a href="https://www.google.com/maps/search/?api=1&query=39+Haskins+St,+Providence,+RI+02903" className="text-emerald-700 underline">Open in Google Maps</a></p>
+            </div>
+          </CardContent>
+        </Card>
       </section>
 
       <footer className="border-t border-stone-200 bg-white">
