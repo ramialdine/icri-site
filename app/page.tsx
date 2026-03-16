@@ -22,7 +22,28 @@ import {
 } from "lucide-react";
 import Map from "@/components/Map";
 
-const prayerTimes = [
+// Helpers for AlAdhan API
+function to12Hour(time24: string): string {
+  const [h, m] = time24.split(":").map(Number);
+  const period = h >= 12 ? "PM" : "AM";
+  const hour = h % 12 || 12;
+  return `${hour}:${String(m).padStart(2, "0")} ${period}`;
+}
+function addMinutes(time24: string, minutes: number): string {
+  const [h, m] = time24.split(":").map(Number);
+  const total = h * 60 + m + minutes;
+  return `${String(Math.floor(total / 60) % 24).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
+}
+const IQAMAH_OFFSETS: Record<string, number> = {
+  Fajr: 21,
+  Dhuhr: 27,
+  Asr: 32,
+  Maghrib: 5,
+  Isha: 18,
+};
+const PRAYER_CACHE_KEY = "icri_prayer_times";
+
+const fallbackPrayerTimes = [
   { name: "Fajr", adhan: "5:24 AM", iqamah: "5:45 AM" },
   { name: "Dhuhr", adhan: "12:03 PM", iqamah: "12:30 PM" },
   { name: "Asr", adhan: "3:28 PM", iqamah: "4:00 PM" },
@@ -92,7 +113,48 @@ const prayerVisuals = {
 
 export default function Page() {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [aboutExpanded, setAboutExpanded] = useState(false);
+  const [prayerTimes, setPrayerTimes] = useState(fallbackPrayerTimes);
   const heroRef = useRef<HTMLElement | null>(null);
+
+  // Fetch Providence prayer times from AlAdhan, refresh once daily
+  useEffect(() => {
+    const today = new Date().toDateString();
+    try {
+      const cached = localStorage.getItem(PRAYER_CACHE_KEY);
+      if (cached) {
+        const { date, data } = JSON.parse(cached);
+        if (date === today) {
+          setPrayerTimes(data);
+          return;
+        }
+      }
+    } catch {}
+
+    fetch(
+      "https://api.aladhan.com/v1/timingsByCity?city=Providence&country=US&state=Rhode+Island&method=2"
+    )
+      .then((r) => r.json())
+      .then((json) => {
+        const t = json?.data?.timings;
+        if (!t) return;
+        const prayers = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"].map(
+          (name) => ({
+            name,
+            adhan: to12Hour(t[name]),
+            iqamah: to12Hour(addMinutes(t[name], IQAMAH_OFFSETS[name])),
+          })
+        );
+        setPrayerTimes(prayers);
+        try {
+          localStorage.setItem(
+            PRAYER_CACHE_KEY,
+            JSON.stringify({ date: today, data: prayers })
+          );
+        } catch {}
+      })
+      .catch(() => {}); // silently keep fallback times
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -240,9 +302,7 @@ export default function Page() {
                     Prayer Schedule
                   </div>
                 </div>
-                <p className="max-w-xl text-base text-emerald-50/90">
-                  Daily prayer times and Jumu&apos;ah details in one dedicated section for quick scanning.
-                </p>
+
               </div>
               <div className="grid bg-white md:grid-cols-2 xl:grid-cols-5 xl:divide-x xl:divide-y-0">
                 {prayerTimes.map((prayer, index) => (
@@ -294,7 +354,7 @@ export default function Page() {
                   <div>
                     <p className="text-base font-semibold">Jumu&apos;ah</p>
                     <p className="text-sm text-stone-600 md:text-base">
-                      1st Khutbah 12:30 PM · 2nd Khutbah 1:15 PM
+                      1st Khutbah 1:00 PM
                     </p>
                   </div>
                   <Button variant="outline" className="rounded-2xl md:self-auto self-start">
@@ -313,13 +373,14 @@ export default function Page() {
         className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-16"
       >
         <Card className="rounded-[32px] border-stone-200 shadow-sm">
-          <CardContent className="grid gap-8 p-8 lg:grid-cols-[1.15fr_0.85fr] lg:p-10">
+          <CardContent className="grid gap-8 p-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-start lg:p-10">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-700">
                 About the Masjid
               </p>
               <h3 className="mt-3 text-3xl font-bold sm:text-4xl">
-                A long-standing mosque serving Providence since 1976.
+                A staple of the community; <br />
+                serving Rhode Island since 1976.
               </h3>
               <div className="mt-6 space-y-5 text-base leading-8 text-stone-600">
                 <p>
@@ -329,43 +390,62 @@ export default function Page() {
                   welcoming Islamic center offers a range of services and
                   amenities for worshippers and community members.
                 </p>
-                <p>
-                  One of the main highlights of Masjid Al Kareem is its
-                  commitment to inclusivity. The mosque provides a kid-friendly
-                  environment, ensuring that families can comfortably worship
-                  together. Additionally, the presence of wheelchair amenities,
-                  such as accessible prayer spaces and parking, ensures that
-                  individuals with mobility needs can easily navigate the
-                  premises.
-                </p>
-                <p>
-                  The mosque offers a variety of services to cater to the needs
-                  of the community. Five daily prayers are held, providing a
-                  spiritual space for worshippers to connect with their faith
-                  throughout the day. Jumu&apos;ah prayers, the congregational
-                  Friday prayers, bring the community together in a special way.
-                  The mosque also hosts a weekend school for children in a
-                  dedicated classroom, providing an opportunity for them to
-                  learn about Islam and their cultural heritage. During
-                  Ramadan, the mosque organizes Iftar gatherings, which allow
-                  the community to come together and break their fasts during
-                  the holy month.
-                </p>
-                <p>
-                  There is a spacious and dedicated women&apos;s section with a separate entrance directly to it. The mosque also offers many dedicated parking spaces close to the building for women.
-                </p>
-                <p>
-                  Situated in the heart of Providence, Rhode Island, Masjid Al
-                  Kareem is a vital hub for the Muslim community, offering a
-                  peaceful and welcoming environment for worshippers of all ages
-                  and backgrounds. With its long-standing presence and
-                  commitment to providing necessary facilities and services,
-                  this mosque plays a crucial role in fostering a strong and
-                  unified community.
-                </p>
+
+                {/* Expandable content */}
+                <div
+                  className={`overflow-hidden transition-all duration-500 ease-in-out ${
+                    aboutExpanded ? "max-h-[800px] opacity-100" : "max-h-0 opacity-0"
+                  }`}
+                >
+                  <div className="space-y-5">
+                    <p>
+                      One of the main highlights of Masjid Al Kareem is its
+                      commitment to inclusivity. The mosque provides a kid-friendly
+                      environment, ensuring that families can comfortably worship
+                      together. Additionally, the presence of wheelchair amenities,
+                      such as accessible prayer spaces and parking, ensures that
+                      individuals with mobility needs can easily navigate the
+                      premises.
+                    </p>
+                    <p>
+                      The mosque offers a variety of services to cater to the needs
+                      of the community. Five daily prayers are held, providing a
+                      spiritual space for worshippers to connect with their faith
+                      throughout the day. Jumu&apos;ah prayers, the congregational
+                      Friday prayers, bring the community together in a special way.
+                      The mosque also hosts a weekend school for children in a
+                      dedicated classroom, providing an opportunity for them to
+                      learn about Islam and their cultural heritage. During Ramadan,
+                      the mosque organizes Iftar gatherings, which allow the
+                      community to come together and break their fasts during the
+                      holy month.
+                    </p>
+                    <p>
+                      There is a spacious and dedicated women&apos;s section with a
+                      separate entrance directly to it. The mosque also offers many
+                      dedicated parking spaces close to the building for women.
+                    </p>
+                    <p>
+                      Situated in the heart of Providence, Rhode Island, Masjid Al
+                      Kareem is a vital hub for the Muslim community, offering a
+                      peaceful and welcoming environment for worshippers of all ages
+                      and backgrounds. With its long-standing presence and
+                      commitment to providing necessary facilities and services,
+                      this mosque plays a crucial role in fostering a strong and
+                      unified community.
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setAboutExpanded((prev) => !prev)}
+                  className="inline-flex cursor-pointer items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-2.5 text-sm font-semibold text-emerald-700 transition-colors hover:bg-emerald-100 hover:text-emerald-800 active:bg-emerald-200"
+                >
+                  {aboutExpanded ? "Read less ↑" : "Read more ↓"}
+                </button>
               </div>
             </div>
-            <div className="space-y-6">
+            <div>
               <div className="relative aspect-[4/3] overflow-hidden rounded-3xl border border-stone-200">
                 <Image
                   src="/masjidExterior.png"
@@ -374,16 +454,6 @@ export default function Page() {
                   sizes="(max-width: 1024px) 100vw, 480px"
                   className="object-cover"
                 />
-              </div>
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-                {quickLinks.map((item) => (
-                  <div
-                    key={item}
-                    className="rounded-2xl bg-stone-100 px-4 py-3 text-sm font-medium text-stone-700"
-                  >
-                    {item}
-                  </div>
-                ))}
               </div>
             </div>
           </CardContent>
@@ -458,7 +528,7 @@ export default function Page() {
                   Events
                 </p>
                 <h3 className="mt-3 text-3xl font-bold">
-                  Announcements and events without the chaos
+                  Masjid Al Kareem Announcements and Events
                 </h3>
                 <p className="mt-4 leading-7 text-stone-600">
                   This section can be connected to a CMS, Google Calendar, or a
