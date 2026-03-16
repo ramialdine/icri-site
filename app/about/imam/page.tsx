@@ -1,66 +1,15 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import StandardPageHeader from "@/components/StandardPageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Mail, Phone, Moon, Sun } from "lucide-react";
-
-type ThemePreference = "system" | "light" | "dark";
+import { Mail, Phone } from "lucide-react";
 
 export default function ImamPage() {
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [theme, setTheme] = useState<"light" | "dark">("light");
-  const [mounted, setMounted] = useState(false);
-  const [themePreference, setThemePreference] = useState<ThemePreference>("system");
-  const initRef = useRef(false);
-
-  useEffect(() => {
-    if (initRef.current) return;
-    initRef.current = true;
-    
-    setMounted(true);
-    const savedTheme = localStorage.getItem("theme-preference") as ThemePreference | null;
-    if (savedTheme) {
-      setThemePreference(savedTheme);
-    }
-  }, []);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  useEffect(() => {
-    const updateTheme = () => {
-      let newTheme: "light" | "dark" = "light";
-      if (themePreference === "system") {
-        newTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-      } else {
-        newTheme = themePreference;
-      }
-      setTheme(newTheme);
-      document.documentElement.classList.toggle("dark", newTheme === "dark");
-    };
-
-    updateTheme();
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    mediaQuery.addEventListener("change", updateTheme);
-    return () => mediaQuery.removeEventListener("change", updateTheme);
-  }, [themePreference]);
-
-  const toggleTheme = () => {
-    const newTheme: ThemePreference = themePreference === "dark" ? "light" : "dark";
-    setThemePreference(newTheme);
-    localStorage.setItem("theme-preference", newTheme);
-  };
-
   const revealInView = {
     initial: { opacity: 0, y: 34 },
     whileInView: { opacity: 1, y: 0 },
@@ -70,78 +19,9 @@ export default function ImamPage() {
 
   return (
     <div className="min-h-screen bg-stone-50 text-stone-900 dark:bg-stone-950 dark:text-stone-100">
-      <header
-        className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
-          isScrolled
-            ? "border-b border-stone-200/80 bg-white/90 backdrop-blur shadow-sm dark:border-stone-800/80 dark:bg-stone-950/90"
-            : "border-b border-transparent bg-transparent"
-        }`}
-      >
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-          <Link href="/" className="flex items-center gap-4 transition hover:opacity-80">
-            <div className="relative h-14 w-[180px] overflow-hidden rounded-md border border-stone-200 bg-white shadow-sm sm:h-16 sm:w-[220px]">
-              <Image
-                src="/ICRI_logo.jpeg"
-                alt="Islamic Center of Rhode Island logo"
-                fill
-                sizes="(max-width: 640px) 180px, 220px"
-                className="object-contain p-1"
-                priority
-              />
-            </div>
-            <div className="hidden sm:block">
-              <p
-                className={`text-xs font-semibold uppercase tracking-[0.2em] ${
-                  isScrolled ? "text-emerald-700" : "text-emerald-100"
-                }`}
-              >
-                ICRI
-              </p>
-              <h1
-                className={`text-base font-bold sm:text-lg ${
-                  isScrolled ? "text-stone-900 dark:text-stone-100" : "text-white"
-                }`}
-              >
-                Masjid Al Kareem
-              </h1>
-            </div>
-          </Link>
-          <nav
-            className={`hidden gap-6 text-sm font-medium md:flex ${
-              isScrolled ? "text-stone-700 dark:text-stone-200" : "text-white"
-            }`}
-          >
-            <Link href="/#prayers" className={isScrolled ? "hover:text-emerald-700" : "hover:text-emerald-200"}>
-              Prayer Times
-            </Link>
-            <Link href="/programs" className={isScrolled ? "hover:text-emerald-700" : "hover:text-emerald-200"}>
-              Programs
-            </Link>
-            <Link href="/events" className={isScrolled ? "hover:text-emerald-700" : "hover:text-emerald-200"}>
-              Events
-            </Link>
-            <Link href="/#contact" className={isScrolled ? "hover:text-emerald-700" : "hover:text-emerald-200"}>
-              Contact
-            </Link>
-          </nav>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={toggleTheme}
-              className="rounded-xl border-white/60 bg-white/90 text-stone-700 hover:bg-white dark:border-stone-700 dark:bg-stone-900 dark:text-stone-200 dark:hover:bg-stone-800"
-              aria-label="Toggle dark mode"
-            >
-              {mounted ? (theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />) : <Moon className="h-4 w-4" />}
-            </Button>
-            <Button asChild className="rounded-2xl bg-emerald-700 hover:bg-emerald-800">
-              <Link href="/donate">Donate</Link>
-            </Button>
-          </div>
-        </div>
-      </header>
+      <StandardPageHeader currentPage="About" breadcrumbTrail={["About", "The Imam"]} />
 
-      <section className="relative flex min-h-[60svh] items-center justify-center overflow-hidden pt-20">
+      <section className="relative flex min-h-[60svh] items-center justify-center overflow-hidden pt-8">
         <div className="absolute inset-0 bg-gradient-to-br from-emerald-900 via-emerald-800 to-teal-900" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(16,185,129,0.2),transparent_45%)]" />
         <motion.div

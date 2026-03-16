@@ -371,21 +371,6 @@ export default function Page() {
                 className={`flex items-center gap-1.5 transition ${isScrolled ? "hover:text-emerald-700" : "hover:text-emerald-200"}`}
               >
                 About
-                <svg
-                  className={`h-4 w-4 transition-transform ${
-                    aboutDropdownOpen ? "rotate-180" : ""
-                  }`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 14l-7 7m0 0l-7-7m7 7V3"
-                  />
-                </svg>
               </button>
               {aboutDropdownOpen && (
                 <div
