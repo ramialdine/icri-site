@@ -30,6 +30,22 @@ Copy `.env.example` to `.env.local` and set:
 - `NEXT_PUBLIC_SANITY_DATASET` (usually `production`)
 - `NEXT_PUBLIC_SANITY_API_VERSION` (already defaulted)
 
+To protect Studio behind HTTP Basic Auth, also set:
+
+- `STUDIO_BASIC_AUTH_USER`
+- `STUDIO_BASIC_AUTH_PASSWORD`
+- `STUDIO_BASIC_AUTH_COOKIE_DAYS` (optional, default `365`)
+
+When set, all `/studio/*` routes require login before loading the Studio UI.
+After first successful login, a secure HTTP-only cookie is set so users typically
+won't be prompted again until the cookie expires.
+
+### 1.1) Keep Studio less discoverable
+
+- Keep `robots` disabled for Studio (already configured in the Studio layout).
+- Do not link `/studio` publicly in your main navigation.
+- Add an additional hosting firewall/rate-limit rule for `/studio/*` (Vercel/Cloudflare) for bot suppression.
+
 ### 2) Content models included
 
 - `prayerConfig` (biweekly Week A/Week B iqama defaults)
