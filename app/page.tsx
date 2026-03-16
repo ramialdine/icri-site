@@ -153,6 +153,7 @@ const prayerVisuals = {
 export default function Page() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [aboutExpanded, setAboutExpanded] = useState(false);
+  const [aboutDropdownOpen, setAboutDropdownOpen] = useState(false);
   const [prayerTimes, setPrayerTimes] = useState(fallbackPrayerTimes);
   const [jumuahSessions, setJumuahSessions] = useState(fallbackJumuahSessions);
   const [programs, setPrograms] = useState(fallbackPrograms);
@@ -364,9 +365,61 @@ export default function Page() {
               isScrolled ? "text-stone-700 dark:text-stone-200" : "text-white"
             }`}
           >
-            <a href="#about" className={isScrolled ? "hover:text-emerald-700" : "hover:text-emerald-200"}>
-              About
-            </a>
+            <div className="relative">
+              <button
+                onClick={() => setAboutDropdownOpen(!aboutDropdownOpen)}
+                className={`flex items-center gap-1.5 transition ${isScrolled ? "hover:text-emerald-700" : "hover:text-emerald-200"}`}
+              >
+                About
+                <svg
+                  className={`h-4 w-4 transition-transform ${
+                    aboutDropdownOpen ? "rotate-180" : ""
+                  }`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 14l-7 7m0 0l-7-7m7 7V3"
+                  />
+                </svg>
+              </button>
+              {aboutDropdownOpen && (
+                <div
+                  className={`absolute top-full left-0 mt-2 w-48 rounded-xl shadow-lg border ${
+                    isScrolled
+                      ? "bg-white border-stone-200 text-stone-700 dark:bg-stone-900 dark:border-stone-700 dark:text-stone-200"
+                      : "bg-white/95 border-white text-stone-700 dark:bg-stone-900/95 dark:border-stone-700 dark:text-stone-200"
+                  }`}
+                >
+                  <Link
+                    href="/about/imam"
+                    className={`block px-4 py-3 first:rounded-t-xl transition text-sm font-medium ${
+                      isScrolled
+                        ? "hover:bg-emerald-50 dark:hover:bg-emerald-950"
+                        : "hover:bg-emerald-50 dark:hover:bg-emerald-950"
+                    }`}
+                    onClick={() => setAboutDropdownOpen(false)}
+                  >
+                    The Imam
+                  </Link>
+                  <Link
+                    href="/about/president"
+                    className={`block px-4 py-3 last:rounded-b-xl transition text-sm font-medium border-t ${
+                      isScrolled
+                        ? "border-stone-100 hover:bg-emerald-50 dark:border-stone-700 dark:hover:bg-emerald-950"
+                        : "border-stone-100 hover:bg-emerald-50 dark:border-stone-700 dark:hover:bg-emerald-950"
+                    }`}
+                    onClick={() => setAboutDropdownOpen(false)}
+                  >
+                    The President
+                  </Link>
+                </div>
+              )}
+            </div>
             <a href="#prayers" className={isScrolled ? "hover:text-emerald-700" : "hover:text-emerald-200"}>
               Prayer Times
             </a>
@@ -375,6 +428,9 @@ export default function Page() {
             </Link>
             <Link href="/events" className={isScrolled ? "hover:text-emerald-700" : "hover:text-emerald-200"}>
               Events
+            </Link>
+            <Link href="/amenities" className={isScrolled ? "hover:text-emerald-700" : "hover:text-emerald-200"}>
+              Amenities
             </Link>
             <a href="#contact" className={isScrolled ? "hover:text-emerald-700" : "hover:text-emerald-200"}>
               Contact
