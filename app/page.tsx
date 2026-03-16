@@ -20,30 +20,40 @@ import {
   Sunset,
   MoonStar,
 } from "lucide-react";
-import Map from "@/components/Map";
 
-// Helpers for AlAdhan API
-function to12Hour(time24: string): string {
-  const [h, m] = time24.split(":").map(Number);
-  const period = h >= 12 ? "PM" : "AM";
-  const hour = h % 12 || 12;
-  return `${hour}:${String(m).padStart(2, "0")} ${period}`;
-}
-function addMinutes(time24: string, minutes: number): string {
-  const [h, m] = time24.split(":").map(Number);
-  const total = h * 60 + m + minutes;
-  return `${String(Math.floor(total / 60) % 24).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
-}
-const IQAMAH_OFFSETS: Record<string, number> = {
-  Fajr: 21,
-  Dhuhr: 27,
-  Asr: 32,
-  Maghrib: 5,
-  Isha: 18,
+type PrayerTime = {
+  name: string;
+  adhan: string;
+  iqamah: string;
 };
+
+type JumuahSession = {
+  label: string;
+  khutbah: string;
+  iqamah: string;
+};
+
+type ProgramCard = {
+  iconKey: "book" | "users" | "calendar";
+  title: string;
+  text: string;
+};
+
+type EventCard = {
+  date: string;
+  title: string;
+  detail: string;
+};
+
+type Announcement = {
+  title: string;
+  message: string;
+  isPinned?: boolean;
+};
+
 const PRAYER_CACHE_KEY = "icri_prayer_times";
 
-const fallbackPrayerTimes = [
+const fallbackPrayerTimes: PrayerTime[] = [
   { name: "Fajr", adhan: "5:24 AM", iqamah: "5:45 AM" },
   { name: "Dhuhr", adhan: "12:03 PM", iqamah: "12:30 PM" },
   { name: "Asr", adhan: "3:28 PM", iqamah: "4:00 PM" },
@@ -51,32 +61,53 @@ const fallbackPrayerTimes = [
   { name: "Isha", adhan: "8:12 PM", iqamah: "8:30 PM" },
 ];
 
-const programs = [
+const fallbackJumuahSessions: JumuahSession[] = [
+  { label: "1st Khutbah", khutbah: "1:00 PM", iqamah: "1:30 PM" },
+];
+
+const fallbackPrograms: ProgramCard[] = [
   {
-    icon: BookOpen,
+    iconKey: "book",
     title: "Qur'an & Islamic Learning",
     text: "Weekly classes, youth halaqas, beginner-friendly learning, and community reminders for every age group.",
   },
   {
-    icon: Users,
+    iconKey: "users",
     title: "Community Programs",
     text: "Family nights, sister and brother gatherings, service projects, and local support for Providence المسلمين.",
   },
   {
-    icon: CalendarDays,
+    iconKey: "calendar",
     title: "Ramadan & Special Events",
     text: "Iftar gatherings, taraweeh updates, Eid announcements, and important masjid events all in one place.",
   },
 ];
 
-const quickLinks = [
-  "Prayer Times",
-  "Events",
-  "Donate",
-  "Programs",
-  "Contact",
-  "Volunteer",
+const fallbackEvents: EventCard[] = [
+  {
+    date: "Mar 20",
+    title: "Community Iftar",
+    detail: "Open to families and students",
+  },
+  {
+    date: "Mar 22",
+    title: "Youth Halaqa",
+    detail: "After Maghrib in the multipurpose hall",
+  },
+  {
+    date: "Mar 29",
+    title: "Weekend Tafsir",
+    detail: "Guest speaker and Q&A session",
+  },
 ];
+
+const fallbackAnnouncements: Announcement[] = [];
+
+const programIconMap = {
+  book: BookOpen,
+  users: Users,
+  calendar: CalendarDays,
+} as const;
 
 const prayerVisuals = {
   Fajr: {
@@ -115,45 +146,71 @@ export default function Page() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [aboutExpanded, setAboutExpanded] = useState(false);
   const [prayerTimes, setPrayerTimes] = useState(fallbackPrayerTimes);
+  const [jumuahSessions, setJumuahSessions] = useState(fallbackJumuahSessions);
+  const [programs, setPrograms] = useState(fallbackPrograms);
+  const [events, setEvents] = useState(fallbackEvents);
+  const [announcements, setAnnouncements] = useState(fallbackAnnouncements);
   const heroRef = useRef<HTMLElement | null>(null);
 
-  // Fetch Providence prayer times from AlAdhan, refresh once daily
+  // Fetch merged prayer payload (Adhan from API, Iqamah from CMS), refresh once daily
   useEffect(() => {
     const today = new Date().toDateString();
-    try {
-      const cached = localStorage.getItem(PRAYER_CACHE_KEY);
-      if (cached) {
-        const { date, data } = JSON.parse(cached);
-        if (date === today) {
-          setPrayerTimes(data);
-          return;
-        }
-      }
-    } catch {}
-
-    fetch(
-      "https://api.aladhan.com/v1/timingsByCity?city=Providence&country=US&state=Rhode+Island&method=2"
-    )
+    fetch("/api/prayers/today")
       .then((r) => r.json())
       .then((json) => {
-        const t = json?.data?.timings;
-        if (!t) return;
-        const prayers = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"].map(
-          (name) => ({
-            name,
-            adhan: to12Hour(t[name]),
-            iqamah: to12Hour(addMinutes(t[name], IQAMAH_OFFSETS[name])),
-          })
-        );
+        const prayers = Array.isArray(json?.prayers) ? json.prayers : fallbackPrayerTimes;
+        const jumuah = Array.isArray(json?.jumuahSessions) && json.jumuahSessions.length > 0
+          ? json.jumuahSessions
+          : fallbackJumuahSessions;
+
         setPrayerTimes(prayers);
+        setJumuahSessions(jumuah);
+
         try {
           localStorage.setItem(
             PRAYER_CACHE_KEY,
-            JSON.stringify({ date: today, data: prayers })
+            JSON.stringify({ date: today, data: prayers, jumuah })
           );
         } catch {}
       })
       .catch(() => {}); // silently keep fallback times
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/content/home")
+      .then((r) => r.json())
+      .then((json) => {
+        if (Array.isArray(json?.programs) && json.programs.length > 0) {
+          setPrograms(
+            json.programs.map((program: ProgramCard) => ({
+              iconKey: program.iconKey,
+              title: program.title,
+              text: program.text,
+            }))
+          );
+        }
+
+        if (Array.isArray(json?.events) && json.events.length > 0) {
+          setEvents(
+            json.events.map((event: EventCard) => ({
+              date: event.date,
+              title: event.title,
+              detail: event.detail,
+            }))
+          );
+        }
+
+        if (Array.isArray(json?.announcements)) {
+          setAnnouncements(
+            json.announcements.map((announcement: Announcement) => ({
+              title: announcement.title,
+              message: announcement.message,
+              isPinned: announcement.isPinned,
+            }))
+          );
+        }
+      })
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -353,9 +410,13 @@ export default function Page() {
                 <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                   <div>
                     <p className="text-base font-semibold">Jumu&apos;ah</p>
-                    <p className="text-sm text-stone-600 md:text-base">
-                      1st Khutbah 1:00 PM
-                    </p>
+                    <div className="mt-1 space-y-1">
+                      {jumuahSessions.map((session) => (
+                        <p key={`${session.label}-${session.khutbah}`} className="text-sm text-stone-600 md:text-base">
+                          {session.label} {session.khutbah} · Iqamah {session.iqamah}
+                        </p>
+                      ))}
+                    </div>
                   </div>
                   <Button variant="outline" className="rounded-2xl md:self-auto self-start">
                     Full Timetable
@@ -531,34 +592,17 @@ export default function Page() {
                   Masjid Al Kareem Announcements and Events
                 </h3>
                 <p className="mt-4 leading-7 text-stone-600">
-                  This section can be connected to a CMS, Google Calendar, or a
-                  simple admin panel so the masjid can post Eid announcements,
-                  fundraisers, classes, and youth events without needing to
-                  summon the one cousin who knows web design.
+                  {announcements[0]?.message ||
+                    "Use Studio to post Eid announcements, fundraisers, classes, and youth events without touching code."}
                 </p>
                 <p className="mt-4 text-sm text-stone-500">
-                  Weekly reflections and reminders from Imam ABL can also be
-                  featured here.
+                  {announcements[0]?.title
+                    ? `Pinned announcement: ${announcements[0].title}`
+                    : "Weekly reflections and reminders from Imam ABL can also be featured here."}
                 </p>
               </div>
               <div className="grid gap-4">
-                {[
-                  {
-                    date: "Mar 20",
-                    title: "Community Iftar",
-                    detail: "Open to families and students",
-                  },
-                  {
-                    date: "Mar 22",
-                    title: "Youth Halaqa",
-                    detail: "After Maghrib in the multipurpose hall",
-                  },
-                  {
-                    date: "Mar 29",
-                    title: "Weekend Tafsir",
-                    detail: "Guest speaker and Q&A session",
-                  },
-                ].map((event) => (
+                {events.map((event) => (
                   <div
                     key={event.title}
                     className="flex items-center justify-between rounded-2xl border border-stone-200 px-5 py-4"
@@ -596,7 +640,7 @@ export default function Page() {
         </div>
         <div className="grid gap-6 lg:grid-cols-3">
           {programs.map((program) => {
-            const Icon = program.icon;
+            const Icon = programIconMap[program.iconKey] || BookOpen;
             return (
               <Card
                 key={program.title}

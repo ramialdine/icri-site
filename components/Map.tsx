@@ -9,6 +9,15 @@ type Props = {
   markerLabel?: string;
 };
 
+type GoogleMapsWindow = Window & {
+  google?: {
+    maps?: {
+      Map: new (element: HTMLElement, options: Record<string, unknown>) => unknown;
+      Marker: new (options: Record<string, unknown>) => unknown;
+    };
+  };
+};
+
 function loadScript(src: string) {
   return new Promise<void>((resolve, reject) => {
     if (document.querySelector(`script[src="${src}"]`)) return resolve();
@@ -37,7 +46,7 @@ export default function Map({ lat = 41.835, lng = -71.397, zoom = 16, markerLabe
       .then(() => {
         if (cancelled) return;
         if (!ref.current) return;
-        const win: any = window;
+        const win = window as GoogleMapsWindow;
         const google = win.google;
         if (!google || !google.maps) return;
 
