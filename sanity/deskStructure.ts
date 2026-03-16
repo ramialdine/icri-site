@@ -1,4 +1,6 @@
 import type { StructureResolver } from "sanity/structure";
+import { getPreviewUrl } from "./previewUrls";
+import { PreviewPane } from "./components/PreviewPane";
 
 const groupedTypes = new Set(["prayerConfig", "dateOverride", "announcement", "event", "program"]);
 
@@ -37,21 +39,63 @@ export const deskStructure: StructureResolver = (S) =>
                 .child(
                   S.documentTypeList("announcement")
                     .title("Announcements")
-                    .defaultOrdering([{ field: "_updatedAt", direction: "desc" }]),
+                    .defaultOrdering([{ field: "_updatedAt", direction: "desc" }])
+                    .child((documentId) =>
+                      S.document()
+                        .documentId(documentId)
+                        .schemaType("announcement")
+                        .views([
+                          S.view.form().title("Edit"),
+                          S.view
+                            .component(PreviewPane)
+                            .title("Preview")
+                            .options({
+                              url: getPreviewUrl({ _type: "announcement", _id: documentId }),
+                            }),
+                        ]),
+                    ),
                 ),
               S.listItem()
                 .title("🗓️ Events")
                 .child(
                   S.documentTypeList("event")
                     .title("Events")
-                    .defaultOrdering([{ field: "startAt", direction: "desc" }]),
+                    .defaultOrdering([{ field: "startAt", direction: "desc" }])
+                    .child((documentId) =>
+                      S.document()
+                        .documentId(documentId)
+                        .schemaType("event")
+                        .views([
+                          S.view.form().title("Edit"),
+                          S.view
+                            .component(PreviewPane)
+                            .title("Preview")
+                            .options({
+                              url: getPreviewUrl({ _type: "event", _id: documentId }),
+                            }),
+                        ]),
+                    ),
                 ),
               S.listItem()
                 .title("📚 Programs")
                 .child(
                   S.documentTypeList("program")
                     .title("Programs")
-                    .defaultOrdering([{ field: "order", direction: "asc" }]),
+                    .defaultOrdering([{ field: "_updatedAt", direction: "desc" }])
+                    .child((documentId) =>
+                      S.document()
+                        .documentId(documentId)
+                        .schemaType("program")
+                        .views([
+                          S.view.form().title("Edit"),
+                          S.view
+                            .component(PreviewPane)
+                            .title("Preview")
+                            .options({
+                              url: getPreviewUrl({ _type: "program", _id: documentId }),
+                            }),
+                        ]),
+                    ),
                 ),
             ]),
         ),
