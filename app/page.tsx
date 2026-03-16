@@ -361,12 +361,12 @@ export default function Page() {
             <a href="#prayers" className={isScrolled ? "hover:text-emerald-700" : "hover:text-emerald-200"}>
               Prayer Times
             </a>
-            <a href="#programs" className={isScrolled ? "hover:text-emerald-700" : "hover:text-emerald-200"}>
+            <Link href="/programs" className={isScrolled ? "hover:text-emerald-700" : "hover:text-emerald-200"}>
               Programs
-            </a>
-            <a href="#events" className={isScrolled ? "hover:text-emerald-700" : "hover:text-emerald-200"}>
+            </Link>
+            <Link href="/events" className={isScrolled ? "hover:text-emerald-700" : "hover:text-emerald-200"}>
               Events
-            </a>
+            </Link>
             <a href="#contact" className={isScrolled ? "hover:text-emerald-700" : "hover:text-emerald-200"}>
               Contact
             </a>
@@ -688,9 +688,10 @@ export default function Page() {
               </div>
               <div className="grid gap-4">
                 {events.map((event) => (
-                  <div
+                  <Link
+                    href="/events"
                     key={event.title}
-                    className="flex items-center justify-between rounded-2xl border border-stone-200 px-5 py-4"
+                    className="flex items-center justify-between rounded-2xl border border-stone-200 px-5 py-4 transition hover:border-emerald-200 hover:bg-emerald-50/50 dark:border-stone-800 dark:hover:border-emerald-900 dark:hover:bg-emerald-950/20"
                   >
                     <div className="flex items-center gap-4">
                       <div className="rounded-2xl bg-stone-100 px-3 py-2 text-sm font-semibold text-stone-800 dark:bg-emerald-900/45 dark:text-emerald-200 dark:ring-1 dark:ring-emerald-700/40">
@@ -702,7 +703,7 @@ export default function Page() {
                       </div>
                     </div>
                     <ChevronRight className="h-5 w-5 text-stone-400" />
-                  </div>
+                  </Link>
                 ))}
               </div>
             </CardContent>
@@ -739,9 +740,9 @@ export default function Page() {
                   <p className="mt-3 leading-7 text-stone-600">
                     {program.text}
                   </p>
-                  <button className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-emerald-700">
+                  <Link href="/programs" className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-emerald-700 hover:text-emerald-800">
                     Learn more <ChevronRight className="h-4 w-4" />
-                  </button>
+                  </Link>
                 </CardContent>
               </Card>
             );
