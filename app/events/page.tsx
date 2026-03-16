@@ -2,7 +2,6 @@ import Link from "next/link";
 import { CalendarDays, Clock3, ExternalLink, MapPin } from "lucide-react";
 
 import FlyerThumbnail from "@/components/FlyerThumbnail";
-import StandardPageHeader from "@/components/StandardPageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { getEventsPagePayload, type EventListItem } from "@/sanity/lib/content";
@@ -36,8 +35,6 @@ export default async function EventsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-emerald-50/40 text-stone-900 dark:from-stone-950 dark:to-stone-950 dark:text-stone-100">
-      <StandardPageHeader currentPage="Events" />
-
       <main className="px-4 pb-10 pt-8 sm:px-6 lg:px-8 lg:pb-14">
       <section className="mx-auto max-w-6xl">
         <Card className="rounded-[30px] border-stone-200 shadow-sm dark:border-stone-800 dark:bg-stone-900/80">

@@ -18,6 +18,14 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
+## Design Standard for New Pages
+
+For all new page builds and UI updates, follow:
+
+- [docs/design-standard.md](docs/design-standard.md)
+
+This includes standards for layout rhythm, image usage, buttons, card styling, accessibility, and the global route-derived header/breadcrumb pattern.
+
 ## Embedded CMS (Sanity Studio)
 
 This project now includes an embedded CMS at [http://localhost:3000/studio](http://localhost:3000/studio).

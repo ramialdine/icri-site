@@ -2,7 +2,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import StandardPageHeader from "@/components/StandardPageHeader";
 import { Heart, GraduationCap, Wrench, HandHeart, CreditCard, Landmark } from "lucide-react";
 
 const supportAreas = [
@@ -38,12 +37,10 @@ const supportAreas = [
 
 export default function DonatePage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50/60 to-lime-50/70 text-stone-900 dark:bg-stone-950 dark:text-stone-100">
-      <StandardPageHeader currentPage="Donate" />
-
+    <div className="min-h-screen bg-background text-foreground">
       <main className="px-4 pb-10 pt-8 sm:px-6 lg:px-8 lg:pb-14">
       <section className="mx-auto max-w-7xl">
-        <Card className="overflow-hidden rounded-[32px] border-emerald-200/80 shadow-xl">
+        <Card className="overflow-hidden rounded-[32px] shadow-xl">
           <CardContent className="grid gap-8 p-8 lg:grid-cols-[1.1fr_0.9fr] lg:p-10">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-700">
@@ -52,20 +49,20 @@ export default function DonatePage() {
               <h1 className="mt-3 text-4xl font-bold leading-tight sm:text-5xl">
                 Support the masjid mission 💚
               </h1>
-              <p className="mt-5 max-w-2xl text-base leading-7 text-stone-700 sm:text-lg">
+              <p className="mt-5 max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">
                 Every donation helps sustain worship, Islamic learning, and community support for families across Providence.
               </p>
               <div className="mt-7 flex flex-wrap gap-3">
                 <Button asChild className="rounded-2xl bg-emerald-700 px-6 hover:bg-emerald-800">
                   <a href="#donation-methods">Donate Now</a>
                 </Button>
-                <Button asChild variant="outline" className="rounded-2xl border-emerald-300 bg-white/90 text-emerald-800 hover:bg-emerald-50">
+                <Button asChild variant="outline" className="rounded-2xl">
                   <Link href="/">Back to Home</Link>
                 </Button>
               </div>
             </div>
 
-            <div className="relative min-h-[260px] overflow-hidden rounded-[28px] border border-emerald-200/80 shadow-sm">
+            <div className="relative min-h-[260px] overflow-hidden rounded-[28px] shadow-sm">
               <Image
                 src="/masjidExterior.png"
                 alt="Masjid Al Kareem exterior"
@@ -83,6 +80,71 @@ export default function DonatePage() {
         </Card>
       </section>
 
+      <section className="mx-auto max-w-7xl py-8 lg:py-10">
+        <Card className="overflow-hidden rounded-[30px] shadow-sm">
+          <CardContent className="grid gap-8 p-6 lg:grid-cols-[1fr_1fr] lg:gap-10 lg:p-8">
+            <div className="relative min-h-[260px] overflow-hidden rounded-2xl">
+              <Image
+                src="/muslimsDonating.jpeg"
+                alt="Community members giving charity together"
+                fill
+                sizes="(max-width: 1024px) 100vw, 560px"
+                className="object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/45 to-transparent" />
+              <p className="absolute bottom-4 left-4 right-4 text-sm font-medium text-white">
+                Charity strengthens our community and brings blessing to every home.
+              </p>
+            </div>
+
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-700">
+                Giving in Islam
+              </p>
+              <h2 className="mt-2 text-3xl font-bold">Qur’an and Hadith on charity</h2>
+              <p className="mt-3 text-sm text-muted-foreground">
+                The reminders below are quoted with source references.
+              </p>
+
+              <div className="mt-6 space-y-4">
+                <blockquote className="rounded-2xl border border-emerald-200/80 bg-emerald-50/60 p-4 dark:border-emerald-900 dark:bg-emerald-950/30">
+                  <p className="text-sm leading-7">
+                    “The example of those who spend their wealth in the way of Allāh is like a seed
+                    [of grain] which grows seven spikes; in each spike is a hundred grains. And Allāh
+                    multiplies [His reward] for whom He wills. And Allāh is all-Encompassing and Knowing.”
+                  </p>
+                  <footer className="mt-2 text-xs font-semibold text-emerald-800 dark:text-emerald-300">
+                    Qur’an 2:261 (Sahih International)
+                  </footer>
+                </blockquote>
+
+                <blockquote className="rounded-2xl border border-emerald-200/80 bg-emerald-50/60 p-4 dark:border-emerald-900 dark:bg-emerald-950/30">
+                  <p className="text-sm leading-7">
+                    “And donate from what We have provided for you before death comes to one of you and
+                    you cry, ‘My Lord! If only You delayed me for a short while, I would give in charity
+                    and be one of the righteous.’”
+                  </p>
+                  <footer className="mt-2 text-xs font-semibold text-emerald-800 dark:text-emerald-300">
+                    Qur’an 63:10 (The Clear Quran)
+                  </footer>
+                </blockquote>
+
+                <blockquote className="rounded-2xl border border-emerald-200/80 bg-emerald-50/60 p-4 dark:border-emerald-900 dark:bg-emerald-950/30">
+                  <p className="text-sm leading-7">
+                    “There is never a day wherein servants (of God) get up at morn, but are not visited by
+                    two angels. One of them says: O Allah, give him more who spends (for the sake of Allah),
+                    and the other says: O Allah, bring destruction to one who withholds.”
+                  </p>
+                  <footer className="mt-2 text-xs font-semibold text-emerald-800 dark:text-emerald-300">
+                    Sahih Muslim 1010
+                  </footer>
+                </blockquote>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </section>
+
       <section className="mx-auto max-w-7xl py-4 lg:py-8">
         <div className="mb-6">
           <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-700">What your donation supports</p>
@@ -92,14 +154,14 @@ export default function DonatePage() {
           {supportAreas.map((item) => {
             const Icon = item.icon;
             return (
-              <Card key={item.title} className="rounded-[24px] border-emerald-200/70 bg-white/95 shadow-sm">
+              <Card key={item.title} className="rounded-[24px] shadow-sm">
                 <CardContent className="p-6">
-                  <div className="mb-4 inline-flex items-center gap-2 rounded-2xl bg-emerald-50 px-3 py-2 text-emerald-700">
+                  <div className="mb-4 inline-flex items-center gap-2 rounded-2xl bg-emerald-50 px-3 py-2 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
                     <Icon className="h-5 w-5" />
                     <span className="text-sm font-semibold">{item.emoji}</span>
                   </div>
                   <h3 className="text-xl font-bold">{item.title}</h3>
-                  <p className="mt-3 leading-7 text-stone-600">{item.description}</p>
+                  <p className="mt-3 leading-7 text-muted-foreground">{item.description}</p>
                 </CardContent>
               </Card>
             );
@@ -108,37 +170,37 @@ export default function DonatePage() {
       </section>
 
       <section id="donation-methods" className="mx-auto max-w-7xl py-8 lg:py-12">
-        <Card className="rounded-[30px] border-emerald-200/70 bg-white shadow-sm">
+        <Card className="rounded-[30px] shadow-sm">
           <CardContent className="p-8 lg:p-10">
             <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-700">Donation Methods</p>
             <h2 className="mt-2 text-3xl font-bold">Choose the easiest way to contribute</h2>
 
             <div className="mt-8 grid gap-4 md:grid-cols-3">
-              <div className="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-5">
-                <div className="mb-3 inline-flex rounded-xl bg-white p-2 text-emerald-700 shadow-sm">
+              <div className="rounded-2xl border border-emerald-200 dark:border-emerald-900 bg-emerald-50/70 dark:bg-emerald-950/30 p-5">
+                <div className="mb-3 inline-flex rounded-xl bg-white dark:bg-stone-900 p-2 text-emerald-700 dark:text-emerald-400 shadow-sm">
                   <CreditCard className="h-5 w-5" />
                 </div>
                 <p className="font-semibold">Online Donation</p>
-                <p className="mt-2 text-sm text-stone-600">Secure one-time or recurring donations through the website payment form.</p>
+                <p className="mt-2 text-sm text-muted-foreground">Secure one-time or recurring donations through the website payment form.</p>
                 <Button className="mt-4 w-full rounded-xl bg-emerald-700 hover:bg-emerald-800">Donate Online</Button>
               </div>
 
-              <div className="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-5">
-                <div className="mb-3 inline-flex rounded-xl bg-white p-2 text-emerald-700 shadow-sm">
+              <div className="rounded-2xl border border-emerald-200 dark:border-emerald-900 bg-emerald-50/70 dark:bg-emerald-950/30 p-5">
+                <div className="mb-3 inline-flex rounded-xl bg-white dark:bg-stone-900 p-2 text-emerald-700 dark:text-emerald-400 shadow-sm">
                   <Landmark className="h-5 w-5" />
                 </div>
                 <p className="font-semibold">Zelle</p>
-                <p className="mt-2 text-sm text-stone-600">Send directly to: donations@icri.org (replace with your official address).</p>
-                <p className="mt-4 rounded-lg bg-white px-3 py-2 text-sm font-medium text-stone-700">Memo: Sadaqah / Zakat / General Fund</p>
+                <p className="mt-2 text-sm text-muted-foreground">Send directly to: donations@icri.org (replace with your official address).</p>
+                <p className="mt-4 rounded-lg bg-card px-3 py-2 text-sm font-medium">Memo: Sadaqah / Zakat / General Fund</p>
               </div>
 
-              <div className="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-5">
-                <div className="mb-3 inline-flex rounded-xl bg-white p-2 text-emerald-700 shadow-sm">
+              <div className="rounded-2xl border border-emerald-200 dark:border-emerald-900 bg-emerald-50/70 dark:bg-emerald-950/30 p-5">
+                <div className="mb-3 inline-flex rounded-xl bg-white dark:bg-stone-900 p-2 text-emerald-700 dark:text-emerald-400 shadow-sm">
                   <Heart className="h-5 w-5" />
                 </div>
                 <p className="font-semibold">Venmo</p>
-                <p className="mt-2 text-sm text-stone-600">Send to: @MasjidAlKareem (replace with your official handle).</p>
-                <p className="mt-4 rounded-lg bg-white px-3 py-2 text-sm font-medium text-stone-700">Include intention in the payment note</p>
+                <p className="mt-2 text-sm text-muted-foreground">Send to: @MasjidAlKareem (replace with your official handle).</p>
+                <p className="mt-4 rounded-lg bg-card px-3 py-2 text-sm font-medium">Include intention in the payment note</p>
               </div>
             </div>
           </CardContent>

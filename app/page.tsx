@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -20,7 +20,6 @@ import {
   Sun,
   Sunset,
   MoonStar,
-  Moon,
 } from "lucide-react";
 
 type PrayerTime = {
@@ -56,8 +55,6 @@ type Announcement = {
   message: string;
   isPinned?: boolean;
 };
-
-type ThemePreference = "system" | "light" | "dark";
 
 const PRAYER_CACHE_KEY = "icri_prayer_times";
 
@@ -151,66 +148,12 @@ const prayerVisuals = {
 } as const;
 
 export default function Page() {
-  const [isScrolled, setIsScrolled] = useState(false);
   const [aboutExpanded, setAboutExpanded] = useState(false);
-  const [aboutDropdownOpen, setAboutDropdownOpen] = useState(false);
   const [prayerTimes, setPrayerTimes] = useState(fallbackPrayerTimes);
   const [jumuahSessions, setJumuahSessions] = useState(fallbackJumuahSessions);
   const [programs, setPrograms] = useState(fallbackPrograms);
   const [events, setEvents] = useState(fallbackEvents);
   const [announcements, setAnnouncements] = useState(fallbackAnnouncements);
-  const [mounted, setMounted] = useState(false);
-  const [themePreference, setThemePreference] = useState<ThemePreference>("system");
-  const [theme, setTheme] = useState<"light" | "dark">("light");
-  const heroRef = useRef<HTMLElement | null>(null);
-
-  useEffect(() => {
-    const savedTheme = window.localStorage.getItem("theme");
-    const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-
-    if (savedTheme === "light" || savedTheme === "dark") {
-      setThemePreference(savedTheme);
-      setTheme(savedTheme);
-    } else {
-      setThemePreference("system");
-      setTheme(systemTheme);
-    }
-
-    setMounted(true);
-  }, []);
-
-  const toggleTheme = () => {
-    const nextTheme = theme === "dark" ? "light" : "dark";
-    setThemePreference(nextTheme);
-    setTheme(nextTheme);
-  };
-
-  useEffect(() => {
-    if (themePreference !== "system") {
-      return;
-    }
-
-    const media = window.matchMedia("(prefers-color-scheme: dark)");
-    const applySystemTheme = (isDark: boolean) => {
-      setTheme(isDark ? "dark" : "light");
-    };
-
-    applySystemTheme(media.matches);
-    const handleChange = (event: MediaQueryListEvent) => {
-      applySystemTheme(event.matches);
-    };
-
-    media.addEventListener("change", handleChange);
-    return () => media.removeEventListener("change", handleChange);
-  }, [themePreference]);
-
-  useEffect(() => {
-    const root = document.documentElement;
-    root.classList.toggle("dark", theme === "dark");
-    try {
-      localStorage.setItem("theme", themePreference === "system" ? "system" : theme);
-    } catch {}
-  }, [theme, themePreference]);
 
   // Fetch merged prayer payload (Adhan from API, Iqamah from CMS), refresh once daily
   useEffect(() => {
@@ -277,28 +220,6 @@ export default function Page() {
       .catch(() => {});
   }, []);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      if (!heroRef.current) {
-        setIsScrolled(false);
-        return;
-      }
-
-      const heroBottom = heroRef.current.getBoundingClientRect().bottom;
-      setIsScrolled(heroBottom <= 88);
-    };
-
-    const rafId = window.requestAnimationFrame(handleScroll);
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    window.addEventListener("resize", handleScroll);
-
-    return () => {
-      window.cancelAnimationFrame(rafId);
-      window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("resize", handleScroll);
-    };
-  }, []);
-
   const revealInView = {
     initial: { opacity: 0, y: 34 },
     whileInView: { opacity: 1, y: 0 },
@@ -308,124 +229,7 @@ export default function Page() {
 
   return (
     <div className="min-h-screen bg-stone-50 text-stone-900 dark:bg-stone-950 dark:text-stone-100">
-      <header
-        className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
-          isScrolled
-            ? "border-b border-stone-200/80 bg-white/90 backdrop-blur shadow-sm dark:border-stone-800/80 dark:bg-stone-950/90"
-            : "border-b border-transparent bg-transparent"
-        }`}
-      >
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-4">
-            <div className="relative h-14 w-[180px] overflow-hidden rounded-md border border-stone-200 bg-white shadow-sm sm:h-16 sm:w-[220px]">
-              <Image
-                src="/ICRI_logo.jpeg"
-                alt="Islamic Center of Rhode Island logo"
-                fill
-                sizes="(max-width: 640px) 180px, 220px"
-                className="object-contain p-1"
-                priority
-              />
-            </div>
-            <div>
-              <p
-                className={`hidden text-xs font-semibold uppercase tracking-[0.2em] sm:block ${
-                  isScrolled ? "text-emerald-700" : "text-emerald-100"
-                }`}
-              >
-                ICRI
-              </p>
-              <h1
-                className={`text-base font-bold sm:text-lg ${
-                  isScrolled ? "text-stone-900 dark:text-stone-100" : "text-white"
-                }`}
-              >
-                Masjid Al Kareem
-              </h1>
-            </div>
-          </div>
-          <nav
-            className={`hidden gap-6 text-sm font-medium md:flex ${
-              isScrolled ? "text-stone-700 dark:text-stone-200" : "text-white"
-            }`}
-          >
-            <div className="relative">
-              <button
-                onClick={() => setAboutDropdownOpen(!aboutDropdownOpen)}
-                className={`flex items-center gap-1.5 transition ${isScrolled ? "hover:text-emerald-700" : "hover:text-emerald-200"}`}
-              >
-                About
-              </button>
-              {aboutDropdownOpen && (
-                <div
-                  className={`absolute top-full left-0 mt-2 w-48 rounded-xl shadow-lg border ${
-                    isScrolled
-                      ? "bg-white border-stone-200 text-stone-700 dark:bg-stone-900 dark:border-stone-700 dark:text-stone-200"
-                      : "bg-white/95 border-white text-stone-700 dark:bg-stone-900/95 dark:border-stone-700 dark:text-stone-200"
-                  }`}
-                >
-                  <Link
-                    href="/about/imam"
-                    className={`block px-4 py-3 first:rounded-t-xl transition text-sm font-medium ${
-                      isScrolled
-                        ? "hover:bg-emerald-50 dark:hover:bg-emerald-950"
-                        : "hover:bg-emerald-50 dark:hover:bg-emerald-950"
-                    }`}
-                    onClick={() => setAboutDropdownOpen(false)}
-                  >
-                    The Imam
-                  </Link>
-                  <Link
-                    href="/about/president"
-                    className={`block px-4 py-3 last:rounded-b-xl transition text-sm font-medium border-t ${
-                      isScrolled
-                        ? "border-stone-100 hover:bg-emerald-50 dark:border-stone-700 dark:hover:bg-emerald-950"
-                        : "border-stone-100 hover:bg-emerald-50 dark:border-stone-700 dark:hover:bg-emerald-950"
-                    }`}
-                    onClick={() => setAboutDropdownOpen(false)}
-                  >
-                    The President
-                  </Link>
-                </div>
-              )}
-            </div>
-            <a href="#prayers" className={isScrolled ? "hover:text-emerald-700" : "hover:text-emerald-200"}>
-              Prayer Times
-            </a>
-            <Link href="/programs" className={isScrolled ? "hover:text-emerald-700" : "hover:text-emerald-200"}>
-              Programs
-            </Link>
-            <Link href="/events" className={isScrolled ? "hover:text-emerald-700" : "hover:text-emerald-200"}>
-              Events
-            </Link>
-            <Link href="/announcements" className={isScrolled ? "hover:text-emerald-700" : "hover:text-emerald-200"}>
-              Announcements
-            </Link>
-            <Link href="/amenities" className={isScrolled ? "hover:text-emerald-700" : "hover:text-emerald-200"}>
-              Amenities
-            </Link>
-            <a href="#contact" className={isScrolled ? "hover:text-emerald-700" : "hover:text-emerald-200"}>
-              Contact
-            </a>
-          </nav>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={toggleTheme}
-              className="rounded-xl border-white/60 bg-white/90 text-stone-700 hover:bg-white dark:border-stone-700 dark:bg-stone-900 dark:text-stone-200 dark:hover:bg-stone-800"
-              aria-label="Toggle dark mode"
-            >
-              {mounted ? (theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />) : <Moon className="h-4 w-4" />}
-            </Button>
-            <Button asChild className="rounded-2xl bg-emerald-700 hover:bg-emerald-800">
-              <Link href="/donate">Donate</Link>
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      <section ref={heroRef} className="relative flex min-h-[100svh] items-center justify-center overflow-hidden">
+      <section className="relative flex min-h-[100svh] items-center justify-center overflow-hidden pt-20">
         <Image
           src="/menEntranceAtNight.jpg"
           alt="Masjid Al Kareem entrance at night"
@@ -455,10 +259,10 @@ export default function Page() {
             </p>
           </div>
           <Button asChild className="h-16 rounded-2xl bg-emerald-600 px-9 text-lg font-semibold shadow-lg shadow-emerald-900/25 hover:bg-emerald-700 sm:h-20 sm:px-12 sm:text-2xl">
-            <a href="#prayers">🕰️ View Prayer Schedule</a>
+            <a href="#prayers">View Prayer Schedule</a>
           </Button>
           <Button asChild variant="outline" className="h-16 rounded-2xl border-2 border-emerald-100/90 bg-white px-9 text-lg font-semibold text-emerald-900 shadow-lg shadow-emerald-950/20 hover:bg-emerald-50 dark:border-emerald-200 dark:bg-white dark:text-emerald-900 dark:hover:bg-emerald-50 sm:h-20 sm:px-12 sm:text-2xl">
-            <Link href="/donate">💚 Donate to the Masjid</Link>
+            <Link href="/donate">Donate to the Masjid</Link>
           </Button>
         </motion.div>
       </section>
