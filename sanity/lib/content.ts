@@ -201,7 +201,7 @@ function normalizeProgramIcon(iconKey?: string): "book" | "users" | "calendar" {
   return "book";
 }
 
-function formatAnnouncementWindow(startAt?: string, endAt?: string): string | undefined {
+export function formatAnnouncementWindow(startAt?: string, endAt?: string): string | undefined {
   if (!startAt && !endAt) {
     return undefined;
   }
