@@ -2,7 +2,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { BookOpen, CalendarDays, Users } from "lucide-react";
 
-import StandardPageHeader from "@/components/StandardPageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { getProgramsPagePayload, type ProgramListItem } from "@/sanity/lib/content";
@@ -46,8 +45,6 @@ export default async function ProgramsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-emerald-50/40 text-stone-900 dark:from-stone-950 dark:to-stone-950 dark:text-stone-100">
-      <StandardPageHeader currentPage="Programs" />
-
       <main className="px-4 pb-10 pt-8 sm:px-6 lg:px-8 lg:pb-14">
       <section className="mx-auto max-w-6xl">
         <Card className="rounded-[30px] border-stone-200 shadow-sm dark:border-stone-800 dark:bg-stone-900/80">

@@ -4,7 +4,6 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import StandardPageHeader from "@/components/StandardPageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Mail, Phone } from "lucide-react";
@@ -19,8 +18,6 @@ export default function ImamPage() {
 
   return (
     <div className="min-h-screen bg-stone-50 text-stone-900 dark:bg-stone-950 dark:text-stone-100">
-      <StandardPageHeader currentPage="About" breadcrumbTrail={["About", "The Imam"]} />
-
       <section className="relative flex min-h-[60svh] items-center justify-center overflow-hidden pt-8">
         <div className="absolute inset-0 bg-gradient-to-br from-emerald-900 via-emerald-800 to-teal-900" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(16,185,129,0.2),transparent_45%)]" />
@@ -45,17 +42,19 @@ export default function ImamPage() {
       <motion.section {...revealInView} className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
         <Card className="rounded-[32px] border-stone-200 shadow-sm overflow-hidden">
           <CardContent className="p-0">
-            <div className="grid gap-8 lg:grid-cols-[1fr_1.2fr] lg:items-start">
-              <div className="relative aspect-square overflow-hidden lg:rounded-r-3xl lg:rounded-l-none rounded-t-3xl lg:rounded-t-none">
-                <Image
-                  src="/ICRI_logo.jpeg"
-                  alt="The Imam"
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 1024px) 100vw, 400px"
-                />
+            <div className="grid gap-10 lg:grid-cols-[1fr_1.2fr] lg:items-center">
+              <div className="ml-4 lg:ml-8 lg:self-center">
+                <div className="relative h-80 min-h-[320px] overflow-hidden rounded-3xl lg:h-auto lg:min-h-[420px]">
+                  <Image
+                    src="/imamABLportrait.jpeg"
+                    alt="The Imam"
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 1024px) 100vw, 400px"
+                  />
+                </div>
               </div>
-              <div className="px-8 py-8 lg:py-10">
+              <div className="pl-8 pr-8 py-8 lg:py-10 lg:pl-12">
                 <div>
                   <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-700">
                     Imam

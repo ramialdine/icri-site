@@ -1,5 +1,4 @@
 import Link from "next/link";
-import StandardPageHeader from "@/components/StandardPageHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -29,8 +28,6 @@ const amenitySections: AmenitySection[] = [
 export default function AmenitiesPage() {
 	return (
 		<div className="min-h-screen bg-stone-50 text-stone-900 dark:bg-stone-950 dark:text-stone-100">
-			<StandardPageHeader currentPage="Amenities" />
-
 			<main className="py-16 pt-8">
 				<section className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
 				<div className="max-w-3xl">

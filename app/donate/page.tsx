@@ -2,7 +2,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import StandardPageHeader from "@/components/StandardPageHeader";
 import { Heart, GraduationCap, Wrench, HandHeart, CreditCard, Landmark } from "lucide-react";
 
 const supportAreas = [
@@ -39,8 +38,6 @@ const supportAreas = [
 export default function DonatePage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <StandardPageHeader currentPage="Donate" />
-
       <main className="px-4 pb-10 pt-8 sm:px-6 lg:px-8 lg:pb-14">
       <section className="mx-auto max-w-7xl">
         <Card className="overflow-hidden rounded-[32px] shadow-xl">
