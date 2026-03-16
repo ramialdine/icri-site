@@ -42,8 +42,8 @@ export default function StandardPageHeader({ currentPage, breadcrumbTrail }: Sta
   return (
     <>
       <header className="fixed inset-x-0 top-0 z-50 border-b border-stone-200/80 bg-white/90 shadow-sm backdrop-blur transition-all duration-300 dark:border-stone-800/80 dark:bg-stone-950/90">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-          <Link href="/" className="flex items-center gap-4 transition hover:opacity-80">
+        <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-4 sm:px-6 lg:px-8">
+          <Link href="/" className="flex items-center gap-4 transition hover:opacity-80 flex-shrink-0">
             <div className="relative h-14 w-[180px] overflow-hidden rounded-md border border-stone-200 bg-white shadow-sm sm:h-16 sm:w-[220px]">
               <Image
                 src="/ICRI_logo.jpeg"
@@ -54,16 +54,19 @@ export default function StandardPageHeader({ currentPage, breadcrumbTrail }: Sta
                 priority
               />
             </div>
-            <div>
-              <p className="hidden text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700 sm:block dark:text-emerald-300">
+            <div className="hidden sm:block">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700 dark:text-emerald-300">
                 ICRI
               </p>
-              <h1 className="text-base font-bold text-stone-900 dark:text-stone-100 sm:text-lg">
+              <h1 className="text-base font-bold text-stone-900 dark:text-stone-100">
                 Masjid Al Kareem
               </h1>
             </div>
           </Link>
-          <nav className="hidden gap-6 text-sm font-medium text-stone-700 dark:text-stone-200 md:flex">
+          <Button asChild className="rounded-2xl bg-emerald-700 hover:bg-emerald-800 px-8 py-2 text-base font-semibold flex-shrink-0">
+            <Link href="/donate">Donate</Link>
+          </Button>
+          <nav className="hidden gap-6 text-sm font-medium text-stone-700 dark:text-stone-200 lg:flex">
             <div className="relative">
               <button
                 onClick={() => setAboutDropdownOpen(!aboutDropdownOpen)}
@@ -109,18 +112,15 @@ export default function StandardPageHeader({ currentPage, breadcrumbTrail }: Sta
               Contact
             </Link>
           </nav>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 ml-auto">
             <Button
               variant="outline"
               size="icon"
               onClick={toggleTheme}
-              className="rounded-xl border-white/60 bg-white/90 text-stone-700 hover:bg-white dark:border-stone-700 dark:bg-stone-900 dark:text-stone-200 dark:hover:bg-stone-800"
+              className="rounded-xl border-white/60 bg-white/90 text-stone-700 hover:bg-white dark:border-stone-700 dark:bg-stone-900 dark:text-stone-200 dark:hover:bg-stone-800 flex-shrink-0"
               aria-label="Toggle dark mode"
             >
               {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-            </Button>
-            <Button asChild className="rounded-2xl bg-emerald-700 hover:bg-emerald-800">
-              <Link href="/donate">Donate</Link>
             </Button>
           </div>
         </div>

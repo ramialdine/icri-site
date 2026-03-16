@@ -315,8 +315,8 @@ export default function Page() {
             : "border-b border-transparent bg-transparent"
         }`}
       >
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-4">
+        <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-4 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-4 flex-shrink-0">
             <div className="relative h-14 w-[180px] overflow-hidden rounded-md border border-stone-200 bg-white shadow-sm sm:h-16 sm:w-[220px]">
               <Image
                 src="/ICRI_logo.jpeg"
@@ -344,11 +344,15 @@ export default function Page() {
               </h1>
             </div>
           </div>
-          <nav
-            className={`hidden gap-6 text-sm font-medium md:flex ${
-              isScrolled ? "text-stone-700 dark:text-stone-200" : "text-white"
-            }`}
-          >
+          <div className="hidden md:flex items-center gap-6 lg:gap-8 ml-6 lg:ml-10">
+            <Button asChild className="rounded-2xl bg-emerald-700 px-8 py-2 text-base font-semibold hover:bg-emerald-800 flex-shrink-0">
+              <Link href="/donate">Donate</Link>
+            </Button>
+            <nav
+              className={`hidden gap-6 text-sm font-medium md:flex ${
+                isScrolled ? "text-stone-700 dark:text-stone-200" : "text-white"
+              }`}
+            >
             <div className="relative">
               <button
                 onClick={() => setAboutDropdownOpen(!aboutDropdownOpen)}
@@ -407,8 +411,9 @@ export default function Page() {
             <a href="#contact" className={isScrolled ? "hover:text-emerald-700" : "hover:text-emerald-200"}>
               Contact
             </a>
-          </nav>
-          <div className="flex items-center gap-2">
+            </nav>
+          </div>
+          <div className="ml-auto flex items-center gap-2">
             <Button
               variant="outline"
               size="icon"
@@ -418,7 +423,7 @@ export default function Page() {
             >
               {mounted ? (theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />) : <Moon className="h-4 w-4" />}
             </Button>
-            <Button asChild className="rounded-2xl bg-emerald-700 hover:bg-emerald-800">
+            <Button asChild className="md:hidden rounded-2xl bg-emerald-700 hover:bg-emerald-800">
               <Link href="/donate">Donate</Link>
             </Button>
           </div>
@@ -455,10 +460,10 @@ export default function Page() {
             </p>
           </div>
           <Button asChild className="h-16 rounded-2xl bg-emerald-600 px-9 text-lg font-semibold shadow-lg shadow-emerald-900/25 hover:bg-emerald-700 sm:h-20 sm:px-12 sm:text-2xl">
-            <a href="#prayers">🕰️ View Prayer Schedule</a>
+            <a href="#prayers">View Prayer Schedule</a>
           </Button>
           <Button asChild variant="outline" className="h-16 rounded-2xl border-2 border-emerald-100/90 bg-white px-9 text-lg font-semibold text-emerald-900 shadow-lg shadow-emerald-950/20 hover:bg-emerald-50 dark:border-emerald-200 dark:bg-white dark:text-emerald-900 dark:hover:bg-emerald-50 sm:h-20 sm:px-12 sm:text-2xl">
-            <Link href="/donate">💚 Donate to the Masjid</Link>
+            <Link href="/donate">Donate to the Masjid</Link>
           </Button>
         </motion.div>
       </section>
