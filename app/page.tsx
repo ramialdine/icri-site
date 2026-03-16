@@ -126,7 +126,7 @@ export default function Page() {
   return (
     <div className="min-h-screen bg-stone-50 text-stone-900">
       <header
-        className={`sticky top-0 z-50 transition-all duration-300 ${
+        className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
           isScrolled
             ? "border-b border-stone-200/80 bg-white/90 backdrop-blur shadow-sm"
             : "border-b border-transparent bg-transparent"
@@ -188,7 +188,7 @@ export default function Page() {
         </div>
       </header>
 
-      <section ref={heroRef} className="relative flex min-h-[calc(100svh-88px)] items-center justify-center overflow-hidden">
+      <section ref={heroRef} className="relative flex min-h-[100svh] items-center justify-center overflow-hidden">
         <Image
           src="/masjidExterior.png"
           alt="Masjid exterior background"
