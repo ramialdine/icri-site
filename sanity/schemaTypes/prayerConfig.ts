@@ -6,30 +6,35 @@ const prayerFields = [
   defineField({
     name: "fajr",
     title: "Fajr Iqama",
+    description: "Enter time as HH:mm (24-hour). Example: 05:45",
     type: "string",
     validation: (rule) => rule.required().regex(HHMM_24H_REGEX, { name: "HH:mm" }).error(timeValidationMessage),
   }),
   defineField({
     name: "dhuhr",
     title: "Dhuhr Iqama",
+    description: "Enter time as HH:mm (24-hour). Example: 13:30",
     type: "string",
     validation: (rule) => rule.required().regex(HHMM_24H_REGEX, { name: "HH:mm" }).error(timeValidationMessage),
   }),
   defineField({
     name: "asr",
     title: "Asr Iqama",
+    description: "Enter time as HH:mm (24-hour). Example: 16:45",
     type: "string",
     validation: (rule) => rule.required().regex(HHMM_24H_REGEX, { name: "HH:mm" }).error(timeValidationMessage),
   }),
   defineField({
     name: "maghrib",
     title: "Maghrib Iqama",
+    description: "Enter time as HH:mm (24-hour). Example: 18:20",
     type: "string",
     validation: (rule) => rule.required().regex(HHMM_24H_REGEX, { name: "HH:mm" }).error(timeValidationMessage),
   }),
   defineField({
     name: "isha",
     title: "Isha Iqama",
+    description: "Enter time as HH:mm (24-hour). Example: 19:45",
     type: "string",
     validation: (rule) => rule.required().regex(HHMM_24H_REGEX, { name: "HH:mm" }).error(timeValidationMessage),
   }),
@@ -37,114 +42,67 @@ const prayerFields = [
 
 export const prayerConfigType = defineType({
   name: "prayerConfig",
-  title: "Prayer Configuration",
+  title: "Prayer Times Settings",
   type: "document",
   fields: [
     defineField({
       name: "timezone",
-      title: "Masjid Timezone",
+      title: "Masjid Time Zone",
+      description: "Usually leave as America/New_York unless you move to a different time zone.",
       type: "string",
       initialValue: "America/New_York",
       validation: (rule) => rule.required(),
     }),
     defineField({
-      name: "weekAnchorDate",
-      title: "Week A Anchor Date",
-      description: "Any known Week A date. Week parity is calculated from this date.",
-      type: "date",
-      validation: (rule) => rule.required(),
-    }),
-    defineField({
-      name: "biweeklyTemplate",
-      title: "Biweekly Defaults",
+      name: "weeklyTemplate",
+      title: "Default Weekly Prayer Times",
+      description: "Set the regular weekly iqama schedule. Use special date overrides only when needed.",
       type: "object",
       validation: (rule) => rule.required(),
       fields: [
+        ...prayerFields,
         defineField({
-          name: "weekA",
-          title: "Week A",
-          type: "object",
-          fields: [
-            ...prayerFields,
-            defineField({
-              name: "jumuah",
-              title: "Jumu'ah Sessions",
-              type: "array",
-              of: [
-                defineArrayMember({
-                  type: "object",
-                  fields: [
-                    defineField({ name: "label", title: "Label", type: "string", initialValue: "1st Khutbah" }),
-                    defineField({
-                      name: "khutbahTime",
-                      title: "Khutbah Time",
-                      type: "string",
-                      validation: (rule) => rule.required().regex(HHMM_24H_REGEX, { name: "HH:mm" }).error(timeValidationMessage),
-                    }),
-                    defineField({
-                      name: "iqamahTime",
-                      title: "Iqama Time",
-                      type: "string",
-                      validation: (rule) => rule.required().regex(HHMM_24H_REGEX, { name: "HH:mm" }).error(timeValidationMessage),
-                    }),
-                  ],
-                  preview: {
-                    select: {
-                      title: "label",
-                      khutbahTime: "khutbahTime",
-                      iqamahTime: "iqamahTime",
-                    },
-                    prepare: ({ title, khutbahTime, iqamahTime }) => ({
-                      title: title || "Jumu'ah Session",
-                      subtitle: `${khutbahTime} • Iqama ${iqamahTime}`,
-                    }),
-                  },
+          name: "jumuah",
+          title: "Jumu'ah Sessions",
+          description: "Add one or more Jumu'ah khutbah/iqama sessions.",
+          type: "array",
+          of: [
+            defineArrayMember({
+              type: "object",
+              fields: [
+                defineField({
+                  name: "label",
+                  title: "Session Label",
+                  description: "Example: 1st Khutbah, 2nd Khutbah",
+                  type: "string",
+                  initialValue: "1st Khutbah",
+                }),
+                defineField({
+                  name: "khutbahTime",
+                  title: "Khutbah Time",
+                  description: "Enter time as HH:mm (24-hour). Example: 13:15",
+                  type: "string",
+                  validation: (rule) => rule.required().regex(HHMM_24H_REGEX, { name: "HH:mm" }).error(timeValidationMessage),
+                }),
+                defineField({
+                  name: "iqamahTime",
+                  title: "Iqama Time",
+                  description: "Enter time as HH:mm (24-hour). Example: 13:45",
+                  type: "string",
+                  validation: (rule) => rule.required().regex(HHMM_24H_REGEX, { name: "HH:mm" }).error(timeValidationMessage),
                 }),
               ],
-            }),
-          ],
-        }),
-        defineField({
-          name: "weekB",
-          title: "Week B",
-          type: "object",
-          fields: [
-            ...prayerFields,
-            defineField({
-              name: "jumuah",
-              title: "Jumu'ah Sessions",
-              type: "array",
-              of: [
-                defineArrayMember({
-                  type: "object",
-                  fields: [
-                    defineField({ name: "label", title: "Label", type: "string", initialValue: "1st Khutbah" }),
-                    defineField({
-                      name: "khutbahTime",
-                      title: "Khutbah Time",
-                      type: "string",
-                      validation: (rule) => rule.required().regex(HHMM_24H_REGEX, { name: "HH:mm" }).error(timeValidationMessage),
-                    }),
-                    defineField({
-                      name: "iqamahTime",
-                      title: "Iqama Time",
-                      type: "string",
-                      validation: (rule) => rule.required().regex(HHMM_24H_REGEX, { name: "HH:mm" }).error(timeValidationMessage),
-                    }),
-                  ],
-                  preview: {
-                    select: {
-                      title: "label",
-                      khutbahTime: "khutbahTime",
-                      iqamahTime: "iqamahTime",
-                    },
-                    prepare: ({ title, khutbahTime, iqamahTime }) => ({
-                      title: title || "Jumu'ah Session",
-                      subtitle: `${khutbahTime} • Iqama ${iqamahTime}`,
-                    }),
-                  },
+              preview: {
+                select: {
+                  title: "label",
+                  khutbahTime: "khutbahTime",
+                  iqamahTime: "iqamahTime",
+                },
+                prepare: ({ title, khutbahTime, iqamahTime }) => ({
+                  title: title || "Jumu'ah Session",
+                  subtitle: `${khutbahTime} • Iqama ${iqamahTime}`,
                 }),
-              ],
+              },
             }),
           ],
         }),
@@ -153,8 +111,8 @@ export const prayerConfigType = defineType({
   ],
   preview: {
     prepare: () => ({
-      title: "Prayer Configuration",
-      subtitle: "Biweekly defaults and timezone",
+      title: "Prayer Times Settings",
+      subtitle: "Weekly schedule and masjid timezone",
     }),
   },
 });

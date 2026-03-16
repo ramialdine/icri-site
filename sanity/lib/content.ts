@@ -3,9 +3,13 @@ import { groq } from "next-sanity";
 import { sanityClient } from "./client";
 
 type AnnouncementDoc = {
+  _id?: string;
   title: string;
   message: string;
   isPinned?: boolean;
+  startAt?: string;
+  endAt?: string;
+  isActive?: boolean;
 };
 
 type EventDoc = {
@@ -57,6 +61,15 @@ export type ProgramListItem = {
   imageAlt?: string;
 };
 
+export type AnnouncementListItem = {
+  id: string;
+  title: string;
+  message: string;
+  isPinned: boolean;
+  statusLabel: string;
+  windowLabel?: string;
+};
+
 const announcementsQuery = groq`*[_type == "announcement" && isActive == true] | order(isPinned desc, startAt desc) {
   title,
   message,
@@ -102,6 +115,16 @@ const programsQuery = groq`*[_type == "program" && isActive == true] | order(ord
     alt,
     "url": asset->url
   }
+}`;
+
+const allAnnouncementsQuery = groq`*[_type == "announcement" && isActive == true] | order(isPinned desc, _updatedAt desc) {
+  _id,
+  title,
+  message,
+  isPinned,
+  startAt,
+  endAt,
+  isActive
 }`;
 
 function formatEventDate(dateIso: string): string {
@@ -176,6 +199,41 @@ function normalizeProgramIcon(iconKey?: string): "book" | "users" | "calendar" {
   }
 
   return "book";
+}
+
+function formatAnnouncementWindow(startAt?: string, endAt?: string): string | undefined {
+  if (!startAt && !endAt) {
+    return undefined;
+  }
+
+  const formatter = new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    timeZone: "America/New_York",
+  });
+
+  const start = startAt ? new Date(startAt) : null;
+  const end = endAt ? new Date(endAt) : null;
+
+  const validStart = start && !Number.isNaN(start.getTime()) ? formatter.format(start) : null;
+  const validEnd = end && !Number.isNaN(end.getTime()) ? formatter.format(end) : null;
+
+  if (validStart && validEnd) {
+    return `${validStart} → ${validEnd} ET`;
+  }
+
+  if (validStart) {
+    return `From ${validStart} ET`;
+  }
+
+  if (validEnd) {
+    return `Until ${validEnd} ET`;
+  }
+
+  return undefined;
 }
 
 export async function getHomeContentPayload() {
@@ -266,5 +324,22 @@ export async function getProgramsPagePayload(): Promise<ProgramListItem[] | null
     scheduleText: program.scheduleText,
     imageUrl: program.cardImage?.url,
     imageAlt: program.cardImage?.alt || `${program.title} image`,
+  }));
+}
+
+export async function getAnnouncementsPagePayload(): Promise<AnnouncementListItem[] | null> {
+  if (!sanityClient) {
+    return null;
+  }
+
+  const announcements = await sanityClient.fetch<AnnouncementDoc[]>(allAnnouncementsQuery);
+
+  return (announcements || []).map((announcement, index) => ({
+    id: announcement._id || `announcement-${index}`,
+    title: announcement.title,
+    message: announcement.message,
+    isPinned: Boolean(announcement.isPinned),
+    statusLabel: announcement.isPinned ? "Pinned" : "General",
+    windowLabel: formatAnnouncementWindow(announcement.startAt, announcement.endAt),
   }));
 }
