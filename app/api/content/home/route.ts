@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 
 import { getHomeContentPayload } from "@/sanity/lib/content";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 const fallbackPayload = {
   announcements: [],
   events: [
@@ -44,15 +47,23 @@ export async function GET() {
   try {
     const payload = await getHomeContentPayload();
     if (!payload) {
-      return NextResponse.json(fallbackPayload);
+      return NextResponse.json(fallbackPayload, {
+        headers: {
+          "Cache-Control": "no-store",
+        },
+      });
     }
 
     return NextResponse.json(payload, {
       headers: {
-        "Cache-Control": "s-maxage=300, stale-while-revalidate=86400",
+        "Cache-Control": "no-store",
       },
     });
   } catch {
-    return NextResponse.json(fallbackPayload);
+    return NextResponse.json(fallbackPayload, {
+      headers: {
+        "Cache-Control": "no-store",
+      },
+    });
   }
 }

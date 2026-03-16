@@ -21,6 +21,20 @@ export const programType = defineType({
       },
     }),
     defineField({ name: "scheduleText", title: "Schedule", type: "string" }),
+    defineField({
+      name: "cardImage",
+      title: "Card Image",
+      type: "image",
+      options: { hotspot: true },
+      fields: [
+        defineField({
+          name: "alt",
+          title: "Alt text",
+          type: "string",
+          description: "Short accessibility description for the program image",
+        }),
+      ],
+    }),
     defineField({ name: "order", title: "Sort Order", type: "number", initialValue: 0 }),
     defineField({ name: "isActive", title: "Active", type: "boolean", initialValue: true }),
   ],

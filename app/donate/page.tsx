@@ -38,6 +38,31 @@ const supportAreas = [
 export default function DonatePage() {
   return (
     <main className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50/60 to-lime-50/70 text-stone-900">
+      <header className="sticky top-0 z-40 border-b border-stone-200/80 bg-white/95 backdrop-blur">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+          <Link href="/" className="text-base font-bold text-stone-900">
+            Masjid Al Kareem
+          </Link>
+          <nav className="hidden items-center gap-6 text-sm font-medium md:flex">
+            <Link href="/" className="text-stone-600 hover:text-emerald-700">
+              Home
+            </Link>
+            <Link href="/#prayers" className="text-stone-600 hover:text-emerald-700">
+              Prayer Times
+            </Link>
+            <Link href="/programs" className="text-stone-600 hover:text-emerald-700">
+              Programs
+            </Link>
+            <Link href="/events" className="text-stone-600 hover:text-emerald-700">
+              Events
+            </Link>
+          </nav>
+          <Button asChild className="rounded-xl bg-emerald-700 hover:bg-emerald-800">
+            <Link href="/donate">Donate</Link>
+          </Button>
+        </div>
+      </header>
+
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
         <Card className="overflow-hidden rounded-[32px] border-emerald-200/80 shadow-xl">
           <CardContent className="grid gap-8 p-8 lg:grid-cols-[1.1fr_0.9fr] lg:p-10">

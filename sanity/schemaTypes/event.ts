@@ -10,6 +10,20 @@ export const eventType = defineType({
     defineField({ name: "startAt", title: "Start", type: "datetime", validation: (rule) => rule.required() }),
     defineField({ name: "endAt", title: "End", type: "datetime" }),
     defineField({ name: "location", title: "Location", type: "string" }),
+    defineField({
+      name: "flyerImage",
+      title: "Flyer Image",
+      type: "image",
+      options: { hotspot: true },
+      fields: [
+        defineField({
+          name: "alt",
+          title: "Alt text",
+          type: "string",
+          description: "Short accessibility description for the flyer image",
+        }),
+      ],
+    }),
     defineField({ name: "ctaUrl", title: "Call to Action URL", type: "url" }),
     defineField({ name: "isPublished", title: "Published", type: "boolean", initialValue: true }),
   ],
