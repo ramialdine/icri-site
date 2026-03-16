@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, Moon, Sun } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { ArrowLeft, ChevronDown, Moon, Sun } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
@@ -13,7 +14,9 @@ type StandardPageHeaderProps = {
 };
 
 export default function StandardPageHeader({ currentPage, breadcrumbTrail }: StandardPageHeaderProps) {
+  const pathname = usePathname();
   const [aboutDropdownOpen, setAboutDropdownOpen] = useState(false);
+  const aboutDropdownRef = useRef<HTMLDivElement | null>(null);
   const [theme, setTheme] = useState<"light" | "dark">(() => {
     if (typeof window === "undefined") {
       return "light";
@@ -36,6 +39,38 @@ export default function StandardPageHeader({ currentPage, breadcrumbTrail }: Sta
     const nextTheme = theme === "dark" ? "light" : "dark";
     setTheme(nextTheme);
   };
+
+  useEffect(() => {
+    setAboutDropdownOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    const handleOutsideClick = (event: MouseEvent | TouchEvent) => {
+      if (!aboutDropdownRef.current) {
+        return;
+      }
+
+      if (!aboutDropdownRef.current.contains(event.target as Node)) {
+        setAboutDropdownOpen(false);
+      }
+    };
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setAboutDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleOutsideClick);
+    document.addEventListener("touchstart", handleOutsideClick);
+    document.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+      document.removeEventListener("touchstart", handleOutsideClick);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, []);
 
   const trail = breadcrumbTrail && breadcrumbTrail.length > 0 ? breadcrumbTrail : [currentPage];
 
@@ -67,19 +102,26 @@ export default function StandardPageHeader({ currentPage, breadcrumbTrail }: Sta
             <Link href="/donate">Donate</Link>
           </Button>
           <nav className="hidden gap-6 text-sm font-medium text-stone-700 dark:text-stone-200 lg:flex">
-            <div className="relative">
+            <div ref={aboutDropdownRef} className="relative">
               <button
                 onClick={() => setAboutDropdownOpen(!aboutDropdownOpen)}
-                className="flex items-center transition hover:text-emerald-700 dark:hover:text-emerald-300"
+                aria-expanded={aboutDropdownOpen}
+                aria-haspopup="menu"
+                className="inline-flex items-center gap-1.5 rounded-md px-1 py-0.5 transition hover:text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 dark:hover:text-emerald-300"
               >
                 About
+                <ChevronDown className={`h-4 w-4 transition-transform ${aboutDropdownOpen ? "rotate-180" : ""}`} />
               </button>
               {aboutDropdownOpen && (
-                <div className="absolute top-full left-0 mt-2 w-48 rounded-xl border border-stone-200 bg-white text-stone-700 shadow-lg dark:border-stone-700 dark:bg-stone-900 dark:text-stone-200">
+                <div
+                  role="menu"
+                  className="absolute top-full left-0 mt-2 w-48 rounded-xl border border-stone-200 bg-white text-stone-700 shadow-lg dark:border-stone-700 dark:bg-stone-900 dark:text-stone-200"
+                >
                   <Link
                     href="/about/imam"
                     className="block px-4 py-3 first:rounded-t-xl text-sm font-medium hover:bg-emerald-50 dark:hover:bg-emerald-950"
                     onClick={() => setAboutDropdownOpen(false)}
+                    role="menuitem"
                   >
                     The Imam
                   </Link>
@@ -87,6 +129,7 @@ export default function StandardPageHeader({ currentPage, breadcrumbTrail }: Sta
                     href="/about/president"
                     className="block border-t border-stone-100 px-4 py-3 text-sm font-medium hover:bg-emerald-50 dark:border-stone-700 dark:hover:bg-emerald-950"
                     onClick={() => setAboutDropdownOpen(false)}
+                    role="menuitem"
                   >
                     The President
                   </Link>

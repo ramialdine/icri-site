@@ -83,6 +83,71 @@ export default function DonatePage() {
         </Card>
       </section>
 
+      <section className="mx-auto max-w-7xl py-8 lg:py-10">
+        <Card className="overflow-hidden rounded-[30px] shadow-sm">
+          <CardContent className="grid gap-8 p-6 lg:grid-cols-[1fr_1fr] lg:gap-10 lg:p-8">
+            <div className="relative min-h-[260px] overflow-hidden rounded-2xl">
+              <Image
+                src="/muslimsDonating.jpeg"
+                alt="Community members giving charity together"
+                fill
+                sizes="(max-width: 1024px) 100vw, 560px"
+                className="object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/45 to-transparent" />
+              <p className="absolute bottom-4 left-4 right-4 text-sm font-medium text-white">
+                Charity strengthens our community and brings blessing to every home.
+              </p>
+            </div>
+
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-700">
+                Giving in Islam
+              </p>
+              <h2 className="mt-2 text-3xl font-bold">Qur’an and Hadith on charity</h2>
+              <p className="mt-3 text-sm text-muted-foreground">
+                The reminders below are quoted with source references.
+              </p>
+
+              <div className="mt-6 space-y-4">
+                <blockquote className="rounded-2xl border border-emerald-200/80 bg-emerald-50/60 p-4 dark:border-emerald-900 dark:bg-emerald-950/30">
+                  <p className="text-sm leading-7">
+                    “The example of those who spend their wealth in the way of Allāh is like a seed
+                    [of grain] which grows seven spikes; in each spike is a hundred grains. And Allāh
+                    multiplies [His reward] for whom He wills. And Allāh is all-Encompassing and Knowing.”
+                  </p>
+                  <footer className="mt-2 text-xs font-semibold text-emerald-800 dark:text-emerald-300">
+                    Qur’an 2:261 (Sahih International)
+                  </footer>
+                </blockquote>
+
+                <blockquote className="rounded-2xl border border-emerald-200/80 bg-emerald-50/60 p-4 dark:border-emerald-900 dark:bg-emerald-950/30">
+                  <p className="text-sm leading-7">
+                    “And donate from what We have provided for you before death comes to one of you and
+                    you cry, ‘My Lord! If only You delayed me for a short while, I would give in charity
+                    and be one of the righteous.’”
+                  </p>
+                  <footer className="mt-2 text-xs font-semibold text-emerald-800 dark:text-emerald-300">
+                    Qur’an 63:10 (The Clear Quran)
+                  </footer>
+                </blockquote>
+
+                <blockquote className="rounded-2xl border border-emerald-200/80 bg-emerald-50/60 p-4 dark:border-emerald-900 dark:bg-emerald-950/30">
+                  <p className="text-sm leading-7">
+                    “There is never a day wherein servants (of God) get up at morn, but are not visited by
+                    two angels. One of them says: O Allah, give him more who spends (for the sake of Allah),
+                    and the other says: O Allah, bring destruction to one who withholds.”
+                  </p>
+                  <footer className="mt-2 text-xs font-semibold text-emerald-800 dark:text-emerald-300">
+                    Sahih Muslim 1010
+                  </footer>
+                </blockquote>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </section>
+
       <section className="mx-auto max-w-7xl py-4 lg:py-8">
         <div className="mb-6">
           <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-700">What your donation supports</p>

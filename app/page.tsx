@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import FlyerThumbnail from "@/components/FlyerThumbnail";
 import { Card, CardContent } from "@/components/ui/card";
@@ -15,6 +16,7 @@ import {
   CalendarDays,
   BookOpen,
   Users,
+  ChevronDown,
   ChevronRight,
   Sunrise,
   Sun,
@@ -151,6 +153,7 @@ const prayerVisuals = {
 } as const;
 
 export default function Page() {
+  const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
   const [aboutExpanded, setAboutExpanded] = useState(false);
   const [aboutDropdownOpen, setAboutDropdownOpen] = useState(false);
@@ -163,6 +166,7 @@ export default function Page() {
   const [themePreference, setThemePreference] = useState<ThemePreference>("system");
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const heroRef = useRef<HTMLElement | null>(null);
+  const aboutDropdownRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const savedTheme = window.localStorage.getItem("theme");
@@ -211,6 +215,38 @@ export default function Page() {
       localStorage.setItem("theme", themePreference === "system" ? "system" : theme);
     } catch {}
   }, [theme, themePreference]);
+
+  useEffect(() => {
+    setAboutDropdownOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    const handleOutsideClick = (event: MouseEvent | TouchEvent) => {
+      if (!aboutDropdownRef.current) {
+        return;
+      }
+
+      if (!aboutDropdownRef.current.contains(event.target as Node)) {
+        setAboutDropdownOpen(false);
+      }
+    };
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setAboutDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleOutsideClick);
+    document.addEventListener("touchstart", handleOutsideClick);
+    document.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+      document.removeEventListener("touchstart", handleOutsideClick);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, []);
 
   // Fetch merged prayer payload (Adhan from API, Iqamah from CMS), refresh once daily
   useEffect(() => {
@@ -353,15 +389,19 @@ export default function Page() {
                 isScrolled ? "text-stone-700 dark:text-stone-200" : "text-white"
               }`}
             >
-            <div className="relative">
+            <div ref={aboutDropdownRef} className="relative">
               <button
                 onClick={() => setAboutDropdownOpen(!aboutDropdownOpen)}
-                className={`flex items-center gap-1.5 transition ${isScrolled ? "hover:text-emerald-700" : "hover:text-emerald-200"}`}
+                aria-expanded={aboutDropdownOpen}
+                aria-haspopup="menu"
+                className={`inline-flex items-center gap-1.5 rounded-md px-1 py-0.5 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 ${isScrolled ? "hover:text-emerald-700" : "hover:text-emerald-200"}`}
               >
                 About
+                <ChevronDown className={`h-4 w-4 transition-transform ${aboutDropdownOpen ? "rotate-180" : ""}`} />
               </button>
               {aboutDropdownOpen && (
                 <div
+                  role="menu"
                   className={`absolute top-full left-0 mt-2 w-48 rounded-xl shadow-lg border ${
                     isScrolled
                       ? "bg-white border-stone-200 text-stone-700 dark:bg-stone-900 dark:border-stone-700 dark:text-stone-200"
@@ -376,6 +416,7 @@ export default function Page() {
                         : "hover:bg-emerald-50 dark:hover:bg-emerald-950"
                     }`}
                     onClick={() => setAboutDropdownOpen(false)}
+                    role="menuitem"
                   >
                     The Imam
                   </Link>
@@ -387,6 +428,7 @@ export default function Page() {
                         : "border-stone-100 hover:bg-emerald-50 dark:border-stone-700 dark:hover:bg-emerald-950"
                     }`}
                     onClick={() => setAboutDropdownOpen(false)}
+                    role="menuitem"
                   >
                     The President
                   </Link>
