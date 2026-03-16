@@ -13,7 +13,8 @@ export type JumuahSession = {
 
 type PrayerConfig = {
   timezone?: string;
-  weekAnchorDate?: string;
+  weeklyTemplate?: Record<PrayerKey, string> & { jumuah?: JumuahSession[] };
+  // Backward compatibility for existing content before migration:
   biweeklyTemplate?: {
     weekA?: Record<PrayerKey, string> & { jumuah?: JumuahSession[] };
     weekB?: Record<PrayerKey, string> & { jumuah?: JumuahSession[] };
@@ -49,7 +50,7 @@ const IQAMAH_FALLBACK_OFFSETS: Record<PrayerName, number> = {
 
 const prayerConfigQuery = groq`*[_type == "prayerConfig"][0]{
   timezone,
-  weekAnchorDate,
+  weeklyTemplate,
   biweeklyTemplate
 }`;
 
@@ -86,13 +87,6 @@ function addMinutes(time24: string, minutes: number): string {
   const outHour = Math.floor(normalized / 60);
   const outMinute = normalized % 60;
   return `${String(outHour).padStart(2, "0")}:${String(outMinute).padStart(2, "0")}`;
-}
-
-function dayDiff(anchorDate: string, todayDate: string): number {
-  const anchor = new Date(`${anchorDate}T00:00:00Z`);
-  const today = new Date(`${todayDate}T00:00:00Z`);
-  const milliseconds = today.getTime() - anchor.getTime();
-  return Math.floor(milliseconds / 86400000);
 }
 
 function getDateInTimezone(timezone: string): string {
@@ -173,13 +167,11 @@ export async function getTodayPrayerPayload() {
       })
     : null;
 
-  const weekAnchorDate = config?.weekAnchorDate;
-  const diffInDays = weekAnchorDate ? dayDiff(weekAnchorDate, effectiveDate) : 0;
-  const weekIndex = Math.floor(diffInDays / 7);
-  const isWeekA = weekIndex % 2 === 0;
-  const weekDefaults = isWeekA
-    ? config?.biweeklyTemplate?.weekA
-    : config?.biweeklyTemplate?.weekB;
+  const weeklyDefaults =
+    config?.weeklyTemplate ||
+    // Backward compatibility fallback until content is migrated:
+    config?.biweeklyTemplate?.weekA ||
+    config?.biweeklyTemplate?.weekB;
 
   const prayers = PRAYER_ORDER.map((prayerName) => {
     const adhan24 = parseApiTime(timings[prayerName]);
@@ -187,7 +179,7 @@ export async function getTodayPrayerPayload() {
       prayerName,
       adhan24,
       override,
-      weekDefaults,
+      weekDefaults: weeklyDefaults,
     });
 
     return {
@@ -203,14 +195,14 @@ export async function getTodayPrayerPayload() {
   const jumuahSessions = isFriday
     ? override?.jumuah?.length
       ? override.jumuah
-      : weekDefaults?.jumuah || []
+      : weeklyDefaults?.jumuah || []
     : [];
 
   return {
     date: effectiveDate,
     source: {
       adhan: "aladhan",
-      iqamah: override ? "dateOverride" : weekDefaults ? (isWeekA ? "weekA" : "weekB") : "fallbackOffset",
+      iqamah: override ? "dateOverride" : weeklyDefaults ? "weeklyDefault" : "fallbackOffset",
     },
     prayers,
     jumuahSessions: jumuahSessions.map((session) => ({

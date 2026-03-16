@@ -160,34 +160,22 @@ export default function Page() {
   const [events, setEvents] = useState(fallbackEvents);
   const [announcements, setAnnouncements] = useState(fallbackAnnouncements);
   const [mounted, setMounted] = useState(false);
-  const [themePreference, setThemePreference] = useState<ThemePreference>(() => {
-    if (typeof window === "undefined") {
-      return "system";
-    }
-
-    const savedTheme = window.localStorage.getItem("theme");
-    if (savedTheme === "light" || savedTheme === "dark" || savedTheme === "system") {
-      return savedTheme;
-    }
-
-    return "system";
-  });
-
-  const [theme, setTheme] = useState<"light" | "dark">(() => {
-    if (typeof window === "undefined") {
-      return "light";
-    }
-
-    const savedTheme = window.localStorage.getItem("theme");
-    if (savedTheme === "light" || savedTheme === "dark") {
-      return savedTheme;
-    }
-
-    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-  });
+  const [themePreference, setThemePreference] = useState<ThemePreference>("system");
+  const [theme, setTheme] = useState<"light" | "dark">("light");
   const heroRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
+    const savedTheme = window.localStorage.getItem("theme");
+    const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+
+    if (savedTheme === "light" || savedTheme === "dark") {
+      setThemePreference(savedTheme);
+      setTheme(savedTheme);
+    } else {
+      setThemePreference("system");
+      setTheme(systemTheme);
+    }
+
     setMounted(true);
   }, []);
 
@@ -198,10 +186,6 @@ export default function Page() {
   };
 
   useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
-
     if (themePreference !== "system") {
       return;
     }
@@ -413,6 +397,9 @@ export default function Page() {
             </Link>
             <Link href="/events" className={isScrolled ? "hover:text-emerald-700" : "hover:text-emerald-200"}>
               Events
+            </Link>
+            <Link href="/announcements" className={isScrolled ? "hover:text-emerald-700" : "hover:text-emerald-200"}>
+              Announcements
             </Link>
             <Link href="/amenities" className={isScrolled ? "hover:text-emerald-700" : "hover:text-emerald-200"}>
               Amenities
@@ -735,6 +722,12 @@ export default function Page() {
                     ? `Pinned announcement: ${announcements[0].title}`
                     : "Weekly reflections and reminders from Imam ABL can also be featured here."}
                 </p>
+                <Link
+                  href="/announcements"
+                  className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-emerald-700 hover:text-emerald-800"
+                >
+                  View all announcements <ChevronRight className="h-4 w-4" />
+                </Link>
               </div>
               <div className="grid gap-4">
                 {events.map((event) => (

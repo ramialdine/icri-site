@@ -99,6 +99,9 @@ export default function StandardPageHeader({ currentPage, breadcrumbTrail }: Sta
             <Link href="/events" className="hover:text-emerald-700 dark:hover:text-emerald-300">
               Events
             </Link>
+            <Link href="/announcements" className="hover:text-emerald-700 dark:hover:text-emerald-300">
+              Announcements
+            </Link>
             <Link href="/amenities" className="hover:text-emerald-700 dark:hover:text-emerald-300">
               Amenities
             </Link>
