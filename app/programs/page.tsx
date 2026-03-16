@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { BookOpen, CalendarDays, Users } from "lucide-react";
 
@@ -44,6 +45,31 @@ export default async function ProgramsPage() {
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-white to-emerald-50/40 px-4 py-10 text-stone-900 dark:from-stone-950 dark:to-stone-950 dark:text-stone-100 sm:px-6 lg:px-8 lg:py-14">
+      <header className="sticky top-0 z-40 -mx-4 mb-8 border-b border-stone-200/80 bg-white/95 backdrop-blur dark:border-stone-800/80 dark:bg-stone-950/95 sm:-mx-6 lg:-mx-8">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+          <Link href="/" className="text-base font-bold text-stone-900 dark:text-stone-100">
+            Masjid Al Kareem
+          </Link>
+          <nav className="hidden items-center gap-6 text-sm font-medium md:flex">
+            <Link href="/" className="text-stone-600 hover:text-emerald-700 dark:text-stone-300 dark:hover:text-emerald-300">
+              Home
+            </Link>
+            <Link href="/#prayers" className="text-stone-600 hover:text-emerald-700 dark:text-stone-300 dark:hover:text-emerald-300">
+              Prayer Times
+            </Link>
+            <Link href="/programs" className="text-emerald-700 dark:text-emerald-300">
+              Programs
+            </Link>
+            <Link href="/events" className="text-stone-600 hover:text-emerald-700 dark:text-stone-300 dark:hover:text-emerald-300">
+              Events
+            </Link>
+          </nav>
+          <Button asChild className="rounded-xl bg-emerald-700 hover:bg-emerald-800">
+            <Link href="/donate">Donate</Link>
+          </Button>
+        </div>
+      </header>
+
       <section className="mx-auto max-w-6xl">
         <Card className="rounded-[30px] border-stone-200 shadow-sm dark:border-stone-800 dark:bg-stone-900/80">
           <CardContent className="p-8 lg:p-10">
@@ -73,9 +99,21 @@ export default async function ProgramsPage() {
           return (
             <Card key={program.id} className="rounded-[24px] border-stone-200 shadow-sm transition hover:-translate-y-1 dark:border-stone-800 dark:bg-stone-900/70">
               <CardContent className="p-6">
-                <div className="inline-flex rounded-2xl bg-emerald-50 p-3 text-emerald-700 dark:bg-emerald-900/25 dark:text-emerald-300">
-                  <Icon className="h-6 w-6" />
-                </div>
+                {program.imageUrl ? (
+                  <div className="relative mb-4 aspect-[16/10] w-full overflow-hidden rounded-2xl border border-stone-200 dark:border-stone-700">
+                    <Image
+                      src={program.imageUrl}
+                      alt={program.imageAlt || `${program.title} image`}
+                      fill
+                      sizes="(max-width: 1024px) 100vw, 360px"
+                      className="object-cover"
+                    />
+                  </div>
+                ) : (
+                  <div className="inline-flex rounded-2xl bg-emerald-50 p-3 text-emerald-700 dark:bg-emerald-900/25 dark:text-emerald-300">
+                    <Icon className="h-6 w-6" />
+                  </div>
+                )}
                 <h2 className="mt-4 text-xl font-bold">{program.title}</h2>
                 <p className="mt-3 leading-7 text-stone-600 dark:text-stone-300">{program.description}</p>
                 {program.scheduleText ? (

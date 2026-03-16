@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { CalendarDays, Clock3, ExternalLink, MapPin } from "lucide-react";
 
+import FlyerThumbnail from "@/components/FlyerThumbnail";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { getEventsPagePayload, type EventListItem } from "@/sanity/lib/content";
@@ -34,6 +35,31 @@ export default async function EventsPage() {
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-white to-emerald-50/40 px-4 py-10 text-stone-900 dark:from-stone-950 dark:to-stone-950 dark:text-stone-100 sm:px-6 lg:px-8 lg:py-14">
+      <header className="sticky top-0 z-40 -mx-4 mb-8 border-b border-stone-200/80 bg-white/95 backdrop-blur dark:border-stone-800/80 dark:bg-stone-950/95 sm:-mx-6 lg:-mx-8">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+          <Link href="/" className="text-base font-bold text-stone-900 dark:text-stone-100">
+            Masjid Al Kareem
+          </Link>
+          <nav className="hidden items-center gap-6 text-sm font-medium md:flex">
+            <Link href="/" className="text-stone-600 hover:text-emerald-700 dark:text-stone-300 dark:hover:text-emerald-300">
+              Home
+            </Link>
+            <Link href="/#prayers" className="text-stone-600 hover:text-emerald-700 dark:text-stone-300 dark:hover:text-emerald-300">
+              Prayer Times
+            </Link>
+            <Link href="/programs" className="text-stone-600 hover:text-emerald-700 dark:text-stone-300 dark:hover:text-emerald-300">
+              Programs
+            </Link>
+            <Link href="/events" className="text-emerald-700 dark:text-emerald-300">
+              Events
+            </Link>
+          </nav>
+          <Button asChild className="rounded-xl bg-emerald-700 hover:bg-emerald-800">
+            <Link href="/donate">Donate</Link>
+          </Button>
+        </div>
+      </header>
+
       <section className="mx-auto max-w-6xl">
         <Card className="rounded-[30px] border-stone-200 shadow-sm dark:border-stone-800 dark:bg-stone-900/80">
           <CardContent className="p-8 lg:p-10">
@@ -61,7 +87,16 @@ export default async function EventsPage() {
           <Card key={event.id} className="rounded-[24px] border-stone-200 shadow-sm dark:border-stone-800 dark:bg-stone-900/70">
             <CardContent className="p-6">
               <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
-                <div>
+                <div className="flex flex-1 gap-4">
+                  {event.imageUrl ? (
+                    <FlyerThumbnail
+                      src={event.imageUrl}
+                      alt={event.imageAlt || `${event.title} flyer`}
+                      containerClassName="relative h-20 w-14 shrink-0 overflow-hidden rounded-lg border border-stone-200 bg-white p-0.5 dark:border-stone-700 dark:bg-stone-900 sm:h-24 sm:w-16"
+                      imageClassName="object-cover object-center"
+                    />
+                  ) : null}
+                  <div>
                   <div className="inline-flex items-center rounded-xl bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-200">
                     <CalendarDays className="mr-2 h-4 w-4" />
                     {event.dateLabel}
@@ -78,6 +113,7 @@ export default async function EventsPage() {
                       {event.location}
                     </span>
                   </div>
+                </div>
                 </div>
 
                 {event.ctaUrl ? (
@@ -107,6 +143,14 @@ export default async function EventsPage() {
             {pastEvents.slice(0, 8).map((event) => (
               <Card key={event.id} className="rounded-2xl border-stone-200 dark:border-stone-800 dark:bg-stone-900/60">
                 <CardContent className="p-5">
+                  {event.imageUrl ? (
+                    <FlyerThumbnail
+                      src={event.imageUrl}
+                      alt={event.imageAlt || `${event.title} flyer`}
+                      containerClassName="relative mb-3 h-24 w-16 overflow-hidden rounded-lg border border-stone-200 bg-white p-0.5 dark:border-stone-700 dark:bg-stone-900"
+                      imageClassName="object-cover object-center"
+                    />
+                  ) : null}
                   <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-400">{event.dateLabel}</p>
                   <p className="mt-1 text-lg font-semibold">{event.title}</p>
                   <p className="mt-1 text-sm text-stone-600 dark:text-stone-300">{event.summary}</p>

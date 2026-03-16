@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import FlyerThumbnail from "@/components/FlyerThumbnail";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -38,12 +39,16 @@ type ProgramCard = {
   iconKey: "book" | "users" | "calendar";
   title: string;
   text: string;
+  imageUrl?: string;
+  imageAlt?: string;
 };
 
 type EventCard = {
   date: string;
   title: string;
   detail: string;
+  imageUrl?: string;
+  imageAlt?: string;
 };
 
 type Announcement = {
@@ -247,7 +252,7 @@ export default function Page() {
   }, []);
 
   useEffect(() => {
-    fetch("/api/content/home")
+    fetch("/api/content/home", { cache: "no-store" })
       .then((r) => r.json())
       .then((json) => {
         if (Array.isArray(json?.programs) && json.programs.length > 0) {
@@ -256,6 +261,8 @@ export default function Page() {
               iconKey: program.iconKey,
               title: program.title,
               text: program.text,
+              imageUrl: program.imageUrl,
+              imageAlt: program.imageAlt,
             }))
           );
         }
@@ -266,6 +273,8 @@ export default function Page() {
               date: event.date,
               title: event.title,
               detail: event.detail,
+              imageUrl: event.imageUrl,
+              imageAlt: event.imageAlt,
             }))
           );
         }
@@ -694,6 +703,14 @@ export default function Page() {
                     className="flex items-center justify-between rounded-2xl border border-stone-200 px-5 py-4 transition hover:border-emerald-200 hover:bg-emerald-50/50 dark:border-stone-800 dark:hover:border-emerald-900 dark:hover:bg-emerald-950/20"
                   >
                     <div className="flex items-center gap-4">
+                      {event.imageUrl ? (
+                        <FlyerThumbnail
+                          src={event.imageUrl}
+                          alt={event.imageAlt || `${event.title} flyer`}
+                          containerClassName="relative h-16 w-12 shrink-0 overflow-hidden rounded-lg border border-stone-200 bg-white p-0.5 dark:border-stone-700 dark:bg-stone-900"
+                          imageClassName="object-cover object-center"
+                        />
+                      ) : null}
                       <div className="rounded-2xl bg-stone-100 px-3 py-2 text-sm font-semibold text-stone-800 dark:bg-emerald-900/45 dark:text-emerald-200 dark:ring-1 dark:ring-emerald-700/40">
                         {event.date}
                       </div>
@@ -733,9 +750,21 @@ export default function Page() {
                 className="rounded-[28px] border-stone-200 shadow-sm transition hover:-translate-y-1"
               >
                 <CardContent className="p-8">
-                  <div className="mb-5 inline-flex rounded-2xl bg-emerald-50 p-3 text-emerald-700">
-                    <Icon className="h-6 w-6" />
-                  </div>
+                  {program.imageUrl ? (
+                    <div className="relative mb-5 aspect-[16/10] w-full overflow-hidden rounded-2xl border border-stone-200">
+                      <Image
+                        src={program.imageUrl}
+                        alt={program.imageAlt || `${program.title} image`}
+                        fill
+                        sizes="(max-width: 1024px) 100vw, 360px"
+                        className="object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <div className="mb-5 inline-flex rounded-2xl bg-emerald-50 p-3 text-emerald-700">
+                      <Icon className="h-6 w-6" />
+                    </div>
+                  )}
                   <h4 className="text-xl font-bold">{program.title}</h4>
                   <p className="mt-3 leading-7 text-stone-600">
                     {program.text}

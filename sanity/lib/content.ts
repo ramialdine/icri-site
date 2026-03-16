@@ -16,6 +16,10 @@ type EventDoc = {
   endAt?: string;
   location?: string;
   ctaUrl?: string;
+  flyerImage?: {
+    alt?: string;
+    url?: string;
+  };
 };
 
 type ProgramDoc = {
@@ -25,6 +29,10 @@ type ProgramDoc = {
   iconKey?: string;
   scheduleText?: string;
   order?: number;
+  cardImage?: {
+    alt?: string;
+    url?: string;
+  };
 };
 
 export type EventListItem = {
@@ -35,6 +43,8 @@ export type EventListItem = {
   dateLabel: string;
   timeLabel: string;
   ctaUrl?: string;
+  imageUrl?: string;
+  imageAlt?: string;
 };
 
 export type ProgramListItem = {
@@ -43,6 +53,8 @@ export type ProgramListItem = {
   description: string;
   iconKey: "book" | "users" | "calendar";
   scheduleText?: string;
+  imageUrl?: string;
+  imageAlt?: string;
 };
 
 const announcementsQuery = groq`*[_type == "announcement" && isActive == true] | order(isPinned desc, startAt desc) {
@@ -51,14 +63,18 @@ const announcementsQuery = groq`*[_type == "announcement" && isActive == true] |
   isPinned
 }`;
 
-const eventsQuery = groq`*[_type == "event" && isPublished == true] | order(startAt asc)[0...8] {
+const eventsQuery = groq`*[_type == "event" && isPublished == true] | order(defined(flyerImage.asset) desc, startAt asc)[0...8] {
   _id,
   title,
   summary,
   startAt,
   endAt,
   location,
-  ctaUrl
+  ctaUrl,
+  flyerImage {
+    alt,
+    "url": asset->url
+  }
 }`;
 
 const allEventsQuery = groq`*[_type == "event" && isPublished == true] | order(startAt asc) {
@@ -68,7 +84,11 @@ const allEventsQuery = groq`*[_type == "event" && isPublished == true] | order(s
   startAt,
   endAt,
   location,
-  ctaUrl
+  ctaUrl,
+  flyerImage {
+    alt,
+    "url": asset->url
+  }
 }`;
 
 const programsQuery = groq`*[_type == "program" && isActive == true] | order(order asc, _createdAt asc) {
@@ -77,7 +97,11 @@ const programsQuery = groq`*[_type == "program" && isActive == true] | order(ord
   description,
   iconKey,
   scheduleText,
-  order
+  order,
+  cardImage {
+    alt,
+    "url": asset->url
+  }
 }`;
 
 function formatEventDate(dateIso: string): string {
@@ -171,11 +195,15 @@ export async function getHomeContentPayload() {
       date: formatEventDate(event.startAt),
       title: event.title,
       detail: event.summary || "",
+      imageUrl: event.flyerImage?.url,
+      imageAlt: event.flyerImage?.alt || `${event.title} flyer`,
     })),
     programs: (programs || []).map((program) => ({
       title: program.title,
       text: program.description,
       iconKey: program.iconKey || "book",
+      imageUrl: program.cardImage?.url,
+      imageAlt: program.cardImage?.alt || `${program.title} image`,
     })),
   };
 }
@@ -202,6 +230,8 @@ export async function getEventsPagePayload(): Promise<{
       dateLabel,
       timeLabel,
       ctaUrl: event.ctaUrl,
+      imageUrl: event.flyerImage?.url,
+      imageAlt: event.flyerImage?.alt || `${event.title} flyer`,
       startAtMs: Number.isNaN(new Date(event.startAt).getTime()) ? Number.MIN_SAFE_INTEGER : new Date(event.startAt).getTime(),
     };
   });
@@ -234,5 +264,7 @@ export async function getProgramsPagePayload(): Promise<ProgramListItem[] | null
     description: program.description,
     iconKey: normalizeProgramIcon(program.iconKey),
     scheduleText: program.scheduleText,
+    imageUrl: program.cardImage?.url,
+    imageAlt: program.cardImage?.alt || `${program.title} image`,
   }));
 }
