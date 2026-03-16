@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import StandardPageHeader from "@/components/StandardPageHeader";
 import { Heart, GraduationCap, Wrench, HandHeart, CreditCard, Landmark } from "lucide-react";
 
 const supportAreas = [
@@ -37,33 +38,11 @@ const supportAreas = [
 
 export default function DonatePage() {
   return (
-    <main className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50/60 to-lime-50/70 text-stone-900">
-      <header className="sticky top-0 z-40 border-b border-stone-200/80 bg-white/95 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-          <Link href="/" className="text-base font-bold text-stone-900">
-            Masjid Al Kareem
-          </Link>
-          <nav className="hidden items-center gap-6 text-sm font-medium md:flex">
-            <Link href="/" className="text-stone-600 hover:text-emerald-700">
-              Home
-            </Link>
-            <Link href="/#prayers" className="text-stone-600 hover:text-emerald-700">
-              Prayer Times
-            </Link>
-            <Link href="/programs" className="text-stone-600 hover:text-emerald-700">
-              Programs
-            </Link>
-            <Link href="/events" className="text-stone-600 hover:text-emerald-700">
-              Events
-            </Link>
-          </nav>
-          <Button asChild className="rounded-xl bg-emerald-700 hover:bg-emerald-800">
-            <Link href="/donate">Donate</Link>
-          </Button>
-        </div>
-      </header>
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50/60 to-lime-50/70 text-stone-900 dark:bg-stone-950 dark:text-stone-100">
+      <StandardPageHeader currentPage="Donate" />
 
-      <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
+      <main className="px-4 pb-10 pt-8 sm:px-6 lg:px-8 lg:pb-14">
+      <section className="mx-auto max-w-7xl">
         <Card className="overflow-hidden rounded-[32px] border-emerald-200/80 shadow-xl">
           <CardContent className="grid gap-8 p-8 lg:grid-cols-[1.1fr_0.9fr] lg:p-10">
             <div>
@@ -104,7 +83,7 @@ export default function DonatePage() {
         </Card>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8 lg:py-8">
+      <section className="mx-auto max-w-7xl py-4 lg:py-8">
         <div className="mb-6">
           <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-700">What your donation supports</p>
           <h2 className="mt-2 text-3xl font-bold">Where your sadaqah goes</h2>
@@ -128,7 +107,7 @@ export default function DonatePage() {
         </div>
       </section>
 
-      <section id="donation-methods" className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
+      <section id="donation-methods" className="mx-auto max-w-7xl py-8 lg:py-12">
         <Card className="rounded-[30px] border-emerald-200/70 bg-white shadow-sm">
           <CardContent className="p-8 lg:p-10">
             <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-700">Donation Methods</p>
@@ -165,6 +144,7 @@ export default function DonatePage() {
           </CardContent>
         </Card>
       </section>
-    </main>
+      </main>
+    </div>
   );
 }

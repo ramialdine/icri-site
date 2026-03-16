@@ -2,6 +2,7 @@ import Link from "next/link";
 import { CalendarDays, Clock3, ExternalLink, MapPin } from "lucide-react";
 
 import FlyerThumbnail from "@/components/FlyerThumbnail";
+import StandardPageHeader from "@/components/StandardPageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { getEventsPagePayload, type EventListItem } from "@/sanity/lib/content";
@@ -34,32 +35,10 @@ export default async function EventsPage() {
   const pastEvents = payload?.pastEvents || [];
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-white to-emerald-50/40 px-4 py-10 text-stone-900 dark:from-stone-950 dark:to-stone-950 dark:text-stone-100 sm:px-6 lg:px-8 lg:py-14">
-      <header className="sticky top-0 z-40 -mx-4 mb-8 border-b border-stone-200/80 bg-white/95 backdrop-blur dark:border-stone-800/80 dark:bg-stone-950/95 sm:-mx-6 lg:-mx-8">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-          <Link href="/" className="text-base font-bold text-stone-900 dark:text-stone-100">
-            Masjid Al Kareem
-          </Link>
-          <nav className="hidden items-center gap-6 text-sm font-medium md:flex">
-            <Link href="/" className="text-stone-600 hover:text-emerald-700 dark:text-stone-300 dark:hover:text-emerald-300">
-              Home
-            </Link>
-            <Link href="/#prayers" className="text-stone-600 hover:text-emerald-700 dark:text-stone-300 dark:hover:text-emerald-300">
-              Prayer Times
-            </Link>
-            <Link href="/programs" className="text-stone-600 hover:text-emerald-700 dark:text-stone-300 dark:hover:text-emerald-300">
-              Programs
-            </Link>
-            <Link href="/events" className="text-emerald-700 dark:text-emerald-300">
-              Events
-            </Link>
-          </nav>
-          <Button asChild className="rounded-xl bg-emerald-700 hover:bg-emerald-800">
-            <Link href="/donate">Donate</Link>
-          </Button>
-        </div>
-      </header>
+    <div className="min-h-screen bg-gradient-to-b from-white to-emerald-50/40 text-stone-900 dark:from-stone-950 dark:to-stone-950 dark:text-stone-100">
+      <StandardPageHeader currentPage="Events" />
 
+      <main className="px-4 pb-10 pt-8 sm:px-6 lg:px-8 lg:pb-14">
       <section className="mx-auto max-w-6xl">
         <Card className="rounded-[30px] border-stone-200 shadow-sm dark:border-stone-800 dark:bg-stone-900/80">
           <CardContent className="p-8 lg:p-10">
@@ -160,6 +139,7 @@ export default async function EventsPage() {
           </div>
         </section>
       ) : null}
-    </main>
+      </main>
+    </div>
   );
 }
