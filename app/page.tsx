@@ -19,6 +19,7 @@ import {
   Sun,
   Sunset,
   MoonStar,
+  Moon,
 } from "lucide-react";
 
 type PrayerTime = {
@@ -50,6 +51,8 @@ type Announcement = {
   message: string;
   isPinned?: boolean;
 };
+
+type ThemePreference = "system" | "light" | "dark";
 
 const PRAYER_CACHE_KEY = "icri_prayer_times";
 
@@ -150,7 +153,74 @@ export default function Page() {
   const [programs, setPrograms] = useState(fallbackPrograms);
   const [events, setEvents] = useState(fallbackEvents);
   const [announcements, setAnnouncements] = useState(fallbackAnnouncements);
+  const [mounted, setMounted] = useState(false);
+  const [themePreference, setThemePreference] = useState<ThemePreference>(() => {
+    if (typeof window === "undefined") {
+      return "system";
+    }
+
+    const savedTheme = window.localStorage.getItem("theme");
+    if (savedTheme === "light" || savedTheme === "dark" || savedTheme === "system") {
+      return savedTheme;
+    }
+
+    return "system";
+  });
+
+  const [theme, setTheme] = useState<"light" | "dark">(() => {
+    if (typeof window === "undefined") {
+      return "light";
+    }
+
+    const savedTheme = window.localStorage.getItem("theme");
+    if (savedTheme === "light" || savedTheme === "dark") {
+      return savedTheme;
+    }
+
+    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  });
   const heroRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const toggleTheme = () => {
+    const nextTheme = theme === "dark" ? "light" : "dark";
+    setThemePreference(nextTheme);
+    setTheme(nextTheme);
+  };
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    if (themePreference !== "system") {
+      return;
+    }
+
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+    const applySystemTheme = (isDark: boolean) => {
+      setTheme(isDark ? "dark" : "light");
+    };
+
+    applySystemTheme(media.matches);
+    const handleChange = (event: MediaQueryListEvent) => {
+      applySystemTheme(event.matches);
+    };
+
+    media.addEventListener("change", handleChange);
+    return () => media.removeEventListener("change", handleChange);
+  }, [themePreference]);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    root.classList.toggle("dark", theme === "dark");
+    try {
+      localStorage.setItem("theme", themePreference === "system" ? "system" : theme);
+    } catch {}
+  }, [theme, themePreference]);
 
   // Fetch merged prayer payload (Adhan from API, Iqamah from CMS), refresh once daily
   useEffect(() => {
@@ -243,11 +313,11 @@ export default function Page() {
   };
 
   return (
-    <div className="min-h-screen bg-stone-50 text-stone-900">
+    <div className="min-h-screen bg-stone-50 text-stone-900 dark:bg-stone-950 dark:text-stone-100">
       <header
         className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
           isScrolled
-            ? "border-b border-stone-200/80 bg-white/90 backdrop-blur shadow-sm"
+            ? "border-b border-stone-200/80 bg-white/90 backdrop-blur shadow-sm dark:border-stone-800/80 dark:bg-stone-950/90"
             : "border-b border-transparent bg-transparent"
         }`}
       >
@@ -273,7 +343,7 @@ export default function Page() {
               </p>
               <h1
                 className={`text-base font-bold sm:text-lg ${
-                  isScrolled ? "text-stone-900" : "text-white"
+                  isScrolled ? "text-stone-900 dark:text-stone-100" : "text-white"
                 }`}
               >
                 Masjid Al Kareem
@@ -282,7 +352,7 @@ export default function Page() {
           </div>
           <nav
             className={`hidden gap-6 text-sm font-medium md:flex ${
-              isScrolled ? "text-stone-700" : "text-white"
+              isScrolled ? "text-stone-700 dark:text-stone-200" : "text-white"
             }`}
           >
             <a href="#about" className={isScrolled ? "hover:text-emerald-700" : "hover:text-emerald-200"}>
@@ -301,16 +371,27 @@ export default function Page() {
               Contact
             </a>
           </nav>
-          <Button asChild className="rounded-2xl bg-emerald-700 hover:bg-emerald-800">
-            <Link href="/donate">Donate</Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={toggleTheme}
+              className="rounded-xl border-white/60 bg-white/90 text-stone-700 hover:bg-white dark:border-stone-700 dark:bg-stone-900 dark:text-stone-200 dark:hover:bg-stone-800"
+              aria-label="Toggle dark mode"
+            >
+              {mounted ? (theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />) : <Moon className="h-4 w-4" />}
+            </Button>
+            <Button asChild className="rounded-2xl bg-emerald-700 hover:bg-emerald-800">
+              <Link href="/donate">Donate</Link>
+            </Button>
+          </div>
         </div>
       </header>
 
       <section ref={heroRef} className="relative flex min-h-[100svh] items-center justify-center overflow-hidden">
         <Image
-          src="/masjidExterior.png"
-          alt="Masjid exterior background"
+          src="/menEntranceAtNight.jpg"
+          alt="Masjid Al Kareem entrance at night"
           fill
           sizes="100vw"
           className="object-cover"
@@ -339,7 +420,7 @@ export default function Page() {
           <Button asChild className="h-16 rounded-2xl bg-emerald-600 px-9 text-lg font-semibold shadow-lg shadow-emerald-900/25 hover:bg-emerald-700 sm:h-20 sm:px-12 sm:text-2xl">
             <a href="#prayers">🕰️ View Prayer Schedule</a>
           </Button>
-          <Button asChild variant="outline" className="h-16 rounded-2xl border-2 border-emerald-100/90 bg-white/95 px-9 text-lg font-semibold text-emerald-900 shadow-lg shadow-emerald-950/20 hover:bg-emerald-50 sm:h-20 sm:px-12 sm:text-2xl">
+          <Button asChild variant="outline" className="h-16 rounded-2xl border-2 border-emerald-100/90 bg-white px-9 text-lg font-semibold text-emerald-900 shadow-lg shadow-emerald-950/20 hover:bg-emerald-50 dark:border-emerald-200 dark:bg-white dark:text-emerald-900 dark:hover:bg-emerald-50 sm:h-20 sm:px-12 sm:text-2xl">
             <Link href="/donate">💚 Donate to the Masjid</Link>
           </Button>
         </motion.div>
@@ -361,7 +442,7 @@ export default function Page() {
                 </div>
 
               </div>
-              <div className="grid bg-white md:grid-cols-2 xl:grid-cols-5 xl:divide-x xl:divide-y-0">
+              <div className="grid bg-white dark:bg-stone-900 md:grid-cols-2 xl:grid-cols-5 xl:divide-x xl:divide-y-0">
                 {prayerTimes.map((prayer, index) => (
                   (() => {
                     const visual = prayerVisuals[prayer.name as keyof typeof prayerVisuals];
@@ -371,14 +452,14 @@ export default function Page() {
                       <div
                         key={prayer.name}
                         className={`px-6 py-7 md:px-7 md:py-8 xl:min-h-[220px] ${
-                          index < prayerTimes.length - 1 ? "border-b border-stone-200 md:border-b md:border-stone-200 xl:border-b-0" : ""
+                          index < prayerTimes.length - 1 ? "border-b border-stone-200 dark:border-stone-800 md:border-b md:border-stone-200 xl:border-b-0" : ""
                         }`}
                       >
                         <div className="flex h-full flex-col justify-between gap-6">
                           <div className="flex items-start justify-between gap-4">
                             <div>
                               <p className="text-lg font-semibold">{prayer.name}</p>
-                              <p className="mt-1 text-sm text-stone-500">{visual.label}</p>
+                              <p className="mt-1 text-sm text-stone-500 dark:text-stone-400">{visual.label}</p>
                             </div>
                             <div className={`flex h-14 w-14 items-center justify-center rounded-2xl ${visual.backgroundClassName}`}>
                               <PrayerIcon className={`h-7 w-7 ${visual.iconClassName}`} />
@@ -389,7 +470,7 @@ export default function Page() {
                               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-stone-400">
                                 Adhan
                               </p>
-                              <p className="mt-2 text-3xl font-bold text-stone-900">{prayer.adhan}</p>
+                              <p className="mt-2 text-3xl font-bold text-stone-900 dark:text-stone-100">{prayer.adhan}</p>
                             </div>
                             <div>
                               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-stone-400">
@@ -406,13 +487,13 @@ export default function Page() {
                   })()
                 ))}
               </div>
-              <div className="border-t border-stone-200 bg-stone-50 px-6 py-5 md:px-8">
+              <div className="border-t border-stone-200 bg-stone-50 px-6 py-5 dark:border-stone-800 dark:bg-stone-900/70 md:px-8">
                 <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                   <div>
                     <p className="text-base font-semibold">Jumu&apos;ah</p>
                     <div className="mt-1 space-y-1">
                       {jumuahSessions.map((session) => (
-                        <p key={`${session.label}-${session.khutbah}`} className="text-sm text-stone-600 md:text-base">
+                        <p key={`${session.label}-${session.khutbah}`} className="text-sm text-stone-600 dark:text-stone-300 md:text-base">
                           {session.label} {session.khutbah} · Iqamah {session.iqamah}
                         </p>
                       ))}
@@ -509,8 +590,8 @@ export default function Page() {
             <div>
               <div className="relative aspect-[4/3] overflow-hidden rounded-3xl border border-stone-200">
                 <Image
-                  src="/masjidExterior.png"
-                  alt="Exterior of Masjid Al Kareem"
+                  src="/ICRItunnel.jpg"
+                  alt="Interior corridor of Masjid Al Kareem"
                   fill
                   sizes="(max-width: 1024px) 100vw, 480px"
                   className="object-cover"
@@ -524,15 +605,15 @@ export default function Page() {
       <motion.section
         {...revealInView}
         id="support"
-        className="bg-gradient-to-br from-white via-emerald-50/50 to-teal-50/40 py-8 sm:py-10 lg:py-14"
+        className="bg-gradient-to-br from-white via-emerald-50/50 to-teal-50/40 py-8 dark:from-stone-950 dark:via-stone-950 dark:to-stone-950 sm:py-10 lg:py-14"
       >
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <Card className="rounded-[32px] border-stone-200 shadow-sm">
             <CardContent className="grid gap-8 p-8 lg:grid-cols-[0.9fr_1.1fr] lg:p-10">
               <div className="relative aspect-[16/9] overflow-hidden rounded-3xl border border-stone-200">
                 <Image
-                  src="/masjidExterior.png"
-                  alt="Exterior of Masjid Al Kareem"
+                  src="/ICRIcommunity.jpg"
+                  alt="ICRI community members"
                   fill
                   sizes="(max-width: 1024px) 100vw, 520px"
                   className="object-cover"
@@ -571,15 +652,19 @@ export default function Page() {
         </div>
       </motion.section>
 
-      <motion.section {...revealInView} id="events" className="bg-gradient-to-b from-white to-emerald-50/30 py-16">
+      <motion.section
+        {...revealInView}
+        id="events"
+        className="bg-gradient-to-b from-white to-emerald-50/30 py-16 dark:from-stone-950 dark:to-stone-950"
+      >
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <Card className="rounded-[30px] border-stone-200 shadow-sm">
             <CardContent className="grid gap-8 p-8 lg:grid-cols-[0.9fr_1.1fr] lg:p-10">
               <div>
                 <div className="relative mb-5 aspect-[4/3] w-full max-w-xs overflow-hidden rounded-3xl border border-stone-200 shadow-sm">
                   <Image
-                    src="/imamABL.jpeg"
-                    alt="Imam ABL"
+                    src="/muslimsPraying.jpg"
+                    alt="Muslims praying at the masjid"
                     fill
                     sizes="(max-width: 1024px) 100vw, 320px"
                     className="object-cover"
@@ -608,7 +693,7 @@ export default function Page() {
                     className="flex items-center justify-between rounded-2xl border border-stone-200 px-5 py-4"
                   >
                     <div className="flex items-center gap-4">
-                      <div className="rounded-2xl bg-stone-100 px-3 py-2 text-sm font-semibold">
+                      <div className="rounded-2xl bg-stone-100 px-3 py-2 text-sm font-semibold text-stone-800 dark:bg-emerald-900/45 dark:text-emerald-200 dark:ring-1 dark:ring-emerald-700/40">
                         {event.date}
                       </div>
                       <div>
@@ -628,7 +713,7 @@ export default function Page() {
       <motion.section
         {...revealInView}
         id="programs"
-        className="mx-auto max-w-7xl bg-gradient-to-br from-stone-50 to-emerald-50/30 px-4 py-8 sm:px-6 lg:px-8 lg:py-16"
+        className="mx-auto max-w-7xl bg-gradient-to-br from-stone-50 to-emerald-50/30 px-4 py-8 dark:from-stone-950 dark:to-stone-950 sm:px-6 lg:px-8 lg:py-16"
       >
         <div className="mb-8 max-w-2xl">
           <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-700">
@@ -667,7 +752,7 @@ export default function Page() {
       <motion.section
         {...revealInView}
         id="contact"
-        className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8"
+        className="mx-auto max-w-7xl px-4 py-16 dark:bg-stone-950 sm:px-6 lg:px-8"
       >
         <div className="grid gap-6 lg:grid-cols-2">
           <Card className="rounded-[28px] border-stone-200 shadow-sm">
@@ -726,7 +811,7 @@ export default function Page() {
         </div>
       </motion.section>
 
-      <section id="map" className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <section id="map" className="mx-auto max-w-7xl px-4 py-8 dark:bg-stone-950 sm:px-6 lg:px-8">
         <Card className="rounded-[20px] border-stone-200 shadow-sm overflow-hidden">
           <CardContent className="p-0">
             <div className="relative h-[320px] w-full sm:h-[420px]">
@@ -746,7 +831,7 @@ export default function Page() {
         </Card>
       </section>
 
-      <motion.footer {...revealInView} className="border-t border-stone-200 bg-white">
+      <motion.footer {...revealInView} className="border-t border-stone-200 bg-white dark:border-stone-800 dark:bg-stone-950">
         <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-8 text-sm text-stone-600 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
           <div>
             <p className="font-semibold text-stone-900">
