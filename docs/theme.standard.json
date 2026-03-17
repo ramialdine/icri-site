@@ -1,0 +1,133 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "name": "ICRI Theme Standard",
+  "version": "1.0.0",
+  "updated": "2026-03-17",
+  "usage": {
+    "principle": "Prefer semantic tokens over raw color classes",
+    "allowedRawAccents": [
+      "emerald"
+    ],
+    "notes": [
+      "Use semantic tokens first: bg-background, text-foreground, border-border, text-muted-foreground",
+      "Use emerald scale for primary CTAs and highlights",
+      "Dark mode contrast must meet or exceed readable body contrast"
+    ]
+  },
+  "palette": {
+    "brand": {
+      "emerald": {
+        "50": "#ecfdf5",
+        "100": "#d1fae5",
+        "200": "#a7f3d0",
+        "300": "#6ee7b7",
+        "400": "#34d399",
+        "500": "#10b981",
+        "600": "#059669",
+        "700": "#047857",
+        "800": "#065f46",
+        "900": "#064e3b"
+      }
+    },
+    "neutral": {
+      "white": "#ffffff",
+      "black": "#000000",
+      "stone": {
+        "50": "#fafaf9",
+        "100": "#f5f5f4",
+        "200": "#e7e5e4",
+        "300": "#d6d3d1",
+        "400": "#a8a29e",
+        "500": "#78716c",
+        "600": "#57534e",
+        "700": "#44403c",
+        "800": "#292524",
+        "900": "#1c1917",
+        "950": "#0c0a09"
+      },
+      "slate": {
+        "100": "#f1f5f9",
+        "200": "#e2e8f0",
+        "300": "#cbd5e1",
+        "700": "#334155",
+        "800": "#1e293b",
+        "900": "#0f172a"
+      }
+    }
+  },
+  "modes": {
+    "light": {
+      "background": "#ffffff",
+      "foreground": "#171717",
+      "card": "#ffffff",
+      "cardForeground": "#171717",
+      "muted": "#f5f5f4",
+      "mutedForeground": "#57534e",
+      "border": "#e7e5e4",
+      "primary": "#047857",
+      "primaryForeground": "#ffffff"
+    },
+    "dark": {
+      "background": "#171717",
+      "foreground": "#fafafa",
+      "card": "#262626",
+      "cardForeground": "#fafafa",
+      "muted": "#262626",
+      "mutedForeground": "#cbd5e1",
+      "border": "#292524",
+      "primary": "#34d399",
+      "primaryForeground": "#052e16"
+    }
+  },
+  "textStandards": {
+    "body": {
+      "classPattern": "text-base leading-7",
+      "defaultColorClass": "text-foreground",
+      "secondaryColorClass": "text-muted-foreground"
+    },
+    "small": {
+      "classPattern": "text-sm",
+      "defaultColorClass": "text-muted-foreground"
+    },
+    "eyebrow": {
+      "classPattern": "text-sm font-semibold uppercase tracking-[0.2em]",
+      "defaultColorClass": "text-emerald-700",
+      "darkColorClass": "dark:text-emerald-300"
+    }
+  },
+  "componentStandards": {
+    "button": {
+      "primary": {
+        "className": "rounded-2xl bg-emerald-700 text-white hover:bg-emerald-800 dark:bg-emerald-600 dark:text-emerald-50 dark:hover:bg-emerald-500"
+      },
+      "secondary": {
+        "variant": "outline",
+        "className": "rounded-2xl"
+      }
+    },
+    "card": {
+      "radiusOptions": [
+        "rounded-[24px]",
+        "rounded-[30px]",
+        "rounded-[32px]"
+      ],
+      "surface": "bg-card text-card-foreground border-border",
+      "shadow": "shadow-sm"
+    },
+    "header": {
+      "transparentState": {
+        "mobileMenuButtonDarkMode": "Use high-contrast foreground (near black on light chip or near white on dark chip)."
+      }
+    }
+  },
+  "accessibility": {
+    "contrast": {
+      "bodyTextMinimum": "WCAG AA (4.5:1)",
+      "largeTextMinimum": "WCAG AA (3:1)"
+    },
+    "rules": [
+      "Do not use stone-600 on dark surfaces without explicit dark override",
+      "Prefer text-foreground/text-muted-foreground over hard-coded stone shades"
+    ]
+  }
+}

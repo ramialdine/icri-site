@@ -135,3 +135,17 @@
       radial-gradient(circle at 90% 0%, rgba(99, 102, 241, 0.08), transparent 24%);
   }
 }
+
+@layer base {
+  .dark .text-stone-500 {
+    color: rgb(203 213 225) !important;
+  }
+
+  .dark .text-stone-600 {
+    color: rgb(226 232 240) !important;
+  }
+
+  .dark .text-stone-700 {
+    color: rgb(241 245 249) !important;
+  }
+}

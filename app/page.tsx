@@ -378,18 +378,18 @@ export default function Page() {
                   iftars, youth development, and the ongoing needs of a masjid
                   that has served Providence for decades.
                 </p>
-                <div className="mt-6 rounded-3xl bg-emerald-50 p-6">
+                <div className="mt-6 rounded-3xl bg-emerald-700 p-6 text-emerald-50 dark:bg-emerald-800">
                   <div className="flex items-center gap-3">
-                    <Heart className="h-6 w-6 text-emerald-700" />
+                    <Heart className="h-6 w-6 text-emerald-100" />
                     <div>
-                      <p className="font-semibold">Featured appeal</p>
-                      <p className="text-sm text-stone-600">
+                      <p className="font-semibold text-white">Featured appeal</p>
+                      <p className="text-sm text-emerald-100">
                         General masjid support, classes, and community
                         programming
                       </p>
                     </div>
                   </div>
-                  <Button asChild className="mt-5 w-full rounded-2xl bg-emerald-700 hover:bg-emerald-800 sm:w-auto">
+                  <Button asChild className="mt-5 w-full rounded-2xl bg-white text-emerald-800 hover:bg-emerald-50 dark:bg-emerald-100 dark:text-emerald-900 dark:hover:bg-white sm:w-auto">
                     <Link href="/donate">Donate Now</Link>
                   </Button>
                 </div>

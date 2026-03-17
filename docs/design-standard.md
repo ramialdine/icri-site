@@ -2,6 +2,12 @@
 
 This document is the source of truth for generating new pages and UI content in this repo.
 
+## 0) Canonical Theme Source
+
+- Use [docs/theme.standard.json](docs/theme.standard.json) as the canonical color/token source.
+- When this document and JSON conflict, JSON tokens win for color decisions.
+- For implementation, prefer semantic Tailwind token classes (`bg-background`, `text-foreground`, `text-muted-foreground`, `border-border`) over hard-coded color classes.
+
 ## 1) Page Structure
 
 Use this default page skeleton unless a page has a specific reason not to:
@@ -71,9 +77,10 @@ Use `next/image` for local and CMS assets unless preview-only rendering requires
 
 ## 7) Color + Theme
 
-- Respect token classes (`bg-background`, `text-foreground`) where possible.
-- Existing emerald brand accents are acceptable for key highlights and CTAs.
-- Dark mode must remain readable and maintain contrast.
+- Respect token classes (`bg-background`, `text-foreground`, `text-muted-foreground`, `border-border`) as default.
+- Existing emerald brand accents are the approved highlight/CTA palette.
+- Dark mode must remain readable and maintain contrast (WCAG AA minimum for body text).
+- Avoid introducing new ad-hoc color combinations not represented in [docs/theme.standard.json](docs/theme.standard.json).
 
 ## 8) Accessibility Baseline
 
