@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -10,13 +10,16 @@ import { Button } from "@/components/ui/button";
 
 const SEGMENT_LABELS: Record<string, string> = {
   about: "About",
-  imam: "The Imam",
-  president: "The President",
   amenities: "Amenities",
   announcements: "Announcements",
   donate: "Donate",
   events: "Events",
   programs: "Programs",
+};
+
+// Maps a full pathname to a fixed breadcrumb trail, overriding segment-based derivation.
+const ROUTE_TRAIL_OVERRIDES: Record<string, string[]> = {
+  "/about/imam": ["About"],
 };
 
 function formatSegmentLabel(segment: string) {
@@ -33,6 +36,9 @@ function formatSegmentLabel(segment: string) {
 }
 
 function deriveBreadcrumbTrail(pathname: string) {
+  if (ROUTE_TRAIL_OVERRIDES[pathname]) {
+    return ROUTE_TRAIL_OVERRIDES[pathname];
+  }
   const segments = pathname.split("/").filter(Boolean);
   return segments.map((segment) => formatSegmentLabel(segment));
 }
@@ -56,9 +62,18 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileAboutOpen, setMobileAboutOpen] = useState(false);
   const [isHomeScrolled, setIsHomeScrolled] = useState(false);
-  const [mounted, setMounted] = useState(false);
-  const aboutDropdownRef = useRef<HTMLDivElement | null>(null);
-  const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [theme, setTheme] = useState<"light" | "dark">(() => {
+    if (typeof window === "undefined") {
+      return "light";
+    }
+
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme === "light" || savedTheme === "dark") {
+      return savedTheme;
+    }
+
+    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  });
 
   const showSiteChrome = shouldShowSiteChrome(pathname);
   const trail = useMemo(() => deriveBreadcrumbTrail(pathname), [pathname]);
@@ -78,7 +93,6 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
 
   useEffect(() => {
     if (!isHomeRoute) {
-      setIsHomeScrolled(false);
       return;
     }
 
@@ -202,42 +216,12 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
                   isTransparentHomeHeader ? "text-white" : "text-stone-700 dark:text-stone-200"
                 }`}
               >
-                <div ref={aboutDropdownRef} className="relative">
-                  <button
-                    onClick={() => setAboutDropdownOpen(!aboutDropdownOpen)}
-                    aria-expanded={aboutDropdownOpen}
-                    aria-haspopup="menu"
-                    className={`inline-flex items-center gap-1.5 rounded-md px-1 py-0.5 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 ${
-                      isTransparentHomeHeader ? "hover:text-emerald-200" : "hover:text-emerald-700 dark:hover:text-emerald-300"
-                    }`}
-                  >
-                    About
-                    <ChevronDown className={`h-4 w-4 transition-transform ${aboutDropdownOpen ? "rotate-180" : ""}`} />
-                  </button>
-                  {aboutDropdownOpen ? (
-                    <div
-                      role="menu"
-                      className="absolute left-0 top-full mt-2 w-48 rounded-xl border border-stone-200 bg-white text-stone-700 shadow-lg dark:border-stone-700 dark:bg-stone-900 dark:text-stone-200"
-                    >
-                      <Link
-                        href="/about/imam"
-                        className="block px-4 py-3 text-sm font-medium first:rounded-t-xl hover:bg-emerald-50 dark:hover:bg-emerald-950"
-                        onClick={() => setAboutDropdownOpen(false)}
-                        role="menuitem"
-                      >
-                        The Imam
-                      </Link>
-                      <Link
-                        href="/about/president"
-                        className="block border-t border-stone-100 px-4 py-3 text-sm font-medium hover:bg-emerald-50 dark:border-stone-700 dark:hover:bg-emerald-950"
-                        onClick={() => setAboutDropdownOpen(false)}
-                        role="menuitem"
-                      >
-                        The President
-                      </Link>
-                    </div>
-                  ) : null}
-                </div>
+                <Link
+                  href="/about/imam"
+                  className={isTransparentHomeHeader ? "hover:text-emerald-200" : "hover:text-emerald-700 dark:hover:text-emerald-300"}
+                >
+                  About
+                </Link>
                 <Link
                   href="/#prayers"
                   className={isTransparentHomeHeader ? "hover:text-emerald-200" : "hover:text-emerald-700 dark:hover:text-emerald-300"}
