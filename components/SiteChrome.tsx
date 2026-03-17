@@ -51,7 +51,9 @@ function shouldShowSiteChrome(pathname: string) {
 
 export default function SiteChrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const isHomeRoute = pathname === "/";
   const [aboutDropdownOpen, setAboutDropdownOpen] = useState(false);
+  const [isHomeScrolled, setIsHomeScrolled] = useState(false);
   const aboutDropdownRef = useRef<HTMLDivElement | null>(null);
   const [theme, setTheme] = useState<"light" | "dark">(() => {
     if (typeof window === "undefined") {
@@ -68,6 +70,28 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
 
   const showSiteChrome = shouldShowSiteChrome(pathname);
   const trail = useMemo(() => deriveBreadcrumbTrail(pathname), [pathname]);
+  const isTransparentHomeHeader = isHomeRoute && !isHomeScrolled;
+
+  useEffect(() => {
+    if (!isHomeRoute) {
+      setIsHomeScrolled(false);
+      return;
+    }
+
+    const handleScroll = () => {
+      setIsHomeScrolled(window.scrollY > 16);
+    };
+
+    const rafId = window.requestAnimationFrame(handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", handleScroll);
+
+    return () => {
+      window.cancelAnimationFrame(rafId);
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleScroll);
+    };
+  }, [isHomeRoute]);
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", theme === "dark");
@@ -115,7 +139,13 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
     <>
       {showSiteChrome ? (
         <>
-          <header className="fixed inset-x-0 top-0 z-50 border-b border-stone-200/80 bg-white/90 shadow-sm backdrop-blur transition-all duration-300 dark:border-stone-800/80 dark:bg-stone-950/90">
+          <header
+            className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
+              isTransparentHomeHeader
+                ? "border-b border-transparent bg-transparent"
+                : "border-b border-stone-200/80 bg-white/90 shadow-sm backdrop-blur dark:border-stone-800/80 dark:bg-stone-950/90"
+            }`}
+          >
             <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-4 sm:px-6 lg:px-8">
               <Link href="/" className="flex flex-shrink-0 items-center gap-4 transition hover:opacity-80">
                 <div className="relative h-14 w-[180px] overflow-hidden rounded-md border border-stone-200 bg-white shadow-sm sm:h-16 sm:w-[220px]">
@@ -129,10 +159,6 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
                   />
                 </div>
                 <div className="hidden sm:block">
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700 dark:text-emerald-300">
-                    ICRI
-                  </p>
-                  <p className="text-base font-bold text-stone-900 dark:text-stone-100">Masjid Al Kareem</p>
                 </div>
               </Link>
 
@@ -143,13 +169,19 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
                 <Link href="/donate">Donate</Link>
               </Button>
 
-              <nav className="hidden gap-6 text-sm font-medium text-stone-700 dark:text-stone-200 lg:flex">
+              <nav
+                className={`hidden gap-6 text-sm font-medium lg:flex ${
+                  isTransparentHomeHeader ? "text-white" : "text-stone-700 dark:text-stone-200"
+                }`}
+              >
                 <div ref={aboutDropdownRef} className="relative">
                   <button
                     onClick={() => setAboutDropdownOpen(!aboutDropdownOpen)}
                     aria-expanded={aboutDropdownOpen}
                     aria-haspopup="menu"
-                    className="inline-flex items-center gap-1.5 rounded-md px-1 py-0.5 transition hover:text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 dark:hover:text-emerald-300"
+                    className={`inline-flex items-center gap-1.5 rounded-md px-1 py-0.5 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 ${
+                      isTransparentHomeHeader ? "hover:text-emerald-200" : "hover:text-emerald-700 dark:hover:text-emerald-300"
+                    }`}
                   >
                     About
                     <ChevronDown className={`h-4 w-4 transition-transform ${aboutDropdownOpen ? "rotate-180" : ""}`} />
@@ -178,22 +210,40 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
                     </div>
                   ) : null}
                 </div>
-                <Link href="/#prayers" className="hover:text-emerald-700 dark:hover:text-emerald-300">
+                <Link
+                  href="/#prayers"
+                  className={isTransparentHomeHeader ? "hover:text-emerald-200" : "hover:text-emerald-700 dark:hover:text-emerald-300"}
+                >
                   Prayer Times
                 </Link>
-                <Link href="/programs" className="hover:text-emerald-700 dark:hover:text-emerald-300">
+                <Link
+                  href="/programs"
+                  className={isTransparentHomeHeader ? "hover:text-emerald-200" : "hover:text-emerald-700 dark:hover:text-emerald-300"}
+                >
                   Programs
                 </Link>
-                <Link href="/events" className="hover:text-emerald-700 dark:hover:text-emerald-300">
+                <Link
+                  href="/events"
+                  className={isTransparentHomeHeader ? "hover:text-emerald-200" : "hover:text-emerald-700 dark:hover:text-emerald-300"}
+                >
                   Events
                 </Link>
-                <Link href="/announcements" className="hover:text-emerald-700 dark:hover:text-emerald-300">
+                <Link
+                  href="/announcements"
+                  className={isTransparentHomeHeader ? "hover:text-emerald-200" : "hover:text-emerald-700 dark:hover:text-emerald-300"}
+                >
                   Announcements
                 </Link>
-                <Link href="/amenities" className="hover:text-emerald-700 dark:hover:text-emerald-300">
+                <Link
+                  href="/amenities"
+                  className={isTransparentHomeHeader ? "hover:text-emerald-200" : "hover:text-emerald-700 dark:hover:text-emerald-300"}
+                >
                   Amenities
                 </Link>
-                <Link href="/#contact" className="hover:text-emerald-700 dark:hover:text-emerald-300">
+                <Link
+                  href="/#contact"
+                  className={isTransparentHomeHeader ? "hover:text-emerald-200" : "hover:text-emerald-700 dark:hover:text-emerald-300"}
+                >
                   Contact
                 </Link>
               </nav>
