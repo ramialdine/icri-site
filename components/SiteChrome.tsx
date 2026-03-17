@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ArrowLeft, Moon, Sun } from "lucide-react";
+import { ArrowLeft, ChevronDown, Menu, Moon, Sun, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
@@ -58,6 +58,9 @@ function shouldShowSiteChrome(pathname: string) {
 export default function SiteChrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isHomeRoute = pathname === "/";
+  const [aboutDropdownOpen, setAboutDropdownOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileAboutOpen, setMobileAboutOpen] = useState(false);
   const [isHomeScrolled, setIsHomeScrolled] = useState(false);
   const [theme, setTheme] = useState<"light" | "dark">(() => {
     if (typeof window === "undefined") {
@@ -75,6 +78,7 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
   const showSiteChrome = shouldShowSiteChrome(pathname);
   const trail = useMemo(() => deriveBreadcrumbTrail(pathname), [pathname]);
   const isTransparentHomeHeader = isHomeRoute && !isHomeScrolled;
+  const isSolidHeader = !isTransparentHomeHeader || mobileMenuOpen;
 
   useEffect(() => {
     const savedTheme = window.localStorage.getItem("theme");
@@ -116,6 +120,58 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
     localStorage.setItem("theme", theme);
   }, [mounted, theme]);
 
+  useEffect(() => {
+    setAboutDropdownOpen(false);
+    setMobileMenuOpen(false);
+    setMobileAboutOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!mobileMenuOpen) {
+      return;
+    }
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setMobileMenuOpen(false);
+        setMobileAboutOpen(false);
+      }
+    };
+
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [mobileMenuOpen]);
+
+  useEffect(() => {
+    const handleOutsideClick = (event: MouseEvent | TouchEvent) => {
+      if (!aboutDropdownRef.current) {
+        return;
+      }
+
+      if (!aboutDropdownRef.current.contains(event.target as Node)) {
+        setAboutDropdownOpen(false);
+      }
+    };
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setAboutDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleOutsideClick);
+    document.addEventListener("touchstart", handleOutsideClick);
+    document.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+      document.removeEventListener("touchstart", handleOutsideClick);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, []);
+
   const toggleTheme = () => {
     const nextTheme = theme === "dark" ? "light" : "dark";
     setTheme(nextTheme);
@@ -127,19 +183,19 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
         <>
           <header
             className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
-              isTransparentHomeHeader
-                ? "border-b border-transparent bg-transparent"
-                : "border-b border-stone-200/80 bg-white/90 shadow-sm backdrop-blur dark:border-stone-800/80 dark:bg-stone-950/90"
+              isSolidHeader
+                ? "border-b border-stone-200/80 bg-white/90 shadow-sm backdrop-blur dark:border-stone-800/80 dark:bg-stone-950/90"
+                : "border-b border-transparent bg-transparent"
             }`}
           >
-            <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-4 sm:px-6 lg:px-8">
+            <div className="mx-auto flex max-w-7xl items-center gap-2 px-4 py-4 sm:gap-4 sm:px-6 lg:px-8">
               <Link href="/" className="flex flex-shrink-0 items-center gap-4 transition hover:opacity-80">
-                <div className="relative h-14 w-[180px] overflow-hidden rounded-md border border-stone-200 bg-white shadow-sm sm:h-16 sm:w-[220px]">
+                <div className="relative h-14 w-[150px] overflow-hidden rounded-md border border-stone-200 bg-white shadow-sm sm:h-16 sm:w-[220px]">
                   <Image
                     src="/ICRI_logo.jpeg"
                     alt="Islamic Center of Rhode Island logo"
                     fill
-                    sizes="(max-width: 640px) 180px, 220px"
+                    sizes="(max-width: 640px) 150px, 220px"
                     className="object-contain p-1"
                     priority
                   />
@@ -150,7 +206,7 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
 
               <Button
                 asChild
-                className="rounded-2xl bg-emerald-700 px-8 py-2 text-base font-semibold hover:bg-emerald-800"
+                className="rounded-2xl bg-emerald-700 px-4 py-2 text-sm font-semibold hover:bg-emerald-800 sm:px-8 sm:text-base"
               >
                 <Link href="/donate">Donate</Link>
               </Button>
@@ -214,8 +270,104 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
                 >
                   {mounted && theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
                 </Button>
+
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setMobileMenuOpen((prev) => !prev)}
+                  className={`rounded-xl lg:hidden ${
+                    isSolidHeader
+                      ? "border-stone-200 bg-white text-stone-700 hover:bg-stone-100 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-200 dark:hover:bg-stone-800"
+                      : "border-white/60 bg-white/90 text-stone-700 hover:bg-white"
+                  }`}
+                  aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+                  aria-expanded={mobileMenuOpen}
+                  aria-controls="mobile-site-menu"
+                >
+                  {mobileMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+                </Button>
               </div>
             </div>
+
+            {mobileMenuOpen ? (
+              <div
+                id="mobile-site-menu"
+                className="border-t border-stone-200/80 bg-white/95 px-4 pb-4 pt-3 shadow-sm backdrop-blur dark:border-stone-800 dark:bg-stone-950/95 lg:hidden"
+              >
+                <div className="space-y-1">
+                  <button
+                    onClick={() => setMobileAboutOpen((prev) => !prev)}
+                    className="flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm font-medium text-stone-700 hover:bg-stone-100 dark:text-stone-200 dark:hover:bg-stone-800"
+                    aria-expanded={mobileAboutOpen}
+                  >
+                    About
+                    <ChevronDown className={`h-4 w-4 transition-transform ${mobileAboutOpen ? "rotate-180" : ""}`} />
+                  </button>
+
+                  {mobileAboutOpen ? (
+                    <div className="ml-2 space-y-1 border-l border-stone-200 pl-3 dark:border-stone-700">
+                      <Link
+                        href="/about/imam"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="block rounded-lg px-3 py-2 text-sm text-stone-700 hover:bg-stone-100 dark:text-stone-200 dark:hover:bg-stone-800"
+                      >
+                        The Imam
+                      </Link>
+                      <Link
+                        href="/about/president"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="block rounded-lg px-3 py-2 text-sm text-stone-700 hover:bg-stone-100 dark:text-stone-200 dark:hover:bg-stone-800"
+                      >
+                        The President
+                      </Link>
+                    </div>
+                  ) : null}
+
+                  <Link
+                    href="/#prayers"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block rounded-xl px-3 py-2 text-sm font-medium text-stone-700 hover:bg-stone-100 dark:text-stone-200 dark:hover:bg-stone-800"
+                  >
+                    Prayer Times
+                  </Link>
+                  <Link
+                    href="/programs"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block rounded-xl px-3 py-2 text-sm font-medium text-stone-700 hover:bg-stone-100 dark:text-stone-200 dark:hover:bg-stone-800"
+                  >
+                    Programs
+                  </Link>
+                  <Link
+                    href="/events"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block rounded-xl px-3 py-2 text-sm font-medium text-stone-700 hover:bg-stone-100 dark:text-stone-200 dark:hover:bg-stone-800"
+                  >
+                    Events
+                  </Link>
+                  <Link
+                    href="/announcements"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block rounded-xl px-3 py-2 text-sm font-medium text-stone-700 hover:bg-stone-100 dark:text-stone-200 dark:hover:bg-stone-800"
+                  >
+                    Announcements
+                  </Link>
+                  <Link
+                    href="/amenities"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block rounded-xl px-3 py-2 text-sm font-medium text-stone-700 hover:bg-stone-100 dark:text-stone-200 dark:hover:bg-stone-800"
+                  >
+                    Amenities
+                  </Link>
+                  <Link
+                    href="/#contact"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block rounded-xl px-3 py-2 text-sm font-medium text-stone-700 hover:bg-stone-100 dark:text-stone-200 dark:hover:bg-stone-800"
+                  >
+                    Contact
+                  </Link>
+                </div>
+              </div>
+            ) : null}
           </header>
 
           {trail.length > 0 ? (
