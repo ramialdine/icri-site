@@ -54,23 +54,24 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
   const isHomeRoute = pathname === "/";
   const [aboutDropdownOpen, setAboutDropdownOpen] = useState(false);
   const [isHomeScrolled, setIsHomeScrolled] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const aboutDropdownRef = useRef<HTMLDivElement | null>(null);
-  const [theme, setTheme] = useState<"light" | "dark">(() => {
-    if (typeof window === "undefined") {
-      return "light";
-    }
-
-    const savedTheme = localStorage.getItem("theme");
-    if (savedTheme === "light" || savedTheme === "dark") {
-      return savedTheme;
-    }
-
-    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-  });
+  const [theme, setTheme] = useState<"light" | "dark">("light");
 
   const showSiteChrome = shouldShowSiteChrome(pathname);
   const trail = useMemo(() => deriveBreadcrumbTrail(pathname), [pathname]);
   const isTransparentHomeHeader = isHomeRoute && !isHomeScrolled;
+
+  useEffect(() => {
+    const savedTheme = window.localStorage.getItem("theme");
+    if (savedTheme === "light" || savedTheme === "dark") {
+      setTheme(savedTheme);
+    } else {
+      setTheme(window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    }
+
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!isHomeRoute) {
@@ -94,9 +95,13 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
   }, [isHomeRoute]);
 
   useEffect(() => {
+    if (!mounted) {
+      return;
+    }
+
     document.documentElement.classList.toggle("dark", theme === "dark");
     localStorage.setItem("theme", theme);
-  }, [theme]);
+  }, [mounted, theme]);
 
   useEffect(() => {
     setAboutDropdownOpen(false);
@@ -256,7 +261,7 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
                   className="flex-shrink-0 rounded-xl border-white/60 bg-white/90 text-stone-700 hover:bg-white dark:border-stone-700 dark:bg-stone-900 dark:text-stone-200 dark:hover:bg-stone-800"
                   aria-label="Toggle dark mode"
                 >
-                  {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                  {mounted && theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
                 </Button>
               </div>
             </div>
