@@ -148,7 +148,6 @@ const prayerVisuals = {
 } as const;
 
 export default function Page() {
-  const [aboutExpanded, setAboutExpanded] = useState(false);
   const [prayerTimes, setPrayerTimes] = useState(fallbackPrayerTimes);
   const [jumuahSessions, setJumuahSessions] = useState(fallbackJumuahSessions);
   const [programs, setPrograms] = useState(fallbackPrograms);
@@ -348,99 +347,6 @@ export default function Page() {
             </CardContent>
           </Card>
         </div>
-      </motion.section>
-
-      <motion.section
-        {...revealInView}
-        id="about"
-        className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-16"
-      >
-        <Card className="rounded-[32px] border-stone-200 shadow-sm">
-          <CardContent className="grid gap-8 p-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-start lg:p-10">
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-700">
-                About the Masjid
-              </p>
-              <h3 className="mt-3 text-3xl font-bold sm:text-4xl">
-                A staple of the community; <br />
-                serving Rhode Island since 1976.
-              </h3>
-              <div className="mt-6 space-y-5 text-base leading-8 text-stone-600">
-                <p>
-                  Masjid Al Kareem, also known as the Islamic Center of Rhode
-                  Island, is a Sunni mosque that has been an integral part of
-                  the Providence community since its establishment in 1976. This
-                  welcoming Islamic center offers a range of services and
-                  amenities for worshippers and community members.
-                </p>
-
-                {/* Expandable content */}
-                <div
-                  className={`overflow-hidden transition-all duration-500 ease-in-out ${
-                    aboutExpanded ? "max-h-[800px] opacity-100" : "max-h-0 opacity-0"
-                  }`}
-                >
-                  <div className="space-y-5">
-                    <p>
-                      One of the main highlights of Masjid Al Kareem is its
-                      commitment to inclusivity. The mosque provides a kid-friendly
-                      environment, ensuring that families can comfortably worship
-                      together. Additionally, the presence of wheelchair amenities,
-                      such as accessible prayer spaces and parking, ensures that
-                      individuals with mobility needs can easily navigate the
-                      premises.
-                    </p>
-                    <p>
-                      The mosque offers a variety of services to cater to the needs
-                      of the community. Five daily prayers are held, providing a
-                      spiritual space for worshippers to connect with their faith
-                      throughout the day. Jumu&apos;ah prayers, the congregational
-                      Friday prayers, bring the community together in a special way.
-                      The mosque also hosts a weekend school for children in a
-                      dedicated classroom, providing an opportunity for them to
-                      learn about Islam and their cultural heritage. During Ramadan,
-                      the mosque organizes Iftar gatherings, which allow the
-                      community to come together and break their fasts during the
-                      holy month.
-                    </p>
-                    <p>
-                      There is a spacious and dedicated women&apos;s section with a
-                      separate entrance directly to it. The mosque also offers many
-                      dedicated parking spaces close to the building for women.
-                    </p>
-                    <p>
-                      Situated in the heart of Providence, Rhode Island, Masjid Al
-                      Kareem is a vital hub for the Muslim community, offering a
-                      peaceful and welcoming environment for worshippers of all ages
-                      and backgrounds. With its long-standing presence and
-                      commitment to providing necessary facilities and services,
-                      this mosque plays a crucial role in fostering a strong and
-                      unified community.
-                    </p>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => setAboutExpanded((prev) => !prev)}
-                  className="inline-flex cursor-pointer items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-2.5 text-sm font-semibold text-emerald-700 transition-colors hover:bg-emerald-100 hover:text-emerald-800 active:bg-emerald-200"
-                >
-                  {aboutExpanded ? "Read less ↑" : "Read more ↓"}
-                </button>
-              </div>
-            </div>
-            <div>
-              <div className="relative aspect-[4/3] overflow-hidden rounded-3xl border border-stone-200">
-                <Image
-                  src="/ICRItunnel.jpg"
-                  alt="Interior corridor of Masjid Al Kareem"
-                  fill
-                  sizes="(max-width: 1024px) 100vw, 480px"
-                  className="object-cover"
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       </motion.section>
 
       <motion.section
