@@ -280,7 +280,7 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
                   className={`rounded-xl lg:hidden ${
                     isSolidHeader
                       ? "border-stone-200 bg-white text-stone-700 hover:bg-stone-100 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-200 dark:hover:bg-stone-800"
-                      : "border-white/60 bg-white/90 text-stone-700 hover:bg-white"
+                      : "border-white/60 bg-white/90 text-stone-900 hover:bg-white dark:border-stone-300/80 dark:bg-stone-100/95 dark:text-black dark:hover:bg-stone-100"
                   }`}
                   aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
                   aria-expanded={mobileMenuOpen}
