@@ -157,7 +157,7 @@ export default function ImamPage() {
                     Imam Abudl Latif 
                   </h2>
                   <p className="mt-2 text-sm text-stone-600 dark:text-stone-400">
-                    Spiritual Guide, Khutbah Speaker
+                    Spiritual Guide, Khutbah Speaker, and an AWESOME GUY!
                   </p>
                 </div>
 
