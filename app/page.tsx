@@ -622,61 +622,53 @@ export default function Page() {
         id="contact"
         className="mx-auto max-w-7xl px-4 py-16 dark:bg-stone-950 sm:px-6 lg:px-8"
       >
-        <div className="grid gap-6 lg:grid-cols-2">
-          <Card className="rounded-[28px] border-stone-200 shadow-sm">
-            <CardContent className="p-8">
-              <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-700">
-                Visit Us
-              </p>
-              <h3 className="mt-3 text-3xl font-bold">
-                Easy to find. Easy to contact.
-              </h3>
-              <div className="mt-6 space-y-5 text-stone-700">
+        <Card className="rounded-[28px] border-stone-200 bg-emerald-900 text-white shadow-sm">
+          <CardContent className="p-6 sm:p-8 lg:p-10">
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-200">
+                  Visit Us
+                </p>
+                <h3 className="mt-3 text-3xl font-bold">
+                  Easy to find. Easy to contact.
+                </h3>
+              </div>
+
+            </div>
+
+            <div className="mt-6 grid gap-4 md:grid-cols-3">
+              <div className="rounded-2xl border border-emerald-700/60 bg-emerald-950/35 p-5">
                 <div className="flex items-start gap-3">
-                  <MapPin className="mt-1 h-5 w-5 text-emerald-700" />
+                  <MapPin className="mt-1 h-5 w-5 text-emerald-200" />
                   <div>
                     <p className="font-semibold">Address</p>
-                    <p>39 Haskins St, Providence, RI 02903</p>
+                    <p className="mt-1 text-emerald-50/90">39 Haskins St, Providence, RI 02903</p>
                   </div>
                 </div>
+              </div>
+
+              <div className="rounded-2xl border border-emerald-700/60 bg-emerald-950/35 p-5">
                 <div className="flex items-start gap-3">
-                  <Phone className="mt-1 h-5 w-5 text-emerald-700" />
+                  <Phone className="mt-1 h-5 w-5 text-emerald-200" />
                   <div>
                     <p className="font-semibold">Phone</p>
-                    <p>(401) 274-3986</p>
+                    <p className="mt-1 text-emerald-50/90">(401) 274-3986</p>
                   </div>
                 </div>
+              </div>
+
+              <div className="rounded-2xl border border-emerald-700/60 bg-emerald-950/35 p-5">
                 <div className="flex items-start gap-3">
-                  <Clock className="mt-1 h-5 w-5 text-emerald-700" />
+                  <Clock className="mt-1 h-5 w-5 text-emerald-200" />
                   <div>
                     <p className="font-semibold">Open for daily prayers</p>
-                    <p>Prayer access, Jumu&apos;ah, classes, and community events</p>
+                    <p className="mt-1 text-emerald-50/90">Prayer access, Jumu&apos;ah, classes, and community events</p>
                   </div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-
-          <Card className="rounded-[28px] border-stone-200 bg-emerald-900 text-white shadow-sm">
-            <CardContent className="p-8">
-              <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-200">
-                Next Steps
-              </p>
-              <h3 className="mt-3 text-3xl font-bold">
-                Turn this into a real site stack
-              </h3>
-              <div className="mt-6 space-y-4 text-emerald-50/90">
-                <p>• Connect real prayer times API or manual admin updates</p>
-                <p>• Add donation provider like LaunchGood, Stripe, or PayPal</p>
-                <p>• Add events CMS for non-technical masjid admins</p>
-                <p>• Add imam message, board members, classes, and announcements</p>
-              </div>
-              <Button variant="secondary" className="mt-8 rounded-2xl">
-                Request Full Build Plan
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+          </CardContent>
+        </Card>
       </motion.section>
 
       <section id="map" className="mx-auto max-w-7xl px-4 py-8 dark:bg-stone-950 sm:px-6 lg:px-8">
