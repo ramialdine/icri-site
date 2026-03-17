@@ -18,6 +18,7 @@ Use this default page skeleton unless a page has a specific reason not to:
 - Breadcrumbs are derived from route path segments (`usePathname()`).
 - Do not add page-local headers for regular public pages.
 - Breadcrumb row is hidden on home (`/`) and shown for inner routes.
+- On mobile, non-donate links collapse into a hamburger menu in `SiteChrome`.
 - Exclusions: `/preview/*`, `/studio/*`.
 
 ## 3) Typography + Voice
