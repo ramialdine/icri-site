@@ -58,6 +58,16 @@ Always use `components/ui/card.tsx`.
 - Use subtle depth (`shadow-sm`) unless hero-level emphasis is needed.
 - Borders should remain soft and token-friendly (`border-stone-200`, dark variants).
 
+### Long content cards (mobile-first rule)
+- If a card body becomes long enough to dominate the viewport on mobile, make it expandable/collapsible.
+- Default state should show:
+	- full card title
+	- short preview text (about 3–6 lines)
+	- clear action label (`Read more` / `Read less`).
+- Keep the toggle keyboard-accessible and visually clear.
+- Prefer local state per card for toggling rather than page-wide expand/collapse.
+- Use this pattern for biography, policy, history, and other long narrative cards.
+
 ## 6) Images
 
 Use `next/image` for local and CMS assets unless preview-only rendering requires `<img>`.
