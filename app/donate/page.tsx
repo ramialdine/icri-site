@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Heart, GraduationCap, Wrench, HandHeart, CreditCard, Landmark } from "lucide-react";
+import { Heart, GraduationCap, Wrench, HandHeart } from "lucide-react";
 
 const supportAreas = [
   {
@@ -87,14 +87,35 @@ export default function DonatePage() {
 
           <div className="mt-8 grid gap-4 md:grid-cols-3">
             <div className="rounded-2xl border border-white/25 bg-white/10 p-5 backdrop-blur-sm">
-              <div className="mb-3 inline-flex rounded-xl bg-white p-2 text-emerald-700 shadow-sm">
-                <CreditCard className="h-5 w-5" />
+              <div className="mb-3 inline-flex h-12 w-28 items-center justify-center rounded-xl bg-white/95 p-2 shadow-sm ring-1 ring-black/5">
+                <Image
+                  src="/Zelle-Symbol-2638918023.png"
+                  alt="Zelle logo"
+                  width={96}
+                  height={28}
+                  className="h-7 w-auto object-contain"
+                />
+              </div>
+              <p className="font-semibold">Zelle</p>
+              <p className="mt-2 text-sm text-emerald-50/90">Send directly to: icricenter@gmail.com.</p>
+              <p className="mt-4 rounded-lg bg-white/20 px-3 py-2 text-sm font-medium text-white">Memo: Sadaqah / Zakat / General Fund</p>
+            </div>
+
+            <div className="rounded-2xl border border-white/25 bg-white/10 p-5 backdrop-blur-sm">
+              <div className="mb-3 inline-flex h-12 w-28 items-center justify-center rounded-xl bg-emerald-950 p-2 shadow-sm ring-1 ring-white/25">
+                <Image
+                  src="/mohid.png"
+                  alt="Mohid logo"
+                  width={96}
+                  height={28}
+                  className="h-7 w-auto object-contain"
+                />
               </div>
               <p className="font-semibold">Online Donation</p>
-              <p className="mt-2 text-sm text-emerald-50/90">Secure one-time or recurring donations through the website payment form.</p>
+              <p className="mt-2 text-sm text-emerald-50/90">Secure one-time or recurring donations via Mohid.</p>
               <Button asChild className="mt-4 w-full rounded-xl bg-white text-emerald-800 hover:bg-emerald-50">
                 <a
-                  href="https://www.paypal.com/donate/?hosted_button_id=F7245FEM2SAUE"
+                  href="https://us.mohid.co/ri/providence/icri/masjid/online/vfr/campaign/10_nights_to_earn_1_000_months"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -104,21 +125,27 @@ export default function DonatePage() {
             </div>
 
             <div className="rounded-2xl border border-white/25 bg-white/10 p-5 backdrop-blur-sm">
-              <div className="mb-3 inline-flex rounded-xl bg-white p-2 text-emerald-700 shadow-sm">
-                <Landmark className="h-5 w-5" />
+              <div className="mb-3 inline-flex h-12 w-28 items-center justify-center rounded-xl bg-white/95 p-2 shadow-sm ring-1 ring-black/5">
+                <Image
+                  src="/Paypal-logo.png"
+                  alt="PayPal logo"
+                  width={96}
+                  height={28}
+                  className="h-7 w-auto object-contain"
+                />
               </div>
-              <p className="font-semibold">Zelle</p>
-              <p className="mt-2 text-sm text-emerald-50/90">Send directly to: donations@icri.org (replace with your official address).</p>
-              <p className="mt-4 rounded-lg bg-white/20 px-3 py-2 text-sm font-medium text-white">Memo: Sadaqah / Zakat / General Fund</p>
-            </div>
-
-            <div className="rounded-2xl border border-white/25 bg-white/10 p-5 backdrop-blur-sm">
-              <div className="mb-3 inline-flex rounded-xl bg-white p-2 text-emerald-700 shadow-sm">
-                <Heart className="h-5 w-5" />
-              </div>
-              <p className="font-semibold">Venmo</p>
-              <p className="mt-2 text-sm text-emerald-50/90">Send to: @MasjidAlKareem (replace with your official handle).</p>
-              <p className="mt-4 rounded-lg bg-white/20 px-3 py-2 text-sm font-medium text-white">Include intention in the payment note</p>
+              <p className="font-semibold">PayPal</p>
+              <p className="mt-2 text-sm text-emerald-50/90">Donate via PayPal and select specific donation cause.</p>
+              <Button asChild className="mt-4 w-full rounded-xl bg-white text-emerald-800 hover:bg-emerald-50">
+                <a
+                  href="https://www.paypal.com/donate/?hosted_button_id=F7245FEM2SAUE"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Donate Online
+                </a>
+              </Button>
+             
             </div>
           </div>
         </div>
