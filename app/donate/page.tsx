@@ -78,7 +78,7 @@ export default function DonatePage() {
       </section>
 
       <section id="donation-methods" className="py-8 lg:py-12">
-        <div className="rounded-[32px] bg-gradient-to-br from-emerald-700 via-emerald-800 to-emerald-900 p-6 text-white shadow-xl sm:p-8 lg:p-10">
+        <div className="rounded-[32px] bg-emerald-800 p-6 text-white shadow-xl sm:p-8 lg:p-10">
           <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-100">Contribution Options</p>
           <h2 className="mt-2 text-3xl font-bold sm:text-4xl">Choose the easiest way to contribute</h2>
           <p className="mt-3 max-w-3xl text-emerald-50/95">
@@ -92,7 +92,15 @@ export default function DonatePage() {
               </div>
               <p className="font-semibold">Online Donation</p>
               <p className="mt-2 text-sm text-emerald-50/90">Secure one-time or recurring donations through the website payment form.</p>
-              <Button className="mt-4 w-full rounded-xl bg-white text-emerald-800 hover:bg-emerald-50">Donate Online</Button>
+              <Button asChild className="mt-4 w-full rounded-xl bg-white text-emerald-800 hover:bg-emerald-50">
+                <a
+                  href="https://www.paypal.com/donate/?hosted_button_id=F7245FEM2SAUE"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Donate Online
+                </a>
+              </Button>
             </div>
 
             <div className="rounded-2xl border border-white/25 bg-white/10 p-5 backdrop-blur-sm">
@@ -101,7 +109,7 @@ export default function DonatePage() {
               </div>
               <p className="font-semibold">Zelle</p>
               <p className="mt-2 text-sm text-emerald-50/90">Send directly to: donations@icri.org (replace with your official address).</p>
-              <p className="mt-4 rounded-lg bg-white/20 px-3 py-2 text-sm font-medium">Memo: Sadaqah / Zakat / General Fund</p>
+              <p className="mt-4 rounded-lg bg-white/20 px-3 py-2 text-sm font-medium text-white">Memo: Sadaqah / Zakat / General Fund</p>
             </div>
 
             <div className="rounded-2xl border border-white/25 bg-white/10 p-5 backdrop-blur-sm">
@@ -110,7 +118,7 @@ export default function DonatePage() {
               </div>
               <p className="font-semibold">Venmo</p>
               <p className="mt-2 text-sm text-emerald-50/90">Send to: @MasjidAlKareem (replace with your official handle).</p>
-              <p className="mt-4 rounded-lg bg-white/20 px-3 py-2 text-sm font-medium">Include intention in the payment note</p>
+              <p className="mt-4 rounded-lg bg-white/20 px-3 py-2 text-sm font-medium text-white">Include intention in the payment note</p>
             </div>
           </div>
         </div>
