@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist_Mono, Manrope } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import SiteChrome from "@/components/SiteChrome";
 import "./globals.css";
