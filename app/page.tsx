@@ -253,7 +253,7 @@ export default function Page() {
             <h2 className="mt-3 text-4xl font-bold sm:text-5xl md:text-6xl">
               Masjid Al Kareem
             </h2>
-            <p className="mt-3 text-base text-emerald-50 sm:text-lg md:text-xl">
+            <p className="mt-3 text-base text-emerald-50 font-semibold sm:text-lg md:text-xl">
               The staple of the Islamic community in Rhode Island.
             </p>
           </div>
@@ -598,9 +598,9 @@ export default function Page() {
       </section>
 
       <motion.footer {...revealInView} className="border-t border-stone-200 bg-white dark:border-stone-800 dark:bg-stone-950">
-        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-8 text-sm text-stone-600 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
+        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-8 text-sm text-stone-600 dark:text-stone-300 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
           <div>
-            <p className="font-semibold text-stone-900">
+            <p className="font-semibold text-stone-900 dark:text-stone-100">
               Masjid Al Kareem · Islamic Center of Rhode Island
             </p>
             <p>Providence, Rhode Island</p>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -55,43 +55,57 @@ function shouldShowSiteChrome(pathname: string) {
   return true;
 }
 
+type ThemeMode = "light" | "dark";
+
+function getThemeSnapshot(): ThemeMode {
+  if (typeof window === "undefined") {
+    return "light";
+  }
+
+  const savedTheme = window.localStorage.getItem("theme");
+  if (savedTheme === "light" || savedTheme === "dark") {
+    return savedTheme;
+  }
+
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+
+function subscribeTheme(onStoreChange: () => void) {
+  if (typeof window === "undefined") {
+    return () => {};
+  }
+
+  const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+  const handleChange = () => onStoreChange();
+  const handleStorage = (event: StorageEvent) => {
+    if (event.key === "theme") {
+      onStoreChange();
+    }
+  };
+
+  mediaQuery.addEventListener("change", handleChange);
+  window.addEventListener("storage", handleStorage);
+  window.addEventListener("themechange", handleChange);
+
+  return () => {
+    mediaQuery.removeEventListener("change", handleChange);
+    window.removeEventListener("storage", handleStorage);
+    window.removeEventListener("themechange", handleChange);
+  };
+}
+
 export default function SiteChrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isHomeRoute = pathname === "/";
-  const aboutDropdownRef = useRef<HTMLDivElement | null>(null);
-  const [mounted, setMounted] = useState(false);
-  const [aboutDropdownOpen, setAboutDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileAboutOpen, setMobileAboutOpen] = useState(false);
   const [isHomeScrolled, setIsHomeScrolled] = useState(false);
-  const [theme, setTheme] = useState<"light" | "dark">(() => {
-    if (typeof window === "undefined") {
-      return "light";
-    }
-
-    const savedTheme = localStorage.getItem("theme");
-    if (savedTheme === "light" || savedTheme === "dark") {
-      return savedTheme;
-    }
-
-    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-  });
+  const theme = useSyncExternalStore(subscribeTheme, getThemeSnapshot, () => "light");
 
   const showSiteChrome = shouldShowSiteChrome(pathname);
   const trail = useMemo(() => deriveBreadcrumbTrail(pathname), [pathname]);
   const isTransparentHomeHeader = isHomeRoute && !isHomeScrolled;
   const isSolidHeader = !isTransparentHomeHeader || mobileMenuOpen;
-
-  useEffect(() => {
-    const savedTheme = window.localStorage.getItem("theme");
-    if (savedTheme === "light" || savedTheme === "dark") {
-      setTheme(savedTheme);
-    } else {
-      setTheme(window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
-    }
-
-    setMounted(true);
-  }, []);
 
   useEffect(() => {
     if (!isHomeRoute) {
@@ -114,19 +128,9 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
   }, [isHomeRoute]);
 
   useEffect(() => {
-    if (!mounted) {
-      return;
-    }
-
     document.documentElement.classList.toggle("dark", theme === "dark");
     localStorage.setItem("theme", theme);
-  }, [mounted, theme]);
-
-  useEffect(() => {
-    setAboutDropdownOpen(false);
-    setMobileMenuOpen(false);
-    setMobileAboutOpen(false);
-  }, [pathname]);
+  }, [theme]);
 
   useEffect(() => {
     if (!mobileMenuOpen) {
@@ -146,37 +150,10 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
     };
   }, [mobileMenuOpen]);
 
-  useEffect(() => {
-    const handleOutsideClick = (event: MouseEvent | TouchEvent) => {
-      if (!aboutDropdownRef.current) {
-        return;
-      }
-
-      if (!aboutDropdownRef.current.contains(event.target as Node)) {
-        setAboutDropdownOpen(false);
-      }
-    };
-
-    const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setAboutDropdownOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleOutsideClick);
-    document.addEventListener("touchstart", handleOutsideClick);
-    document.addEventListener("keydown", handleEscape);
-
-    return () => {
-      document.removeEventListener("mousedown", handleOutsideClick);
-      document.removeEventListener("touchstart", handleOutsideClick);
-      document.removeEventListener("keydown", handleEscape);
-    };
-  }, []);
-
   const toggleTheme = () => {
-    const nextTheme = theme === "dark" ? "light" : "dark";
-    setTheme(nextTheme);
+    const nextTheme: ThemeMode = theme === "dark" ? "light" : "dark";
+    window.localStorage.setItem("theme", nextTheme);
+    window.dispatchEvent(new Event("themechange"));
   };
 
   return (
@@ -270,7 +247,7 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
                   className="flex-shrink-0 rounded-xl border-white/60 bg-white/90 text-stone-700 hover:bg-white dark:border-stone-700 dark:bg-stone-900 dark:text-stone-200 dark:hover:bg-stone-800"
                   aria-label="Toggle dark mode"
                 >
-                  {mounted && theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                  {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
                 </Button>
 
                 <Button
