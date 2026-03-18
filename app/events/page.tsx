@@ -15,7 +15,7 @@ const fallbackUpcomingEvents: EventListItem[] = [
     title: "Community Iftar",
     summary: "Open to families and students.",
     location: "Masjid Al Kareem, Providence",
-    dateLabel: "Thu, Mar 20, 2026",
+    dateLabel: "Thurs, Mar 20, 2026",
     timeLabel: "6:15 PM ET",
   },
   {
