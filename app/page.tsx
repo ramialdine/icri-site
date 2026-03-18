@@ -151,7 +151,7 @@ export default function Page() {
   const [prayerTimes, setPrayerTimes] = useState(fallbackPrayerTimes);
   const [jumuahSessions, setJumuahSessions] = useState(fallbackJumuahSessions);
   const [programs, setPrograms] = useState(fallbackPrograms);
-  const [events, setEvents] = useState(fallbackEvents);
+  const [events, setEvents] = useState<EventCard[]>([]);
   const [announcements, setAnnouncements] = useState(fallbackAnnouncements);
 
   // Fetch merged prayer payload (Adhan from API, Iqamah from CMS), refresh once daily
@@ -194,7 +194,7 @@ export default function Page() {
           );
         }
 
-        if (Array.isArray(json?.events) && json.events.length > 0) {
+        if (Array.isArray(json?.events)) {
           setEvents(
             json.events.map((event: EventCard) => ({
               date: event.date,
@@ -216,7 +216,9 @@ export default function Page() {
           );
         }
       })
-      .catch(() => {});
+      .catch(() => {
+        setEvents(fallbackEvents);
+      });
   }, []);
 
   const revealInView = {

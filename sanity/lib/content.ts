@@ -76,7 +76,7 @@ const announcementsQuery = groq`*[_type == "announcement" && isActive == true] |
   isPinned
 }`;
 
-const eventsQuery = groq`*[_type == "event" && isPublished == true] | order(defined(flyerImage.asset) desc, startAt asc)[0...8] {
+const eventsQuery = groq`*[_type == "event" && coalesce(isPublished, true) == true] | order(startAt asc)[0...50] {
   _id,
   title,
   summary,
@@ -90,7 +90,7 @@ const eventsQuery = groq`*[_type == "event" && isPublished == true] | order(defi
   }
 }`;
 
-const allEventsQuery = groq`*[_type == "event" && isPublished == true] | order(startAt asc) {
+const allEventsQuery = groq`*[_type == "event" && coalesce(isPublished, true) == true] | order(startAt asc) {
   _id,
   title,
   summary,
@@ -247,15 +247,28 @@ export async function getHomeContentPayload() {
     sanityClient.fetch<ProgramDoc[]>(programsQuery),
   ]);
 
+  const now = Date.now();
+  const mappedEvents = (events || []).map((event) => ({
+    date: formatEventDate(event.startAt),
+    title: event.title,
+    detail: event.summary || "",
+    imageUrl: event.flyerImage?.url,
+    imageAlt: event.flyerImage?.alt || `${event.title} flyer`,
+    startAtMs: Number.isNaN(new Date(event.startAt).getTime()) ? Number.MIN_SAFE_INTEGER : new Date(event.startAt).getTime(),
+  }));
+
+  const upcomingEvents = mappedEvents.filter((event) => event.startAtMs >= now);
+  const pastEvents = mappedEvents
+    .filter((event) => event.startAtMs < now)
+    .sort((a, b) => b.startAtMs - a.startAtMs);
+
+  const selectedEvents = [...upcomingEvents, ...pastEvents]
+    .slice(0, 8)
+    .map(({ startAtMs: _startAtMs, ...event }) => event);
+
   return {
     announcements: announcements || [],
-    events: (events || []).map((event) => ({
-      date: formatEventDate(event.startAt),
-      title: event.title,
-      detail: event.summary || "",
-      imageUrl: event.flyerImage?.url,
-      imageAlt: event.flyerImage?.alt || `${event.title} flyer`,
-    })),
+    events: selectedEvents,
     programs: (programs || []).map((program) => ({
       title: program.title,
       text: program.description,
