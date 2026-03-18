@@ -151,7 +151,7 @@ export default function Page() {
   const [prayerTimes, setPrayerTimes] = useState(fallbackPrayerTimes);
   const [jumuahSessions, setJumuahSessions] = useState(fallbackJumuahSessions);
   const [programs, setPrograms] = useState(fallbackPrograms);
-  const [events, setEvents] = useState(fallbackEvents);
+  const [events, setEvents] = useState<EventCard[]>([]);
   const [announcements, setAnnouncements] = useState(fallbackAnnouncements);
 
   // Fetch merged prayer payload (Adhan from API, Iqamah from CMS), refresh once daily
@@ -194,7 +194,7 @@ export default function Page() {
           );
         }
 
-        if (Array.isArray(json?.events) && json.events.length > 0) {
+        if (Array.isArray(json?.events)) {
           setEvents(
             json.events.map((event: EventCard) => ({
               date: event.date,
@@ -216,7 +216,9 @@ export default function Page() {
           );
         }
       })
-      .catch(() => {});
+      .catch(() => {
+        setEvents(fallbackEvents);
+      });
   }, []);
 
   const revealInView = {
@@ -272,9 +274,7 @@ export default function Page() {
             <CardContent className="p-0">
               <div className="flex flex-col gap-4 bg-emerald-800 px-6 py-8 text-white md:flex-row md:items-end md:justify-between md:px-8 md:py-10">
                 <div>
-                  <p className="text-sm uppercase tracking-[0.2em] text-emerald-100">
-                    Today at the Masjid
-                  </p>
+
                   <div className="mt-3 flex items-center gap-2 text-3xl font-bold sm:text-4xl">
                     <Clock className="h-7 w-7" />
                     Prayer Schedule
@@ -423,15 +423,7 @@ export default function Page() {
                 <h3 className="mt-3 text-3xl font-bold">
                   Masjid Al Kareem Announcements and Events
                 </h3>
-                <p className="mt-4 leading-7 text-stone-600">
-                  {announcements[0]?.message ||
-                    "Use Studio to post Eid announcements, fundraisers, classes, and youth events without touching code."}
-                </p>
-                <p className="mt-4 text-sm text-stone-500">
-                  {announcements[0]?.title
-                    ? `Pinned announcement: ${announcements[0].title}`
-                    : "Weekly reflections and reminders from Imam ABL can also be featured here."}
-                </p>
+
                 <Link
                   href="/announcements"
                   className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-emerald-700 hover:text-emerald-800"
@@ -482,7 +474,7 @@ export default function Page() {
             Programs
           </p>
           <h3 className="mt-2 text-3xl font-bold">
-            Show the masjid as a living community, not just a timetable.
+            Recurring Programs to Nurture Worship, Learning, and Community
           </h3>
         </div>
         <div className="grid gap-6 lg:grid-cols-3">
@@ -533,7 +525,7 @@ export default function Page() {
             <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-200">
-                  Visit Us
+                  Visit Us InshAllah
                 </p>
                 <h3 className="mt-3 text-3xl font-bold">
                   Easy to find. Easy to contact.

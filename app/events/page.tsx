@@ -6,6 +6,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { getEventsPagePayload, type EventListItem } from "@/sanity/lib/content";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 const fallbackUpcomingEvents: EventListItem[] = [
   {
     id: "fallback-1",
@@ -28,10 +31,8 @@ const fallbackUpcomingEvents: EventListItem[] = [
 export default async function EventsPage() {
   const payload = await getEventsPagePayload();
 
-  const upcomingEvents = payload?.upcomingEvents?.length
-    ? payload.upcomingEvents
-    : fallbackUpcomingEvents;
-  const pastEvents = payload?.pastEvents || [];
+  const upcomingEvents = payload ? payload.upcomingEvents : fallbackUpcomingEvents;
+  const pastEvents = payload ? payload.pastEvents : [];
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-emerald-50/40 text-stone-900 dark:from-stone-950 dark:to-stone-950 dark:text-stone-100">

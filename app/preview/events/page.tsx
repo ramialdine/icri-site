@@ -98,8 +98,11 @@ export default async function EventPreview({ searchParams }: EventPreviewProps) 
   }
 
   try {
+    const publishedId = id.replace(/^drafts\./, "");
+    const draftId = id.startsWith("drafts.") ? id : `drafts.${id}`;
+
     const event: PreviewEventDoc | null = await sanityClient?.fetch(
-      `*[_id == $id && _type == "event"][0]{
+      `*[_type == "event" && _id in [$id, $publishedId, $draftId]][0]{
         _id,
         title,
         summary,
@@ -113,7 +116,7 @@ export default async function EventPreview({ searchParams }: EventPreviewProps) 
           "url": asset->url
         }
       }`,
-      { id }
+      { id, publishedId, draftId }
     ) || null;
 
     if (!event) {

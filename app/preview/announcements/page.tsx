@@ -41,8 +41,11 @@ export default async function AnnouncementPreview({
   }
 
   try {
+    const publishedId = id.replace(/^drafts\./, "");
+    const draftId = id.startsWith("drafts.") ? id : `drafts.${id}`;
+
     const announcement: PreviewAnnouncementDoc | null = await sanityClient?.fetch(
-      `*[_id == $id && _type == "announcement"][0]{
+      `*[_type == "announcement" && _id in [$id, $publishedId, $draftId]][0]{
         _id,
         title,
         message,
@@ -51,7 +54,7 @@ export default async function AnnouncementPreview({
         startAt,
         endAt
       }`,
-      { id }
+      { id, publishedId, draftId }
     ) || null;
 
     if (!announcement) {

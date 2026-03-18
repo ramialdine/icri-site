@@ -10,16 +10,17 @@ import { Button } from "@/components/ui/button";
 
 const SEGMENT_LABELS: Record<string, string> = {
   about: "About",
-  amenities: "Amenities",
   announcements: "Announcements",
   donate: "Donate",
   events: "Events",
+  leadership: "Leadership",
   programs: "Programs",
 };
 
 // Maps a full pathname to a fixed breadcrumb trail, overriding segment-based derivation.
 const ROUTE_TRAIL_OVERRIDES: Record<string, string[]> = {
   "/about/imam": ["About"],
+  "/about/leadership": ["About"],
 };
 
 function formatSegmentLabel(segment: string) {
@@ -106,6 +107,29 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
   const trail = useMemo(() => deriveBreadcrumbTrail(pathname), [pathname]);
   const isTransparentHomeHeader = isHomeRoute && !isHomeScrolled;
   const isSolidHeader = !isTransparentHomeHeader || mobileMenuOpen;
+  const isAboutPageRoute = pathname === "/about" || pathname === "/about/imam";
+  const isLeadershipRoute = pathname === "/about/leadership";
+  const isProgramsRoute = pathname.startsWith("/programs");
+  const isEventsRoute = pathname.startsWith("/events");
+  const isAnnouncementsRoute = pathname.startsWith("/announcements");
+
+  const navLinkClass = (isActive: boolean) =>
+    `inline-flex items-center border-b-2 pb-1 transition ${
+      isTransparentHomeHeader
+        ? isActive
+          ? "border-white text-white"
+          : "border-transparent hover:text-emerald-200"
+        : isActive
+          ? "border-emerald-600 text-emerald-800 dark:border-emerald-400 dark:text-emerald-300"
+          : "border-transparent hover:text-emerald-700 dark:hover:text-emerald-300"
+    }`;
+
+  const mobileLinkClass = (isActive: boolean) =>
+    `block rounded-xl px-3 py-2 text-sm font-medium transition ${
+      isActive
+        ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200"
+        : "text-stone-700 hover:bg-stone-100 dark:text-stone-200 dark:hover:bg-stone-800"
+    }`;
 
   useEffect(() => {
     if (!isHomeRoute) {
@@ -197,43 +221,48 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
               >
                 <Link
                   href="/about/imam"
-                  className={isTransparentHomeHeader ? "hover:text-emerald-200" : "hover:text-emerald-700 dark:hover:text-emerald-300"}
+                  className={navLinkClass(isAboutPageRoute)}
+                  aria-current={isAboutPageRoute ? "page" : undefined}
                 >
                   About
                 </Link>
                 <Link
+                  href="/about/leadership"
+                  className={navLinkClass(isLeadershipRoute)}
+                  aria-current={isLeadershipRoute ? "page" : undefined}
+                >
+                  Leadership
+                </Link>
+                <Link
                   href="/#prayers"
-                  className={isTransparentHomeHeader ? "hover:text-emerald-200" : "hover:text-emerald-700 dark:hover:text-emerald-300"}
+                  className={navLinkClass(false)}
                 >
                   Prayer Times
                 </Link>
                 <Link
                   href="/programs"
-                  className={isTransparentHomeHeader ? "hover:text-emerald-200" : "hover:text-emerald-700 dark:hover:text-emerald-300"}
+                  className={navLinkClass(isProgramsRoute)}
+                  aria-current={isProgramsRoute ? "page" : undefined}
                 >
                   Programs
                 </Link>
                 <Link
                   href="/events"
-                  className={isTransparentHomeHeader ? "hover:text-emerald-200" : "hover:text-emerald-700 dark:hover:text-emerald-300"}
+                  className={navLinkClass(isEventsRoute)}
+                  aria-current={isEventsRoute ? "page" : undefined}
                 >
                   Events
                 </Link>
                 <Link
                   href="/announcements"
-                  className={isTransparentHomeHeader ? "hover:text-emerald-200" : "hover:text-emerald-700 dark:hover:text-emerald-300"}
+                  className={navLinkClass(isAnnouncementsRoute)}
+                  aria-current={isAnnouncementsRoute ? "page" : undefined}
                 >
                   Announcements
                 </Link>
                 <Link
-                  href="/amenities"
-                  className={isTransparentHomeHeader ? "hover:text-emerald-200" : "hover:text-emerald-700 dark:hover:text-emerald-300"}
-                >
-                  Amenities
-                </Link>
-                <Link
                   href="/#contact"
-                  className={isTransparentHomeHeader ? "hover:text-emerald-200" : "hover:text-emerald-700 dark:hover:text-emerald-300"}
+                  className={navLinkClass(false)}
                 >
                   Contact
                 </Link>
@@ -276,7 +305,11 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
                 <div className="space-y-1">
                   <button
                     onClick={() => setMobileAboutOpen((prev) => !prev)}
-                    className="flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm font-medium text-stone-700 hover:bg-stone-100 dark:text-stone-200 dark:hover:bg-stone-800"
+                    className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm font-medium transition ${
+                      isAboutPageRoute
+                        ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200"
+                        : "text-stone-700 hover:bg-stone-100 dark:text-stone-200 dark:hover:bg-stone-800"
+                    }`}
                     aria-expanded={mobileAboutOpen}
                   >
                     About
@@ -288,16 +321,18 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
                       <Link
                         href="/about/imam"
                         onClick={() => setMobileMenuOpen(false)}
-                        className="block rounded-lg px-3 py-2 text-sm text-stone-700 hover:bg-stone-100 dark:text-stone-200 dark:hover:bg-stone-800"
+                        className={mobileLinkClass(pathname === "/about/imam")}
+                        aria-current={pathname === "/about/imam" ? "page" : undefined}
                       >
                         The Imam
                       </Link>
                       <Link
-                        href="/about/president"
+                        href="/about/leadership"
                         onClick={() => setMobileMenuOpen(false)}
-                        className="block rounded-lg px-3 py-2 text-sm text-stone-700 hover:bg-stone-100 dark:text-stone-200 dark:hover:bg-stone-800"
+                        className={mobileLinkClass(isLeadershipRoute)}
+                        aria-current={isLeadershipRoute ? "page" : undefined}
                       >
-                        The President
+                        Leadership
                       </Link>
                     </div>
                   ) : null}
@@ -305,42 +340,38 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
                   <Link
                     href="/#prayers"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="block rounded-xl px-3 py-2 text-sm font-medium text-stone-700 hover:bg-stone-100 dark:text-stone-200 dark:hover:bg-stone-800"
+                    className={mobileLinkClass(false)}
                   >
                     Prayer Times
                   </Link>
                   <Link
                     href="/programs"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="block rounded-xl px-3 py-2 text-sm font-medium text-stone-700 hover:bg-stone-100 dark:text-stone-200 dark:hover:bg-stone-800"
+                    className={mobileLinkClass(isProgramsRoute)}
+                    aria-current={isProgramsRoute ? "page" : undefined}
                   >
                     Programs
                   </Link>
                   <Link
                     href="/events"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="block rounded-xl px-3 py-2 text-sm font-medium text-stone-700 hover:bg-stone-100 dark:text-stone-200 dark:hover:bg-stone-800"
+                    className={mobileLinkClass(isEventsRoute)}
+                    aria-current={isEventsRoute ? "page" : undefined}
                   >
                     Events
                   </Link>
                   <Link
                     href="/announcements"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="block rounded-xl px-3 py-2 text-sm font-medium text-stone-700 hover:bg-stone-100 dark:text-stone-200 dark:hover:bg-stone-800"
+                    className={mobileLinkClass(isAnnouncementsRoute)}
+                    aria-current={isAnnouncementsRoute ? "page" : undefined}
                   >
                     Announcements
                   </Link>
                   <Link
-                    href="/amenities"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="block rounded-xl px-3 py-2 text-sm font-medium text-stone-700 hover:bg-stone-100 dark:text-stone-200 dark:hover:bg-stone-800"
-                  >
-                    Amenities
-                  </Link>
-                  <Link
                     href="/#contact"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="block rounded-xl px-3 py-2 text-sm font-medium text-stone-700 hover:bg-stone-100 dark:text-stone-200 dark:hover:bg-stone-800"
+                    className={mobileLinkClass(false)}
                   >
                     Contact
                   </Link>

@@ -39,9 +39,9 @@ export default function DonatePage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <main className="px-4 pb-10 pt-8 sm:px-6 lg:px-8 lg:pb-14">
-      <section className="mx-auto max-w-7xl">
+      <section className="mx-auto w-full">
         <Card className="overflow-hidden rounded-[32px] shadow-xl">
-          <CardContent className="grid gap-8 p-8 lg:grid-cols-[1.1fr_0.9fr] lg:p-10">
+          <CardContent className="grid gap-8 p-8 lg:grid-cols-[1.2fr_0.8fr] lg:p-10">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-700">
                 Donate to Masjid Al Kareem
@@ -50,12 +50,9 @@ export default function DonatePage() {
                 Support the masjid mission 💚
               </h1>
               <p className="mt-5 max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">
-                Every donation helps sustain worship, Islamic learning, and community support for families across Providence.
+                Every donation helps sustain worship, Islamic learning, and community support for families across Rhode Island.
               </p>
               <div className="mt-7 flex flex-wrap gap-3">
-                <Button asChild className="rounded-2xl bg-emerald-700 px-6 hover:bg-emerald-800">
-                  <a href="#donation-methods">Donate Now</a>
-                </Button>
                 <Button asChild variant="outline" className="rounded-2xl">
                   <Link href="/">Back to Home</Link>
                 </Button>
@@ -78,6 +75,53 @@ export default function DonatePage() {
             </div>
           </CardContent>
         </Card>
+      </section>
+
+      <section id="donation-methods" className="py-8 lg:py-12">
+        <div className="rounded-[32px] bg-emerald-800 p-6 text-white shadow-xl sm:p-8 lg:p-10">
+          <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-100">Contribution Options</p>
+          <h2 className="mt-2 text-3xl font-bold sm:text-4xl">Choose the easiest way to contribute</h2>
+          <p className="mt-3 max-w-3xl text-emerald-50/95">
+            Pick the method that works best for you. Every contribution supports the masjid and our community programs.
+          </p>
+
+          <div className="mt-8 grid gap-4 md:grid-cols-3">
+            <div className="rounded-2xl border border-white/25 bg-white/10 p-5 backdrop-blur-sm">
+              <div className="mb-3 inline-flex rounded-xl bg-white p-2 text-emerald-700 shadow-sm">
+                <CreditCard className="h-5 w-5" />
+              </div>
+              <p className="font-semibold">Online Donation</p>
+              <p className="mt-2 text-sm text-emerald-50/90">Secure one-time or recurring donations through the website payment form.</p>
+              <Button asChild className="mt-4 w-full rounded-xl bg-white text-emerald-800 hover:bg-emerald-50">
+                <a
+                  href="https://www.paypal.com/donate/?hosted_button_id=F7245FEM2SAUE"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Donate Online
+                </a>
+              </Button>
+            </div>
+
+            <div className="rounded-2xl border border-white/25 bg-white/10 p-5 backdrop-blur-sm">
+              <div className="mb-3 inline-flex rounded-xl bg-white p-2 text-emerald-700 shadow-sm">
+                <Landmark className="h-5 w-5" />
+              </div>
+              <p className="font-semibold">Zelle</p>
+              <p className="mt-2 text-sm text-emerald-50/90">Send directly to: donations@icri.org (replace with your official address).</p>
+              <p className="mt-4 rounded-lg bg-white/20 px-3 py-2 text-sm font-medium text-white">Memo: Sadaqah / Zakat / General Fund</p>
+            </div>
+
+            <div className="rounded-2xl border border-white/25 bg-white/10 p-5 backdrop-blur-sm">
+              <div className="mb-3 inline-flex rounded-xl bg-white p-2 text-emerald-700 shadow-sm">
+                <Heart className="h-5 w-5" />
+              </div>
+              <p className="font-semibold">Venmo</p>
+              <p className="mt-2 text-sm text-emerald-50/90">Send to: @MasjidAlKareem (replace with your official handle).</p>
+              <p className="mt-4 rounded-lg bg-white/20 px-3 py-2 text-sm font-medium text-white">Include intention in the payment note</p>
+            </div>
+          </div>
+        </div>
       </section>
 
       <section className="mx-auto max-w-7xl py-8 lg:py-10">
@@ -169,43 +213,6 @@ export default function DonatePage() {
         </div>
       </section>
 
-      <section id="donation-methods" className="mx-auto max-w-7xl py-8 lg:py-12">
-        <Card className="rounded-[30px] shadow-sm">
-          <CardContent className="p-8 lg:p-10">
-            <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-700">Donation Methods</p>
-            <h2 className="mt-2 text-3xl font-bold">Choose the easiest way to contribute</h2>
-
-            <div className="mt-8 grid gap-4 md:grid-cols-3">
-              <div className="rounded-2xl border border-emerald-200 dark:border-emerald-900 bg-emerald-50/70 dark:bg-emerald-950/30 p-5">
-                <div className="mb-3 inline-flex rounded-xl bg-white dark:bg-stone-900 p-2 text-emerald-700 dark:text-emerald-400 shadow-sm">
-                  <CreditCard className="h-5 w-5" />
-                </div>
-                <p className="font-semibold">Online Donation</p>
-                <p className="mt-2 text-sm text-muted-foreground">Secure one-time or recurring donations through the website payment form.</p>
-                <Button className="mt-4 w-full rounded-xl bg-emerald-700 hover:bg-emerald-800">Donate Online</Button>
-              </div>
-
-              <div className="rounded-2xl border border-emerald-200 dark:border-emerald-900 bg-emerald-50/70 dark:bg-emerald-950/30 p-5">
-                <div className="mb-3 inline-flex rounded-xl bg-white dark:bg-stone-900 p-2 text-emerald-700 dark:text-emerald-400 shadow-sm">
-                  <Landmark className="h-5 w-5" />
-                </div>
-                <p className="font-semibold">Zelle</p>
-                <p className="mt-2 text-sm text-muted-foreground">Send directly to: donations@icri.org (replace with your official address).</p>
-                <p className="mt-4 rounded-lg bg-card px-3 py-2 text-sm font-medium">Memo: Sadaqah / Zakat / General Fund</p>
-              </div>
-
-              <div className="rounded-2xl border border-emerald-200 dark:border-emerald-900 bg-emerald-50/70 dark:bg-emerald-950/30 p-5">
-                <div className="mb-3 inline-flex rounded-xl bg-white dark:bg-stone-900 p-2 text-emerald-700 dark:text-emerald-400 shadow-sm">
-                  <Heart className="h-5 w-5" />
-                </div>
-                <p className="font-semibold">Venmo</p>
-                <p className="mt-2 text-sm text-muted-foreground">Send to: @MasjidAlKareem (replace with your official handle).</p>
-                <p className="mt-4 rounded-lg bg-card px-3 py-2 text-sm font-medium">Include intention in the payment note</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </section>
       </main>
     </div>
   );
