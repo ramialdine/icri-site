@@ -91,10 +91,10 @@ export default function DonatePage() {
                 <CreditCard className="h-5 w-5" />
               </div>
               <p className="font-semibold">Online Donation</p>
-              <p className="mt-2 text-sm text-emerald-50/90">Secure one-time or recurring donations through the website payment form.</p>
+              <p className="mt-2 text-sm text-emerald-50/90">Secure one-time or recurring donations via Mohid.</p>
               <Button asChild className="mt-4 w-full rounded-xl bg-white text-emerald-800 hover:bg-emerald-50">
                 <a
-                  href="https://www.paypal.com/donate/?hosted_button_id=F7245FEM2SAUE"
+                  href="https://us.mohid.co/ri/providence/icri/masjid/online/vfr/campaign/10_nights_to_earn_1_000_months"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -108,7 +108,7 @@ export default function DonatePage() {
                 <Landmark className="h-5 w-5" />
               </div>
               <p className="font-semibold">Zelle</p>
-              <p className="mt-2 text-sm text-emerald-50/90">Send directly to: donations@icri.org (replace with your official address).</p>
+              <p className="mt-2 text-sm text-emerald-50/90">Send directly to: icricenter@gmail.com.</p>
               <p className="mt-4 rounded-lg bg-white/20 px-3 py-2 text-sm font-medium text-white">Memo: Sadaqah / Zakat / General Fund</p>
             </div>
 
@@ -116,8 +116,17 @@ export default function DonatePage() {
               <div className="mb-3 inline-flex rounded-xl bg-white p-2 text-emerald-700 shadow-sm">
                 <Heart className="h-5 w-5" />
               </div>
-              <p className="font-semibold">Venmo</p>
-              <p className="mt-2 text-sm text-emerald-50/90">Send to: @MasjidAlKareem (replace with your official handle).</p>
+              <p className="font-semibold">PayPal</p>
+              <p className="mt-2 text-sm text-emerald-50/90">Donate via PayPal.</p>
+              <Button asChild className="mt-4 w-full rounded-xl bg-white text-emerald-800 hover:bg-emerald-50">
+                <a
+                  href="https://www.paypal.com/donate/?hosted_button_id=F7245FEM2SAUE"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Donate Online
+                </a>
+              </Button>
               <p className="mt-4 rounded-lg bg-white/20 px-3 py-2 text-sm font-medium text-white">Include intention in the payment note</p>
             </div>
           </div>
