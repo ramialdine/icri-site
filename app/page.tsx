@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -147,12 +147,88 @@ const prayerVisuals = {
   },
 } as const;
 
+function parseTimeToMinutes(time: string): number | null {
+  const match = time.trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+  if (!match) {
+    return null;
+  }
+
+  let hour = Number(match[1]);
+  const minute = Number(match[2]);
+  const period = match[3].toUpperCase();
+
+  if (hour === 12) {
+    hour = 0;
+  }
+
+  if (period === "PM") {
+    hour += 12;
+  }
+
+  return hour * 60 + minute;
+}
+
+function getProvidenceNowMinutes(): number {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/New_York",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(new Date());
+
+  const hour = Number(parts.find((part) => part.type === "hour")?.value ?? "0");
+  const minute = Number(parts.find((part) => part.type === "minute")?.value ?? "0");
+
+  return hour * 60 + minute;
+}
+
+function getCurrentPrayerName(prayers: PrayerTime[]): string | null {
+  if (!prayers.length) {
+    return null;
+  }
+
+  const withMinutes = prayers
+    .map((prayer) => ({
+      name: prayer.name,
+      minutes: parseTimeToMinutes(prayer.adhan),
+    }))
+    .filter((prayer): prayer is { name: string; minutes: number } => prayer.minutes !== null);
+
+  if (!withMinutes.length) {
+    return null;
+  }
+
+  const nowMinutes = getProvidenceNowMinutes();
+  let active = withMinutes[withMinutes.length - 1]?.name ?? null;
+
+  for (const prayer of withMinutes) {
+    if (nowMinutes >= prayer.minutes) {
+      active = prayer.name;
+    } else {
+      break;
+    }
+  }
+
+  return active;
+}
+
 export default function Page() {
   const [prayerTimes, setPrayerTimes] = useState(fallbackPrayerTimes);
   const [jumuahSessions, setJumuahSessions] = useState(fallbackJumuahSessions);
   const [programs, setPrograms] = useState(fallbackPrograms);
   const [events, setEvents] = useState<EventCard[]>([]);
   const [announcements, setAnnouncements] = useState(fallbackAnnouncements);
+  const [timeTick, setTimeTick] = useState(0);
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      setTimeTick((value) => value + 1);
+    }, 60_000);
+
+    return () => window.clearInterval(intervalId);
+  }, []);
+
+  const currentPrayerName = useMemo(() => getCurrentPrayerName(prayerTimes), [prayerTimes, timeTick]);
 
   // Fetch merged prayer payload (Adhan from API, Iqamah from CMS), refresh once daily
   useEffect(() => {
@@ -274,6 +350,10 @@ export default function Page() {
             <CardContent className="p-0">
               <div className="flex flex-col gap-4 bg-emerald-800 px-6 py-8 text-white md:flex-row md:items-end md:justify-between md:px-8 md:py-10">
                 <div>
+                  <p className="inline-flex items-center gap-2 rounded-full bg-emerald-700/80 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-100">
+                    <MapPin className="h-3.5 w-3.5" />
+                    Providence, Rhode Island
+                  </p>
 
                   <div className="mt-3 flex items-center gap-2 text-3xl font-bold sm:text-4xl">
                     <Clock className="h-7 w-7" />
@@ -282,41 +362,49 @@ export default function Page() {
                 </div>
 
               </div>
-              <div className="grid bg-white dark:bg-stone-900 md:grid-cols-2 xl:grid-cols-5 xl:divide-x xl:divide-y-0">
-                {prayerTimes.map((prayer, index) => (
+              <div className="grid gap-4 bg-white p-4 dark:bg-stone-900 md:grid-cols-5 md:p-5">
+                {prayerTimes.map((prayer) => (
                   (() => {
                     const visual = prayerVisuals[prayer.name as keyof typeof prayerVisuals];
                     const PrayerIcon = visual.icon;
+                    const isCurrentPrayer = currentPrayerName === prayer.name;
 
                     return (
                       <div
                         key={prayer.name}
-                        className={`px-6 py-7 md:px-7 md:py-8 xl:min-h-[220px] ${
-                          index < prayerTimes.length - 1 ? "border-b border-stone-200 dark:border-stone-800 md:border-b md:border-stone-200 xl:border-b-0" : ""
+                        className={`rounded-2xl border px-5 py-6 transition-all duration-200 hover:-translate-y-2 hover:scale-[1.01] hover:shadow-lg md:min-h-[220px] ${
+                          isCurrentPrayer
+                            ? "border-emerald-700 bg-emerald-700 text-white shadow-lg ring-2 ring-emerald-300 dark:border-emerald-500 dark:bg-emerald-700 dark:ring-emerald-500"
+                            : "border-stone-200 bg-white hover:border-emerald-300 dark:border-stone-800 dark:bg-stone-900 dark:hover:border-emerald-700"
                         }`}
                       >
                         <div className="flex h-full flex-col justify-between gap-6">
                           <div className="flex items-start justify-between gap-4">
                             <div>
-                              <p className="text-lg font-semibold">{prayer.name}</p>
-                              <p className="mt-1 text-sm text-stone-500 dark:text-stone-400">{visual.label}</p>
+                              <p className={`text-xl font-bold ${isCurrentPrayer ? "text-white" : "text-stone-900 dark:text-stone-100"}`}>{prayer.name}</p>
+                              {isCurrentPrayer ? (
+                                <p className="mt-1 inline-flex items-center justify-center whitespace-nowrap rounded-full bg-emerald-900/60 px-2.5 py-1 text-[11px] font-bold leading-tight text-emerald-50 ring-1 ring-emerald-300/50">
+                                  Current prayer
+                                </p>
+                              ) : null}
+                              <p className={`mt-1 text-sm ${isCurrentPrayer ? "text-emerald-100" : "text-stone-500 dark:text-stone-400"}`}>{visual.label}</p>
                             </div>
-                            <div className={`flex h-14 w-14 items-center justify-center rounded-2xl ${visual.backgroundClassName}`}>
-                              <PrayerIcon className={`h-7 w-7 ${visual.iconClassName}`} />
+                            <div className={`flex h-14 w-14 items-center justify-center rounded-2xl ${isCurrentPrayer ? "bg-white/15" : visual.backgroundClassName}`}>
+                              <PrayerIcon className={`h-7 w-7 ${isCurrentPrayer ? "text-white" : visual.iconClassName}`} />
                             </div>
                           </div>
                           <div className="space-y-4">
                             <div>
-                              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-stone-400">
+                              <p className={`text-xs font-semibold uppercase tracking-[0.2em] ${isCurrentPrayer ? "text-emerald-100" : "text-stone-400"}`}>
                                 Adhan
                               </p>
-                              <p className="mt-2 text-3xl font-bold text-stone-900 dark:text-stone-100">{prayer.adhan}</p>
+                              <p className={`mt-2 text-3xl ${isCurrentPrayer ? "font-extrabold text-white" : "font-bold text-stone-900 dark:text-stone-100"}`}>{prayer.adhan}</p>
                             </div>
                             <div>
-                              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-stone-400">
+                              <p className={`text-xs font-semibold uppercase tracking-[0.2em] ${isCurrentPrayer ? "text-emerald-100" : "text-stone-400"}`}>
                                 Iqamah
                               </p>
-                              <p className="mt-1 text-lg font-semibold text-emerald-700">
+                              <p className={`mt-1 text-lg ${isCurrentPrayer ? "font-bold text-emerald-100" : "font-semibold text-emerald-700"}`}>
                                 {prayer.iqamah}
                               </p>
                             </div>
@@ -596,6 +684,7 @@ export default function Page() {
               Masjid Al Kareem · Islamic Center of Rhode Island
             </p>
             <p>Providence, Rhode Island</p>
+            <p>© 2026 ICRI. All rights reserved.</p>
           </div>
           <div className="flex gap-4">
             <a href="#" className="hover:text-emerald-700">
