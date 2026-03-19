@@ -108,9 +108,7 @@ export default function DonatePage() {
             </div>
 
             <div className="rounded-2xl border border-stone-200 bg-white p-6 text-center sm:p-7">
-              <p className="mx-auto max-w-xl text-sm leading-7 text-muted-foreground">
-                Use the secure Mohid donation page to give online.
-              </p>
+
               <Button asChild className="mt-5 h-12 w-full rounded-2xl bg-emerald-700 text-base font-semibold hover:bg-emerald-800 sm:h-14 sm:text-lg">
                 <a href={mohidDonationUrl} target="_blank" rel="noopener noreferrer">
                   Open Mohid Donation Page

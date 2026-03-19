@@ -40,12 +40,15 @@ const PRAYER_KEY_MAP: Record<PrayerName, PrayerKey> = {
   Isha: "isha",
 };
 
-const IQAMAH_FALLBACK_OFFSETS: Record<PrayerName, number> = {
-  Fajr: 21,
-  Dhuhr: 27,
-  Asr: 32,
+const IQAMAH_FALLBACK_FIXED_24: Partial<Record<PrayerName, string>> = {
+  Dhuhr: "13:00",
+  Asr: "17:15",
+};
+
+const IQAMAH_FALLBACK_OFFSETS: Partial<Record<PrayerName, number>> = {
+  Fajr: 15,
   Maghrib: 5,
-  Isha: 18,
+  Isha: 10,
 };
 
 const prayerConfigQuery = groq`*[_type == "prayerConfig"][0]{
@@ -138,7 +141,13 @@ function getIqamahForPrayer({
     return weekDefaults[key] as string;
   }
 
-  return addMinutes(adhan24, IQAMAH_FALLBACK_OFFSETS[prayerName]);
+  const fixedIqamah = IQAMAH_FALLBACK_FIXED_24[prayerName];
+  if (fixedIqamah) {
+    return fixedIqamah;
+  }
+
+  const fallbackOffset = IQAMAH_FALLBACK_OFFSETS[prayerName] ?? 0;
+  return addMinutes(adhan24, fallbackOffset);
 }
 
 export async function getTodayPrayerPayload() {
