@@ -35,7 +35,7 @@ const supportAreas = [
   },
 ];
 
-const mohidEmbedVersion = "2026-03-19-2";
+const mohidDonationUrl = "https://us.mohid.co/ri/providence/icri/masjid/online/donation";
 
 export default function DonatePage() {
   return (
@@ -87,8 +87,8 @@ export default function DonatePage() {
             Pick the method that works best for you. Every contribution supports the masjid and our community programs.
           </p>
 
-          <div className="mt-8 rounded-[28px] border border-white/25 bg-white/95 p-4 text-foreground shadow-lg sm:p-5">
-            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <div className="mx-auto mt-8 w-full max-w-3xl rounded-[28px] border border-white/25 bg-white/95 p-5 text-foreground shadow-lg sm:p-6">
+            <div className="mb-5 flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="inline-flex items-center gap-3">
                 <div className="inline-flex h-12 w-28 items-center justify-center rounded-xl bg-emerald-950 p-2 shadow-sm ring-1 ring-white/25">
                   <Image
@@ -107,16 +107,15 @@ export default function DonatePage() {
               <p className="text-sm text-muted-foreground">One-time or recurring donations</p>
             </div>
 
-            <div className="overflow-hidden rounded-2xl border border-stone-200 bg-white">
-              <iframe
-                src={`https://us.mohid.co/ri/providence/icri/masjid/widget/api/index/?m=frgraph&v=${mohidEmbedVersion}`}
-                title="ICRI Mohid donation widget"
-                width="100%"
-                height="540"
-                frameBorder="0"
-                className="w-full"
-                loading="lazy"
-              />
+            <div className="rounded-2xl border border-stone-200 bg-white p-6 text-center sm:p-7">
+              <p className="mx-auto max-w-xl text-sm leading-7 text-muted-foreground">
+                Use the secure Mohid donation page to give online.
+              </p>
+              <Button asChild className="mt-5 h-12 w-full rounded-2xl bg-emerald-700 text-base font-semibold hover:bg-emerald-800 sm:h-14 sm:text-lg">
+                <a href={mohidDonationUrl} target="_blank" rel="noopener noreferrer">
+                  Open Mohid Donation Page
+                </a>
+              </Button>
             </div>
           </div>
 

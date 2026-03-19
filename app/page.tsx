@@ -244,7 +244,23 @@ export default function Page() {
   const [timeTick, setTimeTick] = useState(0);
   const [heroImageIndex, setHeroImageIndex] = useState(0);
   const [heroTransitionEnabled, setHeroTransitionEnabled] = useState(true);
+  const [isPrayerHashNavigation, setIsPrayerHashNavigation] = useState(false);
+  const [isContactHashNavigation, setIsContactHashNavigation] = useState(false);
   const heroSlides = [...homeHeroCarouselImages, homeHeroCarouselImages[0]];
+
+  useEffect(() => {
+    const updateHashState = () => {
+      setIsPrayerHashNavigation(window.location.hash === "#prayers");
+      setIsContactHashNavigation(window.location.hash === "#contact");
+    };
+
+    updateHashState();
+    window.addEventListener("hashchange", updateHashState);
+
+    return () => {
+      window.removeEventListener("hashchange", updateHashState);
+    };
+  }, []);
 
   useEffect(() => {
     const intervalId = window.setInterval(() => {
@@ -417,7 +433,15 @@ export default function Page() {
         </motion.div>
       </section>
 
-      <motion.section {...revealInView} id="prayers" className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
+      <motion.section
+        id="prayers"
+        className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14"
+        initial={isPrayerHashNavigation ? { opacity: 1, y: 0 } : revealInView.initial}
+        whileInView={isPrayerHashNavigation ? undefined : revealInView.whileInView}
+        animate={isPrayerHashNavigation ? { opacity: 1, y: 0 } : undefined}
+        transition={revealInView.transition}
+        viewport={isPrayerHashNavigation ? undefined : revealInView.viewport}
+      >
         <div className="relative z-10">
           <Card className="overflow-hidden rounded-[32px] border-stone-200 shadow-2xl">
             <CardContent className="p-0">
@@ -677,9 +701,13 @@ export default function Page() {
       </motion.section>
 
       <motion.section
-        {...revealInView}
         id="contact"
         className="mx-auto max-w-7xl px-4 py-16 dark:bg-stone-950 sm:px-6 lg:px-8"
+        initial={isContactHashNavigation ? { opacity: 1, y: 0 } : revealInView.initial}
+        whileInView={isContactHashNavigation ? undefined : revealInView.whileInView}
+        animate={isContactHashNavigation ? { opacity: 1, y: 0 } : undefined}
+        transition={revealInView.transition}
+        viewport={isContactHashNavigation ? undefined : revealInView.viewport}
       >
         <Card className="rounded-[28px] border-stone-200 bg-emerald-900 text-white shadow-sm">
           <CardContent className="p-6 sm:p-8 lg:p-10">
