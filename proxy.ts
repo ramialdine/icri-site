@@ -35,14 +35,46 @@ function unauthorizedResponse() {
   });
 }
 
-export async function middleware(request: NextRequest) {
+function isDirectDocumentNavigation(request: NextRequest) {
+  const secFetchMode = request.headers.get("sec-fetch-mode");
+  const secFetchDest = request.headers.get("sec-fetch-dest");
+  const purpose = request.headers.get("purpose") || request.headers.get("x-purpose");
+  const nextRouterPrefetch = request.headers.get("next-router-prefetch");
+  const accept = request.headers.get("accept") || "";
+
+  if (purpose?.toLowerCase() === "prefetch" || nextRouterPrefetch) {
+    return false;
+  }
+
+  if (secFetchMode === "navigate" && secFetchDest === "document") {
+    return true;
+  }
+
+  return accept.includes("text/html");
+}
+
+function nonChallengeResponse() {
+  return new NextResponse("Not found", {
+    status: 404,
+    headers: {
+      "Cache-Control": "no-store",
+    },
+  });
+}
+
+export async function proxy(request: NextRequest) {
+  const shouldChallenge = isDirectDocumentNavigation(request);
   const username = process.env.STUDIO_BASIC_AUTH_USER;
   const password = process.env.STUDIO_BASIC_AUTH_PASSWORD;
   const maxAgeDays = Number(process.env.STUDIO_BASIC_AUTH_COOKIE_DAYS || DEFAULT_AUTH_DAYS);
   const maxAgeSeconds = Math.max(1, Math.floor(maxAgeDays * 24 * 60 * 60));
 
-  // Fail closed if someone enabled middleware but forgot credentials
+  // Fail closed if someone enabled proxy but forgot credentials
   if (!username || !password) {
+    if (!shouldChallenge) {
+      return nonChallengeResponse();
+    }
+
     return new NextResponse("Studio auth is not configured", {
       status: 503,
       headers: { "Cache-Control": "no-store" },
@@ -58,11 +90,19 @@ export async function middleware(request: NextRequest) {
 
   const authHeader = request.headers.get("authorization");
   if (!authHeader?.startsWith("Basic ")) {
+    if (!shouldChallenge) {
+      return nonChallengeResponse();
+    }
+
     return unauthorizedResponse();
   }
 
   const parsed = parseBasicAuth(authHeader);
   if (!parsed) {
+    if (!shouldChallenge) {
+      return nonChallengeResponse();
+    }
+
     return unauthorizedResponse();
   }
 
@@ -70,6 +110,10 @@ export async function middleware(request: NextRequest) {
   const providedPass = parsed.password;
 
   if (providedUser !== username || providedPass !== password) {
+    if (!shouldChallenge) {
+      return nonChallengeResponse();
+    }
+
     return unauthorizedResponse();
   }
 
