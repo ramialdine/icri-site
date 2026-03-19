@@ -30,6 +30,21 @@ export const eventType = defineType({
       title: "End Date & Time",
       description: "Optional end time.",
       type: "datetime",
+      validation: (rule) =>
+        rule.custom((endAt, context) => {
+          if (!endAt) {
+            return true;
+          }
+
+          const startAt = (context.document as { startAt?: string } | undefined)?.startAt;
+          if (!startAt) {
+            return true;
+          }
+
+          return new Date(endAt).getTime() >= new Date(startAt).getTime()
+            ? true
+            : "End Date & Time must be after or equal to Start Date & Time.";
+        }),
     }),
     defineField({
       name: "location",

@@ -627,9 +627,11 @@ export default function Page() {
                       ))}
                     </div>
                   </div>
+                  {/*
                   <Button variant="outline" className="rounded-2xl md:self-auto self-start">
                     Full Timetable
                   </Button>
+                  */}
                 </div>
               </div>
             </CardContent>

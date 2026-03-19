@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Megaphone, Pin, Clock3 } from "lucide-react";
+import { Megaphone, Pin } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -54,12 +54,6 @@ export default async function AnnouncementsPage() {
                     <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1 text-amber-800 dark:bg-amber-900/30 dark:text-amber-200">
                       <Pin className="h-3.5 w-3.5" />
                       Top Priority
-                    </span>
-                  ) : null}
-                  {announcement.windowLabel ? (
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-stone-100 px-3 py-1 text-stone-700 dark:bg-stone-800 dark:text-stone-200">
-                      <Clock3 className="h-3.5 w-3.5" />
-                      {announcement.windowLabel}
                     </span>
                   ) : null}
                 </div>
