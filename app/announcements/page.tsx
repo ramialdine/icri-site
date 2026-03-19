@@ -9,7 +9,7 @@ const fallbackAnnouncements: AnnouncementListItem[] = [
   {
     id: "fallback-1",
     title: "Community Update",
-    message: "Announcements from the masjid will appear here when published in Studio.",
+    message: "Announcements from the masjid will appear here as updates are shared.",
     isPinned: true,
     statusLabel: "Pinned",
   },
@@ -29,15 +29,9 @@ export default async function AnnouncementsPage() {
                 ICRI Announcements
               </p>
               <h1 className="mt-2 text-4xl font-bold sm:text-5xl">Masjid Announcements</h1>
-              <p className="mt-4 max-w-3xl text-base leading-7 text-stone-600 dark:text-stone-300">
-                This page is connected to Sanity Studio. New announcements published in Studio appear here automatically.
-              </p>
               <div className="mt-6 flex flex-wrap gap-3">
                 <Button asChild className="rounded-2xl bg-emerald-700 hover:bg-emerald-800">
                   <Link href="/">Back to Home</Link>
-                </Button>
-                <Button asChild variant="outline" className="rounded-2xl">
-                  <Link href="/studio">Manage in Studio</Link>
                 </Button>
               </div>
             </CardContent>

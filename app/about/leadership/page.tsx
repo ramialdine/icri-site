@@ -72,13 +72,14 @@ export default function LeadershipPage() {
                   <Link href="/#contact">Contact the Masjid</Link>
                 </Button>
                 <Button asChild variant="outline" className="rounded-2xl">
-                  <Link href="/about/imam">Back to About</Link>
+                  <Link href="/about">Back to About</Link>
                 </Button>
               </div>
             </CardContent>
           </Card>
         </div>
 
+        {/*
         <div className="mt-8">
           <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-700">Additional Positions</p>
           <h3 className="mt-2 text-2xl font-bold">Leadership team (placeholders)</h3>
@@ -111,6 +112,7 @@ export default function LeadershipPage() {
             </Card>
           </div>
         </div>
+        */}
       </main>
     </div>
   );
