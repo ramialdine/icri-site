@@ -99,7 +99,12 @@ export type AnnouncementListItem = {
   windowLabel?: string;
 };
 
-const announcementsQuery = groq`*[_type == "announcement" && isActive == true] | order(isPinned desc, startAt desc) {
+const announcementsQuery = groq`*[
+  _type == "announcement" &&
+  isActive == true &&
+  coalesce(startAt <= $now, true) &&
+  coalesce(endAt >= $now, true)
+] | order(isPinned desc, startAt desc) {
   _id,
   title,
   message,
@@ -147,7 +152,12 @@ const programsQuery = groq`*[_type == "program" && isActive == true] | order(ord
   }
 }`;
 
-const allAnnouncementsQuery = groq`*[_type == "announcement" && isActive == true] | order(isPinned desc, _updatedAt desc) {
+const allAnnouncementsQuery = groq`*[
+  _type == "announcement" &&
+  isActive == true &&
+  coalesce(startAt <= $now, true) &&
+  coalesce(endAt >= $now, true)
+] | order(isPinned desc, _updatedAt desc) {
   _id,
   title,
   message,
@@ -271,8 +281,10 @@ export async function getHomeContentPayload(): Promise<HomeContentPayload | null
     return null;
   }
 
+  const nowIso = new Date().toISOString();
+
   const [announcements, events, programs] = await Promise.all([
-    sanityClient.fetch<AnnouncementDoc[]>(announcementsQuery),
+    sanityClient.fetch<AnnouncementDoc[]>(announcementsQuery, { now: nowIso }),
     sanityClient.fetch<EventDoc[]>(eventsQuery),
     sanityClient.fetch<ProgramDoc[]>(programsQuery),
   ]);
@@ -382,7 +394,9 @@ export async function getAnnouncementsPagePayload(): Promise<AnnouncementListIte
     return null;
   }
 
-  const announcements = await sanityClient.fetch<AnnouncementDoc[]>(allAnnouncementsQuery);
+  const nowIso = new Date().toISOString();
+
+  const announcements = await sanityClient.fetch<AnnouncementDoc[]>(allAnnouncementsQuery, { now: nowIso });
 
   return (announcements || []).map((announcement, index) => ({
     id: announcement._id || `announcement-${index}`,

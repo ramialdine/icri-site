@@ -21,15 +21,51 @@ export const announcementType = defineType({
     }),
     defineField({
       name: "startAt",
-      title: "Show From",
-      description: "Optional. Date/time to start showing this announcement.",
+      title: "Show From (Scheduling)",
+      description: "Optional. Start date/time for website visibility. Not shown publicly.",
       type: "datetime",
+      validation: (rule) =>
+        rule.custom((startAt, context) => {
+          if (!startAt) {
+            return true;
+          }
+
+          const endAt = (context.document as { endAt?: string } | undefined)?.endAt;
+          if (!endAt) {
+            return true;
+          }
+
+          return new Date(startAt).getTime() <= new Date(endAt).getTime()
+            ? true
+            : "Show From must be before or equal to Show Until.";
+        }),
     }),
     defineField({
       name: "endAt",
-      title: "Show Until",
-      description: "Optional. Date/time to stop showing this announcement.",
+      title: "Show Until (Scheduling)",
+      description: "Optional. End date/time for website visibility. Not shown publicly.",
       type: "datetime",
+      validation: (rule) =>
+        rule.custom((endAt, context) => {
+          if (!endAt) {
+            return true;
+          }
+
+          const startAt = (context.document as { startAt?: string } | undefined)?.startAt;
+          if (!startAt) {
+            return true;
+          }
+
+          return new Date(endAt).getTime() >= new Date(startAt).getTime()
+            ? true
+            : "Show Until must be after or equal to Show From.";
+        }),
+    }),
+    defineField({
+      name: "announcementDate",
+      title: "Announcement Date (Optional)",
+      description: "Optional date reference for editors. This is not shown on the website by default.",
+      type: "date",
     }),
     defineField({
       name: "isPinned",
