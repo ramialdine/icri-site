@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ArrowLeft, ChevronDown, Menu, Moon, Sun, X } from "lucide-react";
+import { ArrowLeft, Menu, Moon, Sun, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
@@ -19,7 +19,7 @@ const SEGMENT_LABELS: Record<string, string> = {
 
 // Maps a full pathname to a fixed breadcrumb trail, overriding segment-based derivation.
 const ROUTE_TRAIL_OVERRIDES: Record<string, string[]> = {
-  "/about/imam": ["About"],
+  "/about": ["About"],
   "/about/leadership": ["About"],
 };
 
@@ -99,7 +99,6 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
   const pathname = usePathname();
   const isHomeRoute = pathname === "/";
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [mobileAboutOpen, setMobileAboutOpen] = useState(false);
   const [isHomeScrolled, setIsHomeScrolled] = useState(false);
   const theme = useSyncExternalStore(subscribeTheme, getThemeSnapshot, () => "light");
 
@@ -107,7 +106,7 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
   const trail = useMemo(() => deriveBreadcrumbTrail(pathname), [pathname]);
   const isTransparentHomeHeader = isHomeRoute && !isHomeScrolled;
   const isSolidHeader = !isTransparentHomeHeader || mobileMenuOpen;
-  const isAboutPageRoute = pathname === "/about" || pathname === "/about/imam";
+  const isAboutPageRoute = pathname === "/about";
   const isLeadershipRoute = pathname === "/about/leadership";
   const isProgramsRoute = pathname.startsWith("/programs");
   const isEventsRoute = pathname.startsWith("/events");
@@ -164,7 +163,6 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         setMobileMenuOpen(false);
-        setMobileAboutOpen(false);
       }
     };
 
@@ -220,7 +218,34 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
                 }`}
               >
                 <Link
-                  href="/about/imam"
+                  href="/#prayers"
+                  className={navLinkClass(false)}
+                >
+                  Prayer Times
+                </Link>
+                <Link
+                  href="/announcements"
+                  className={navLinkClass(isAnnouncementsRoute)}
+                  aria-current={isAnnouncementsRoute ? "page" : undefined}
+                >
+                  Announcements
+                </Link>
+                <Link
+                  href="/events"
+                  className={navLinkClass(isEventsRoute)}
+                  aria-current={isEventsRoute ? "page" : undefined}
+                >
+                  Events
+                </Link>
+                <Link
+                  href="/programs"
+                  className={navLinkClass(isProgramsRoute)}
+                  aria-current={isProgramsRoute ? "page" : undefined}
+                >
+                  Programs
+                </Link>
+                <Link
+                  href="/about"
                   className={navLinkClass(isAboutPageRoute)}
                   aria-current={isAboutPageRoute ? "page" : undefined}
                 >
@@ -232,33 +257,6 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
                   aria-current={isLeadershipRoute ? "page" : undefined}
                 >
                   Leadership
-                </Link>
-                <Link
-                  href="/#prayers"
-                  className={navLinkClass(false)}
-                >
-                  Prayer Times
-                </Link>
-                <Link
-                  href="/programs"
-                  className={navLinkClass(isProgramsRoute)}
-                  aria-current={isProgramsRoute ? "page" : undefined}
-                >
-                  Programs
-                </Link>
-                <Link
-                  href="/events"
-                  className={navLinkClass(isEventsRoute)}
-                  aria-current={isEventsRoute ? "page" : undefined}
-                >
-                  Events
-                </Link>
-                <Link
-                  href="/announcements"
-                  className={navLinkClass(isAnnouncementsRoute)}
-                  aria-current={isAnnouncementsRoute ? "page" : undefined}
-                >
-                  Announcements
                 </Link>
                 <Link
                   href="/#contact"
@@ -303,32 +301,6 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
                 className="border-t border-stone-200/80 bg-white/95 px-4 pb-4 pt-3 shadow-sm backdrop-blur dark:border-stone-800 dark:bg-stone-950/95 lg:hidden"
               >
                 <div className="space-y-1">
-                  <button
-                    onClick={() => setMobileAboutOpen((prev) => !prev)}
-                    className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm font-medium transition ${
-                      isAboutPageRoute
-                        ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200"
-                        : "text-stone-700 hover:bg-stone-100 dark:text-stone-200 dark:hover:bg-stone-800"
-                    }`}
-                    aria-expanded={mobileAboutOpen}
-                  >
-                    About
-                    <ChevronDown className={`h-4 w-4 transition-transform ${mobileAboutOpen ? "rotate-180" : ""}`} />
-                  </button>
-
-                  {mobileAboutOpen ? (
-                    <div className="ml-2 space-y-1 border-l border-stone-200 pl-3 dark:border-stone-700">
-                      <Link
-                        href="/about/leadership"
-                        onClick={() => setMobileMenuOpen(false)}
-                        className={mobileLinkClass(isLeadershipRoute)}
-                        aria-current={isLeadershipRoute ? "page" : undefined}
-                      >
-                        Leadership
-                      </Link>
-                    </div>
-                  ) : null}
-
                   <Link
                     href="/#prayers"
                     onClick={() => setMobileMenuOpen(false)}
@@ -337,12 +309,12 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
                     Prayer Times
                   </Link>
                   <Link
-                    href="/programs"
+                    href="/announcements"
                     onClick={() => setMobileMenuOpen(false)}
-                    className={mobileLinkClass(isProgramsRoute)}
-                    aria-current={isProgramsRoute ? "page" : undefined}
+                    className={mobileLinkClass(isAnnouncementsRoute)}
+                    aria-current={isAnnouncementsRoute ? "page" : undefined}
                   >
-                    Programs
+                    Announcements
                   </Link>
                   <Link
                     href="/events"
@@ -353,12 +325,28 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
                     Events
                   </Link>
                   <Link
-                    href="/announcements"
+                    href="/programs"
                     onClick={() => setMobileMenuOpen(false)}
-                    className={mobileLinkClass(isAnnouncementsRoute)}
-                    aria-current={isAnnouncementsRoute ? "page" : undefined}
+                    className={mobileLinkClass(isProgramsRoute)}
+                    aria-current={isProgramsRoute ? "page" : undefined}
                   >
-                    Announcements
+                    Programs
+                  </Link>
+                  <Link
+                    href="/about"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={mobileLinkClass(pathname === "/about")}
+                    aria-current={pathname === "/about" ? "page" : undefined}
+                  >
+                    About
+                  </Link>
+                  <Link
+                    href="/about/leadership"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={mobileLinkClass(isLeadershipRoute)}
+                    aria-current={isLeadershipRoute ? "page" : undefined}
+                  >
+                    Leadership
                   </Link>
                   <Link
                     href="/#contact"

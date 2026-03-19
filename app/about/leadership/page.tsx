@@ -72,7 +72,7 @@ export default function LeadershipPage() {
                   <Link href="/#contact">Contact the Masjid</Link>
                 </Button>
                 <Button asChild variant="outline" className="rounded-2xl">
-                  <Link href="/about/imam">Back to About</Link>
+                  <Link href="/about">Back to About</Link>
                 </Button>
               </div>
             </CardContent>
