@@ -643,9 +643,9 @@ export default function Page() {
         className="bg-gradient-to-br from-white via-emerald-50/50 to-teal-50/40 py-8 dark:from-stone-950 dark:via-stone-950 dark:to-stone-950 sm:py-10 lg:py-14"
       >
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <Card className="rounded-[32px] border-stone-200 shadow-sm">
+          <Card className="rounded-[32px] border-emerald-700 bg-emerald-800 text-white shadow-sm dark:border-emerald-700 dark:bg-emerald-900">
             <CardContent className="grid gap-8 p-8 lg:grid-cols-[0.9fr_1.1fr] lg:p-10">
-              <div className="relative aspect-[16/9] overflow-hidden rounded-3xl border border-stone-200">
+              <div className="relative aspect-[16/9] overflow-hidden rounded-3xl border border-emerald-700/60">
                 <Image
                   src="/ICRIcommunity.jpg"
                   alt="ICRI community members"
@@ -653,31 +653,32 @@ export default function Page() {
                   sizes="(max-width: 1024px) 100vw, 520px"
                   className="object-cover"
                 />
+                <div className="absolute inset-0 bg-gradient-to-t from-emerald-950/40 to-transparent" />
               </div>
               <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-700">
+                <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-100">
                   Support the Mission
                 </p>
                 <h3 className="mt-3 text-3xl font-bold">
                   Help sustain worship, learning, and community care.
                 </h3>
-                <p className="mt-4 text-base leading-7 text-stone-600">
+                <p className="mt-4 text-base leading-7 text-emerald-50/95">
                   Support daily operations, educational programming, Ramadan
                   iftars, youth development, and the ongoing needs of a masjid
                   that has served Providence for decades.
                 </p>
-                <div className="mt-6 rounded-3xl bg-emerald-700 p-6 text-emerald-50 dark:bg-emerald-800">
+                <div className="mt-6 rounded-3xl border border-emerald-200/80 bg-white p-6 text-emerald-900 dark:border-emerald-200/20 dark:bg-emerald-50">
                   <div className="flex items-center gap-3">
-                    <Heart className="h-6 w-6 text-emerald-100" />
+                    <Heart className="h-6 w-6 text-emerald-700" />
                     <div>
-                      <p className="font-semibold text-white">Featured appeal</p>
-                      <p className="text-sm text-emerald-100">
+                      <p className="font-semibold text-emerald-900">Featured appeal</p>
+                      <p className="text-sm text-emerald-700">
                         General masjid support, classes, and community
                         programming
                       </p>
                     </div>
                   </div>
-                  <Button asChild className="mt-5 w-full rounded-2xl bg-white text-emerald-800 hover:bg-emerald-50 dark:bg-emerald-100 dark:text-emerald-900 dark:hover:bg-white sm:w-auto">
+                  <Button asChild className="mt-5 w-full rounded-2xl bg-emerald-700 text-white hover:bg-emerald-800 dark:bg-emerald-700 dark:text-white dark:hover:bg-emerald-800 sm:w-auto">
                     <Link href="/donate">Donate Now</Link>
                   </Button>
                 </div>
@@ -693,68 +694,11 @@ export default function Page() {
         className="bg-gradient-to-b from-white to-emerald-50/30 py-16 dark:from-stone-950 dark:to-stone-950"
       >
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid gap-6 lg:grid-cols-2">
+          <div className="grid gap-8">
             <Card className="rounded-[30px] border-stone-200 shadow-sm">
-              <CardContent className="grid gap-8 p-8 lg:grid-cols-[0.9fr_1.1fr] lg:p-10">
-                <div>
-                  <div className="relative mb-5 aspect-[4/3] w-full max-w-xs overflow-hidden rounded-3xl border border-stone-200 shadow-sm">
-                    <Image
-                      src="/muslimsPraying.jpg"
-                      alt="Muslims praying at the masjid"
-                      fill
-                      sizes="(max-width: 1024px) 100vw, 320px"
-                      className="object-cover"
-                    />
-                  </div>
-                  <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-700">
-                    Events
-                  </p>
-                  <h3 className="mt-3 text-3xl font-bold">
-                    Upcoming Masjid Events
-                  </h3>
-
-                  <Link
-                    href="/events"
-                    className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-emerald-700 hover:text-emerald-800"
-                  >
-                    View all events <ChevronRight className="h-4 w-4" />
-                  </Link>
-                </div>
-                <div className="grid gap-4">
-                  {events.map((event) => (
-                    <Link
-                      href="/events"
-                      key={event.title}
-                      className="flex items-center justify-between rounded-2xl border border-stone-200 px-5 py-4 transition hover:border-emerald-200 hover:bg-emerald-50/50 dark:border-stone-800 dark:hover:border-emerald-900 dark:hover:bg-emerald-950/20"
-                    >
-                      <div className="flex items-center gap-4">
-                        {event.imageUrl ? (
-                          <FlyerThumbnail
-                            src={event.imageUrl}
-                            alt={event.imageAlt || `${event.title} flyer`}
-                            containerClassName="relative h-16 w-12 shrink-0 overflow-hidden rounded-lg border border-stone-200 bg-white p-0.5 dark:border-stone-700 dark:bg-stone-900"
-                            imageClassName="object-cover object-center"
-                          />
-                        ) : null}
-                        <div className="rounded-2xl bg-stone-100 px-3 py-2 text-sm font-semibold text-stone-800 dark:bg-emerald-900/45 dark:text-emerald-200 dark:ring-1 dark:ring-emerald-700/40">
-                          {event.date}
-                        </div>
-                        <div>
-                          <p className="font-semibold">{event.title}</p>
-                          <p className="text-sm text-stone-600">{event.detail}</p>
-                        </div>
-                      </div>
-                      <ChevronRight className="h-5 w-5 text-stone-400" />
-                    </Link>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="rounded-[30px] border-stone-200 shadow-sm">
-              <CardContent className="p-8 lg:p-10">
+              <CardContent className="p-8 lg:p-12">
                 <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-700">
-                  Announcements
+                  Announcements 📣
                 </p>
                 <h3 className="mt-3 text-3xl font-bold">
                   Latest Community Updates
@@ -796,6 +740,60 @@ export default function Page() {
                 >
                   View all announcements <ChevronRight className="h-4 w-4" />
                 </Link>
+              </CardContent>
+            </Card>
+
+            <Card className="rounded-[30px] border-stone-200 shadow-sm">
+              <CardContent className="p-8 lg:p-12">
+                <div className="flex items-end justify-between gap-4">
+                  <div>
+                    <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-700">
+                      Events
+                    </p>
+                    <h3 className="mt-3 text-3xl font-bold">
+                      Upcoming Masjid Events
+                    </h3>
+                  </div>
+                  <Link
+                    href="/events"
+                    className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-700 hover:text-emerald-800"
+                  >
+                    View all events <ChevronRight className="h-4 w-4" />
+                  </Link>
+                </div>
+
+                <div className="mt-7 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                  {events.map((event) => (
+                    <Link
+                      href="/events"
+                      key={event.title}
+                      className="rounded-3xl border border-stone-200 p-4 transition hover:border-emerald-200 hover:bg-emerald-50/50 dark:border-stone-800 dark:hover:border-emerald-900 dark:hover:bg-emerald-950/20"
+                    >
+                      {event.imageUrl ? (
+                        <FlyerThumbnail
+                          src={event.imageUrl}
+                          alt={event.imageAlt || `${event.title} flyer`}
+                          containerClassName="relative mb-4 aspect-[16/10] w-full overflow-hidden rounded-2xl border border-stone-200 bg-white p-0.5 dark:border-stone-700 dark:bg-stone-900"
+                          imageClassName="object-cover object-center"
+                        />
+                      ) : (
+                        <div className="mb-4 flex aspect-[16/10] w-full items-center justify-center rounded-2xl border border-dashed border-stone-300 bg-stone-50 px-4 text-center dark:border-stone-700 dark:bg-stone-900/40">
+                          <span className="rounded-2xl bg-stone-100 px-3 py-2 text-sm font-semibold text-stone-800 dark:bg-emerald-900/45 dark:text-emerald-200 dark:ring-1 dark:ring-emerald-700/40">
+                            {event.date}
+                          </span>
+                        </div>
+                      )}
+
+                      <div className="mb-2 inline-flex rounded-2xl bg-stone-100 px-3 py-1.5 text-sm font-semibold text-stone-800 dark:bg-emerald-900/45 dark:text-emerald-200 dark:ring-1 dark:ring-emerald-700/40">
+                        {event.date}
+                      </div>
+                      <div className="flex items-start justify-between gap-3">
+                        <p className="text-lg font-semibold leading-6">{event.title}</p>
+                        <ChevronRight className="mt-0.5 h-5 w-5 shrink-0 text-stone-400" />
+                      </div>
+                    </Link>
+                  ))}
+                </div>
               </CardContent>
             </Card>
           </div>
