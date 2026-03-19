@@ -14,11 +14,6 @@ export type JumuahSession = {
 type PrayerConfig = {
   timezone?: string;
   weeklyTemplate?: Record<PrayerKey, string> & { jumuah?: JumuahSession[] };
-  // Backward compatibility for existing content before migration:
-  biweeklyTemplate?: {
-    weekA?: Record<PrayerKey, string> & { jumuah?: JumuahSession[] };
-    weekB?: Record<PrayerKey, string> & { jumuah?: JumuahSession[] };
-  };
 };
 
 type DateOverride = {
@@ -53,8 +48,7 @@ const IQAMAH_FALLBACK_OFFSETS: Partial<Record<PrayerName, number>> = {
 
 const prayerConfigQuery = groq`*[_type == "prayerConfig"][0]{
   timezone,
-  weeklyTemplate,
-  biweeklyTemplate
+  weeklyTemplate
 }`;
 
 const dateOverrideQuery = groq`*[_type == "dateOverride" && date == $date][0]{
@@ -90,6 +84,15 @@ function addMinutes(time24: string, minutes: number): string {
   const outHour = Math.floor(normalized / 60);
   const outMinute = normalized % 60;
   return `${String(outHour).padStart(2, "0")}:${String(outMinute).padStart(2, "0")}`;
+}
+
+function normalizeCmsTime(value?: string): string | null {
+  if (!value) {
+    return null;
+  }
+
+  const trimmed = value.trim();
+  return /^([01]\d|2[0-3]):([0-5]\d)$/.test(trimmed) ? trimmed : null;
 }
 
 function getDateInTimezone(timezone: string): string {
@@ -133,12 +136,14 @@ function getIqamahForPrayer({
 }): string {
   const key = PRAYER_KEY_MAP[prayerName];
 
-  if (override?.[key]) {
-    return override[key] as string;
+  const overrideTime = normalizeCmsTime(override?.[key]);
+  if (overrideTime) {
+    return overrideTime;
   }
 
-  if (weekDefaults?.[key]) {
-    return weekDefaults[key] as string;
+  const weeklyTime = normalizeCmsTime(weekDefaults?.[key]);
+  if (weeklyTime) {
+    return weeklyTime;
   }
 
   const fixedIqamah = IQAMAH_FALLBACK_FIXED_24[prayerName];
@@ -176,11 +181,7 @@ export async function getTodayPrayerPayload() {
       })
     : null;
 
-  const weeklyDefaults =
-    config?.weeklyTemplate ||
-    // Backward compatibility fallback until content is migrated:
-    config?.biweeklyTemplate?.weekA ||
-    config?.biweeklyTemplate?.weekB;
+  const weeklyDefaults = config?.weeklyTemplate;
 
   const prayers = PRAYER_ORDER.map((prayerName) => {
     const adhan24 = parseApiTime(timings[prayerName]);
