@@ -36,7 +36,7 @@ export default function ImamPage() {
     transition: { duration: 0.55, ease: "easeOut" as const },
     viewport: { once: true, amount: 0.14 },
   };
-
+//comment for deployment
   return (
     <div className="min-h-screen bg-stone-50 text-stone-900 dark:bg-stone-950 dark:text-stone-100">
       <section className="relative flex min-h-[34svh] items-center justify-center overflow-hidden pt-8 sm:min-h-[40svh]">
