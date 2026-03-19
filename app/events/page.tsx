@@ -57,17 +57,19 @@ export default async function EventsPage() {
         {upcomingEvents.map((event) => (
           <Card key={event.id} className="rounded-[24px] border-stone-200 shadow-sm dark:border-stone-800 dark:bg-stone-900/70">
             <CardContent className="p-6">
-              <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
-                <div className="flex flex-1 gap-4">
+              <div className="flex flex-col gap-5 lg:grid lg:grid-cols-[minmax(0,250px)_1fr_auto] lg:items-start">
+                <div>
                   {event.imageUrl ? (
                     <FlyerThumbnail
                       src={event.imageUrl}
                       alt={event.imageAlt || `${event.title} flyer`}
-                      containerClassName="relative h-20 w-14 shrink-0 overflow-hidden rounded-lg border border-stone-200 bg-white p-0.5 dark:border-stone-700 dark:bg-stone-900 sm:h-24 sm:w-16"
+                      containerClassName="relative h-full min-h-[260px] w-full overflow-hidden rounded-2xl border border-stone-200 bg-white p-0.5 dark:border-stone-700 dark:bg-stone-900"
                       imageClassName="object-cover object-center"
                     />
                   ) : null}
-                  <div>
+                </div>
+
+                <div>
                   <div className="inline-flex items-center rounded-xl bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-200">
                     <CalendarDays className="mr-2 h-4 w-4" />
                     {event.dateLabel}
@@ -85,10 +87,9 @@ export default async function EventsPage() {
                     </span>
                   </div>
                 </div>
-                </div>
 
                 {event.ctaUrl ? (
-                  <Button asChild className="rounded-xl bg-emerald-700 hover:bg-emerald-800 md:self-start">
+                  <Button asChild className="rounded-xl bg-emerald-700 hover:bg-emerald-800 lg:self-start">
                     <a
                       href={event.ctaUrl}
                       target={event.ctaUrl.startsWith("http") ? "_blank" : undefined}
@@ -114,17 +115,21 @@ export default async function EventsPage() {
             {pastEvents.slice(0, 8).map((event) => (
               <Card key={event.id} className="rounded-2xl border-stone-200 dark:border-stone-800 dark:bg-stone-900/60">
                 <CardContent className="p-5">
-                  {event.imageUrl ? (
-                    <FlyerThumbnail
-                      src={event.imageUrl}
-                      alt={event.imageAlt || `${event.title} flyer`}
-                      containerClassName="relative mb-3 h-24 w-16 overflow-hidden rounded-lg border border-stone-200 bg-white p-0.5 dark:border-stone-700 dark:bg-stone-900"
-                      imageClassName="object-cover object-center"
-                    />
-                  ) : null}
-                  <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-400">{event.dateLabel}</p>
-                  <p className="mt-1 text-lg font-semibold">{event.title}</p>
-                  <p className="mt-1 text-sm text-stone-600 dark:text-stone-300">{event.summary}</p>
+                  <div className="grid gap-4 sm:grid-cols-[minmax(0,180px)_1fr] sm:items-start">
+                    {event.imageUrl ? (
+                      <FlyerThumbnail
+                        src={event.imageUrl}
+                        alt={event.imageAlt || `${event.title} flyer`}
+                        containerClassName="relative h-full min-h-[190px] w-full overflow-hidden rounded-xl border border-stone-200 bg-white p-0.5 dark:border-stone-700 dark:bg-stone-900"
+                        imageClassName="object-cover object-center"
+                      />
+                    ) : null}
+                    <div>
+                      <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-400">{event.dateLabel}</p>
+                      <p className="mt-1 text-lg font-semibold">{event.title}</p>
+                      <p className="mt-1 text-sm text-stone-600 dark:text-stone-300">{event.summary}</p>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             ))}
