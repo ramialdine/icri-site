@@ -99,6 +99,7 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
   const pathname = usePathname();
   const isHomeRoute = pathname === "/";
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [aboutMenuOpen, setAboutMenuOpen] = useState(false);
   const [isHomeScrolled, setIsHomeScrolled] = useState(false);
   const theme = useSyncExternalStore(subscribeTheme, getThemeSnapshot, () => "light");
 
@@ -106,8 +107,9 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
   const trail = useMemo(() => deriveBreadcrumbTrail(pathname), [pathname]);
   const isTransparentHomeHeader = isHomeRoute && !isHomeScrolled;
   const isSolidHeader = !isTransparentHomeHeader || mobileMenuOpen;
-  const isAboutPageRoute = pathname === "/about";
+  const isAboutSectionRoute = pathname.startsWith("/about");
   const isLeadershipRoute = pathname === "/about/leadership";
+  const isRulesRoute = pathname.startsWith("/about/rules");
   const isProgramsRoute = pathname.startsWith("/programs");
   const isEventsRoute = pathname.startsWith("/events");
   const isAnnouncementsRoute = pathname.startsWith("/announcements");
@@ -127,6 +129,13 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
     `block rounded-xl px-3 py-2 text-sm font-medium transition ${
       isActive
         ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200"
+        : "text-stone-700 hover:bg-stone-100 dark:text-stone-200 dark:hover:bg-stone-800"
+    }`;
+
+  const dropdownLinkClass = (isActive: boolean) =>
+    `block rounded-xl px-4 py-3 text-base font-medium transition ${
+      isActive
+        ? "bg-emerald-50 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200"
         : "text-stone-700 hover:bg-stone-100 dark:text-stone-200 dark:hover:bg-stone-800"
     }`;
 
@@ -244,20 +253,51 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
                 >
                   Programs
                 </Link>
-                <Link
-                  href="/about"
-                  className={navLinkClass(isAboutPageRoute)}
-                  aria-current={isAboutPageRoute ? "page" : undefined}
+                <div
+                  className="relative"
+                  onMouseEnter={() => setAboutMenuOpen(true)}
+                  onMouseLeave={() => setAboutMenuOpen(false)}
+                  onFocusCapture={() => setAboutMenuOpen(true)}
+                  onBlurCapture={(event) => {
+                    const nextFocused = event.relatedTarget;
+                    if (!(nextFocused instanceof Node) || !event.currentTarget.contains(nextFocused)) {
+                      setAboutMenuOpen(false);
+                    }
+                  }}
                 >
-                  About
-                </Link>
-                <Link
-                  href="/about/leadership"
-                  className={navLinkClass(isLeadershipRoute)}
-                  aria-current={isLeadershipRoute ? "page" : undefined}
-                >
-                  Leadership
-                </Link>
+                  <Link
+                    href="/about"
+                    className={navLinkClass(isAboutSectionRoute)}
+                    aria-current={pathname === "/about" ? "page" : undefined}
+                    aria-expanded={aboutMenuOpen}
+                  >
+                    About
+                  </Link>
+                  <div
+                    className={`absolute left-0 top-full z-40 min-w-72 rounded-2xl border border-stone-200 bg-white p-3 shadow-lg transition-all duration-150 dark:border-stone-700 dark:bg-stone-900 ${
+                      aboutMenuOpen
+                        ? "pointer-events-auto translate-y-0 opacity-100"
+                        : "pointer-events-none translate-y-1 opacity-0"
+                    }`}
+                  >
+                    <Link
+                      href="/about/leadership"
+                      className={dropdownLinkClass(isLeadershipRoute)}
+                      aria-current={isLeadershipRoute ? "page" : undefined}
+                      onClick={() => setAboutMenuOpen(false)}
+                    >
+                      Leadership
+                    </Link>
+                    <Link
+                      href="/about/rules"
+                      className={dropdownLinkClass(isRulesRoute)}
+                      aria-current={isRulesRoute ? "page" : undefined}
+                      onClick={() => setAboutMenuOpen(false)}
+                    >
+                      Rules & Etiquette
+                    </Link>
+                  </div>
+                </div>
                 <Link
                   href="/#contact"
                   className={navLinkClass(false)}
@@ -347,6 +387,14 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
                     aria-current={isLeadershipRoute ? "page" : undefined}
                   >
                     Leadership
+                  </Link>
+                  <Link
+                    href="/about/rules"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={mobileLinkClass(isRulesRoute)}
+                    aria-current={isRulesRoute ? "page" : undefined}
+                  >
+                    Rules & Etiquette
                   </Link>
                   <Link
                     href="/#contact"

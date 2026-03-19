@@ -177,12 +177,15 @@ export default function AboutPage() {
           <p className="mx-auto mb-8 mt-4 max-w-2xl text-base text-stone-600 dark:text-stone-300">
             Have questions or would like to learn more about community programs? Reach out through our contact section.
           </p>
-          <div className="flex justify-center gap-4">
+          <div className="flex flex-wrap justify-center gap-4">
             <Button asChild className="rounded-2xl bg-emerald-700 hover:bg-emerald-800">
               <Link href="/#contact">Contact Information</Link>
             </Button>
             <Button asChild variant="outline" className="rounded-2xl">
               <Link href="/about/leadership">Leadership</Link>
+            </Button>
+            <Button asChild variant="outline" className="rounded-2xl">
+              <Link href="/about/rules">Rules & Etiquette</Link>
             </Button>
             <Button asChild variant="outline" className="rounded-2xl">
               <Link href="/">Back to Home</Link>
