@@ -16,6 +16,7 @@ import {
   BookOpen,
   Users,
   ChevronRight,
+  X,
   Sunrise,
   Sun,
   Sunset,
@@ -51,12 +52,14 @@ type EventCard = {
 };
 
 type Announcement = {
+  id?: string;
   title: string;
   message: string;
   isPinned?: boolean;
 };
 
 const PRAYER_CACHE_KEY = "icri_prayer_times";
+const ANNOUNCEMENT_SEEN_KEY_PREFIX = "icri_announcement_seen_v1:";
 
 const fallbackPrayerTimes: PrayerTime[] = [
   { name: "Fajr", adhan: "5:24 AM", iqamah: "5:45 AM" },
@@ -246,7 +249,11 @@ export default function Page() {
   const [heroTransitionEnabled, setHeroTransitionEnabled] = useState(true);
   const [isPrayerHashNavigation, setIsPrayerHashNavigation] = useState(false);
   const [isContactHashNavigation, setIsContactHashNavigation] = useState(false);
+  const [isAnnouncementPopupOpen, setIsAnnouncementPopupOpen] = useState(false);
   const heroSlides = [...homeHeroCarouselImages, homeHeroCarouselImages[0]];
+
+  const latestAnnouncement = announcements[0] ?? null;
+  const announcementPreviewItems = announcements.slice(0, 3);
 
   useEffect(() => {
     const updateHashState = () => {
@@ -325,13 +332,27 @@ export default function Page() {
         }
 
         if (Array.isArray(json?.announcements)) {
-          setAnnouncements(
-            json.announcements.map((announcement: Announcement) => ({
-              title: announcement.title,
-              message: announcement.message,
-              isPinned: announcement.isPinned,
-            }))
-          );
+          const mappedAnnouncements = json.announcements.map((announcement: Announcement) => ({
+            id: announcement.id,
+            title: announcement.title,
+            message: announcement.message,
+            isPinned: announcement.isPinned,
+          }));
+
+          setAnnouncements(mappedAnnouncements);
+
+          const newestAnnouncement = mappedAnnouncements[0];
+          if (newestAnnouncement) {
+            const announcementKey = newestAnnouncement.id || `${newestAnnouncement.title}-${newestAnnouncement.message}`;
+            const seenKey = `${ANNOUNCEMENT_SEEN_KEY_PREFIX}${announcementKey}`;
+
+            try {
+              const alreadySeen = localStorage.getItem(seenKey) === "1";
+              if (!alreadySeen) {
+                setIsAnnouncementPopupOpen(true);
+              }
+            } catch {}
+          }
         }
       })
       .catch(() => {
@@ -375,6 +396,45 @@ export default function Page() {
     };
   }, [heroImageIndex]);
 
+  useEffect(() => {
+    if (!isAnnouncementPopupOpen) {
+      return;
+    }
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") {
+        return;
+      }
+
+      const announcementKey = latestAnnouncement?.id || `${latestAnnouncement?.title}-${latestAnnouncement?.message}`;
+
+      try {
+        if (announcementKey) {
+          localStorage.setItem(`${ANNOUNCEMENT_SEEN_KEY_PREFIX}${announcementKey}`, "1");
+        }
+      } catch {}
+
+      setIsAnnouncementPopupOpen(false);
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [isAnnouncementPopupOpen, latestAnnouncement]);
+
+  const dismissAnnouncementPopup = () => {
+    const announcementKey = latestAnnouncement?.id || `${latestAnnouncement?.title}-${latestAnnouncement?.message}`;
+
+    try {
+      if (announcementKey) {
+        localStorage.setItem(`${ANNOUNCEMENT_SEEN_KEY_PREFIX}${announcementKey}`, "1");
+      }
+    } catch {}
+
+    setIsAnnouncementPopupOpen(false);
+  };
+
   const revealInView = {
     initial: { opacity: 0, y: 34 },
     whileInView: { opacity: 1, y: 0 },
@@ -384,6 +444,49 @@ export default function Page() {
 
   return (
     <div className="min-h-screen bg-stone-50 text-stone-900 dark:bg-stone-950 dark:text-stone-100">
+      {isAnnouncementPopupOpen && latestAnnouncement ? (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 px-4" role="dialog" aria-modal="true" aria-labelledby="announcement-popup-title">
+          <Card className="w-full max-w-xl rounded-[28px] border-stone-200 shadow-xl dark:border-stone-800">
+            <CardContent className="p-6 sm:p-7">
+              <div className="mb-4 flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-700">
+                    Latest Announcement
+                  </p>
+                  <h3 id="announcement-popup-title" className="mt-2 text-2xl font-bold text-stone-900 dark:text-stone-100">
+                    {latestAnnouncement.title}
+                  </h3>
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="rounded-xl"
+                  onClick={dismissAnnouncementPopup}
+                  aria-label="Close announcement popup"
+                >
+                  <X className="h-5 w-5" />
+                </Button>
+              </div>
+
+              <p className="text-base leading-7 text-stone-600 dark:text-stone-300">
+                {latestAnnouncement.message}
+              </p>
+
+              <div className="mt-6 flex flex-wrap gap-3">
+                <Button asChild className="rounded-2xl bg-emerald-700 hover:bg-emerald-800">
+                  <Link href="/announcements" onClick={dismissAnnouncementPopup}>
+                    View all announcements
+                  </Link>
+                </Button>
+                <Button type="button" variant="outline" className="rounded-2xl" onClick={dismissAnnouncementPopup}>
+                  Dismiss
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      ) : null}
+
       <section className="relative flex min-h-[100svh] items-center justify-center overflow-hidden pt-20">
         <motion.div
           className="absolute inset-0 flex"
@@ -590,62 +693,112 @@ export default function Page() {
         className="bg-gradient-to-b from-white to-emerald-50/30 py-16 dark:from-stone-950 dark:to-stone-950"
       >
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <Card className="rounded-[30px] border-stone-200 shadow-sm">
-            <CardContent className="grid gap-8 p-8 lg:grid-cols-[0.9fr_1.1fr] lg:p-10">
-              <div>
-                <div className="relative mb-5 aspect-[4/3] w-full max-w-xs overflow-hidden rounded-3xl border border-stone-200 shadow-sm">
-                  <Image
-                    src="/muslimsPraying.jpg"
-                    alt="Muslims praying at the masjid"
-                    fill
-                    sizes="(max-width: 1024px) 100vw, 320px"
-                    className="object-cover"
-                  />
+          <div className="grid gap-6 lg:grid-cols-2">
+            <Card className="rounded-[30px] border-stone-200 shadow-sm">
+              <CardContent className="grid gap-8 p-8 lg:grid-cols-[0.9fr_1.1fr] lg:p-10">
+                <div>
+                  <div className="relative mb-5 aspect-[4/3] w-full max-w-xs overflow-hidden rounded-3xl border border-stone-200 shadow-sm">
+                    <Image
+                      src="/muslimsPraying.jpg"
+                      alt="Muslims praying at the masjid"
+                      fill
+                      sizes="(max-width: 1024px) 100vw, 320px"
+                      className="object-cover"
+                    />
+                  </div>
+                  <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-700">
+                    Events
+                  </p>
+                  <h3 className="mt-3 text-3xl font-bold">
+                    Upcoming Masjid Events
+                  </h3>
+
+                  <Link
+                    href="/events"
+                    className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-emerald-700 hover:text-emerald-800"
+                  >
+                    View all events <ChevronRight className="h-4 w-4" />
+                  </Link>
                 </div>
+                <div className="grid gap-4">
+                  {events.map((event) => (
+                    <Link
+                      href="/events"
+                      key={event.title}
+                      className="flex items-center justify-between rounded-2xl border border-stone-200 px-5 py-4 transition hover:border-emerald-200 hover:bg-emerald-50/50 dark:border-stone-800 dark:hover:border-emerald-900 dark:hover:bg-emerald-950/20"
+                    >
+                      <div className="flex items-center gap-4">
+                        {event.imageUrl ? (
+                          <FlyerThumbnail
+                            src={event.imageUrl}
+                            alt={event.imageAlt || `${event.title} flyer`}
+                            containerClassName="relative h-16 w-12 shrink-0 overflow-hidden rounded-lg border border-stone-200 bg-white p-0.5 dark:border-stone-700 dark:bg-stone-900"
+                            imageClassName="object-cover object-center"
+                          />
+                        ) : null}
+                        <div className="rounded-2xl bg-stone-100 px-3 py-2 text-sm font-semibold text-stone-800 dark:bg-emerald-900/45 dark:text-emerald-200 dark:ring-1 dark:ring-emerald-700/40">
+                          {event.date}
+                        </div>
+                        <div>
+                          <p className="font-semibold">{event.title}</p>
+                          <p className="text-sm text-stone-600">{event.detail}</p>
+                        </div>
+                      </div>
+                      <ChevronRight className="h-5 w-5 text-stone-400" />
+                    </Link>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="rounded-[30px] border-stone-200 shadow-sm">
+              <CardContent className="p-8 lg:p-10">
                 <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-700">
-                  Events
+                  Announcements
                 </p>
                 <h3 className="mt-3 text-3xl font-bold">
-                  Masjid Al Kareem Announcements and Events
+                  Latest Community Updates
                 </h3>
+                <p className="mt-3 text-base leading-7 text-stone-600 dark:text-stone-300">
+                  Important notices, reminders, and updates from Masjid Al Kareem.
+                </p>
+
+                <div className="mt-6 grid gap-4">
+                  {announcementPreviewItems.length > 0 ? (
+                    announcementPreviewItems.map((announcement, index) => (
+                      <div
+                        key={`${announcement.title}-${index}`}
+                        className="rounded-2xl border border-stone-200 bg-white p-5 dark:border-stone-800 dark:bg-stone-900"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <h4 className="text-lg font-semibold">{announcement.title}</h4>
+                          {announcement.isPinned ? (
+                            <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300">
+                              Pinned
+                            </span>
+                          ) : null}
+                        </div>
+                        <p className="mt-2 line-clamp-3 text-sm leading-6 text-stone-600 dark:text-stone-300">
+                          {announcement.message}
+                        </p>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="rounded-2xl border border-dashed border-stone-300 bg-stone-50 p-5 text-sm text-stone-600 dark:border-stone-700 dark:bg-stone-900/40 dark:text-stone-300">
+                      No announcements right now. Check back soon.
+                    </div>
+                  )}
+                </div>
 
                 <Link
                   href="/announcements"
-                  className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-emerald-700 hover:text-emerald-800"
+                  className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-emerald-700 hover:text-emerald-800"
                 >
                   View all announcements <ChevronRight className="h-4 w-4" />
                 </Link>
-              </div>
-              <div className="grid gap-4">
-                {events.map((event) => (
-                  <Link
-                    href="/events"
-                    key={event.title}
-                    className="flex items-center justify-between rounded-2xl border border-stone-200 px-5 py-4 transition hover:border-emerald-200 hover:bg-emerald-50/50 dark:border-stone-800 dark:hover:border-emerald-900 dark:hover:bg-emerald-950/20"
-                  >
-                    <div className="flex items-center gap-4">
-                      {event.imageUrl ? (
-                        <FlyerThumbnail
-                          src={event.imageUrl}
-                          alt={event.imageAlt || `${event.title} flyer`}
-                          containerClassName="relative h-16 w-12 shrink-0 overflow-hidden rounded-lg border border-stone-200 bg-white p-0.5 dark:border-stone-700 dark:bg-stone-900"
-                          imageClassName="object-cover object-center"
-                        />
-                      ) : null}
-                      <div className="rounded-2xl bg-stone-100 px-3 py-2 text-sm font-semibold text-stone-800 dark:bg-emerald-900/45 dark:text-emerald-200 dark:ring-1 dark:ring-emerald-700/40">
-                        {event.date}
-                      </div>
-                      <div>
-                        <p className="font-semibold">{event.title}</p>
-                        <p className="text-sm text-stone-600">{event.detail}</p>
-                      </div>
-                    </div>
-                    <ChevronRight className="h-5 w-5 text-stone-400" />
-                  </Link>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </motion.section>
 

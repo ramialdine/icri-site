@@ -39,6 +39,35 @@ type ProgramDoc = {
   };
 };
 
+export type HomeAnnouncement = {
+  id?: string;
+  title: string;
+  message: string;
+  isPinned?: boolean;
+};
+
+export type HomeEvent = {
+  date: string;
+  title: string;
+  detail: string;
+  imageUrl?: string;
+  imageAlt: string;
+};
+
+export type HomeProgram = {
+  title: string;
+  text: string;
+  iconKey: string;
+  imageUrl?: string;
+  imageAlt: string;
+};
+
+export type HomeContentPayload = {
+  announcements: HomeAnnouncement[];
+  events: HomeEvent[];
+  programs: HomeProgram[];
+};
+
 export type EventListItem = {
   id: string;
   title: string;
@@ -71,6 +100,7 @@ export type AnnouncementListItem = {
 };
 
 const announcementsQuery = groq`*[_type == "announcement" && isActive == true] | order(isPinned desc, startAt desc) {
+  _id,
   title,
   message,
   isPinned
@@ -236,7 +266,7 @@ export function formatAnnouncementWindow(startAt?: string, endAt?: string): stri
   return undefined;
 }
 
-export async function getHomeContentPayload() {
+export async function getHomeContentPayload(): Promise<HomeContentPayload | null> {
   if (!sanityClient) {
     return null;
   }
@@ -266,8 +296,15 @@ export async function getHomeContentPayload() {
     .slice(0, 8)
     .map(({ startAtMs: _startAtMs, ...event }) => event);
 
+  const mappedAnnouncements: HomeAnnouncement[] = (announcements || []).map((announcement) => ({
+      id: announcement._id,
+      title: announcement.title,
+      message: announcement.message,
+      isPinned: announcement.isPinned,
+    }));
+
   return {
-    announcements: announcements || [],
+    announcements: mappedAnnouncements,
     events: selectedEvents,
     programs: (programs || []).map((program) => ({
       title: program.title,
