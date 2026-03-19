@@ -57,18 +57,33 @@ function shouldShowSiteChrome(pathname: string) {
 }
 
 type ThemeMode = "light" | "dark";
+type ThemePreference = ThemeMode | "system";
 
-function getThemeSnapshot(): ThemeMode {
+const THEME_PREFERENCE_KEY = "theme-preference";
+
+function resolveTheme(preference: ThemePreference): ThemeMode {
   if (typeof window === "undefined") {
     return "light";
   }
 
-  const savedTheme = window.localStorage.getItem("theme");
-  if (savedTheme === "light" || savedTheme === "dark") {
-    return savedTheme;
+  if (preference === "light" || preference === "dark") {
+    return preference;
   }
 
   return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+
+function getThemePreferenceSnapshot(): ThemePreference {
+  if (typeof window === "undefined") {
+    return "system";
+  }
+
+  const savedPreference = window.localStorage.getItem(THEME_PREFERENCE_KEY);
+  if (savedPreference === "light" || savedPreference === "dark" || savedPreference === "system") {
+    return savedPreference;
+  }
+
+  return "system";
 }
 
 function subscribeTheme(onStoreChange: () => void) {
@@ -79,17 +94,25 @@ function subscribeTheme(onStoreChange: () => void) {
   const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
   const handleChange = () => onStoreChange();
   const handleStorage = (event: StorageEvent) => {
-    if (event.key === "theme") {
+    if (event.key === THEME_PREFERENCE_KEY || event.key === "theme") {
       onStoreChange();
     }
   };
 
-  mediaQuery.addEventListener("change", handleChange);
+  if (typeof mediaQuery.addEventListener === "function") {
+    mediaQuery.addEventListener("change", handleChange);
+  } else {
+    mediaQuery.addListener(handleChange);
+  }
   window.addEventListener("storage", handleStorage);
   window.addEventListener("themechange", handleChange);
 
   return () => {
-    mediaQuery.removeEventListener("change", handleChange);
+    if (typeof mediaQuery.removeEventListener === "function") {
+      mediaQuery.removeEventListener("change", handleChange);
+    } else {
+      mediaQuery.removeListener(handleChange);
+    }
     window.removeEventListener("storage", handleStorage);
     window.removeEventListener("themechange", handleChange);
   };
@@ -101,7 +124,12 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [aboutMenuOpen, setAboutMenuOpen] = useState(false);
   const [isHomeScrolled, setIsHomeScrolled] = useState(false);
-  const theme = useSyncExternalStore(subscribeTheme, getThemeSnapshot, () => "light");
+  const themePreference = useSyncExternalStore<ThemePreference>(
+    subscribeTheme,
+    getThemePreferenceSnapshot,
+    () => "system"
+  );
+  const theme = resolveTheme(themePreference);
 
   const showSiteChrome = shouldShowSiteChrome(pathname);
   const trail = useMemo(() => deriveBreadcrumbTrail(pathname), [pathname]);
@@ -161,8 +189,19 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", theme === "dark");
-    localStorage.setItem("theme", theme);
+    document.documentElement.style.colorScheme = theme;
   }, [theme]);
+
+  useEffect(() => {
+    const legacyTheme = window.localStorage.getItem("theme");
+    const savedPreference = window.localStorage.getItem(THEME_PREFERENCE_KEY);
+
+    if (!savedPreference && (legacyTheme === "light" || legacyTheme === "dark")) {
+      window.localStorage.setItem(THEME_PREFERENCE_KEY, "system");
+      window.localStorage.removeItem("theme");
+      window.dispatchEvent(new Event("themechange"));
+    }
+  }, []);
 
   useEffect(() => {
     if (!mobileMenuOpen) {
@@ -183,7 +222,7 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
 
   const toggleTheme = () => {
     const nextTheme: ThemeMode = theme === "dark" ? "light" : "dark";
-    window.localStorage.setItem("theme", nextTheme);
+    window.localStorage.setItem(THEME_PREFERENCE_KEY, nextTheme);
     window.dispatchEvent(new Event("themechange"));
   };
 
