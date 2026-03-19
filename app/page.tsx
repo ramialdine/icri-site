@@ -108,6 +108,29 @@ const fallbackEvents: EventCard[] = [
 
 const fallbackAnnouncements: Announcement[] = [];
 
+const homeHeroCarouselImages = [
+  {
+    src: "/menEntranceAtNight.jpg",
+    alt: "Masjid Al Kareem entrance at night",
+  },
+  {
+    src: "/ramadan2026/interiorprayingwlights.jpg",
+    alt: "Congregants praying inside Masjid Al Kareem during Ramadan",
+  },
+  {
+    src: "/ramadan2026/widerprayingwlights.jpg",
+    alt: "Wide prayer rows inside the masjid",
+  },
+  {
+    src: "/ramadan2026/communityInDiningRoom.jpg",
+    alt: "Community members gathered in the masjid dining room",
+  },
+  {
+    src: "/ramadan2026/womenPrayerLights.jpg",
+    alt: "Women\'s prayer area at Masjid Al Kareem",
+  },
+];
+
 const programIconMap = {
   book: BookOpen,
   users: Users,
@@ -219,6 +242,9 @@ export default function Page() {
   const [events, setEvents] = useState<EventCard[]>([]);
   const [announcements, setAnnouncements] = useState(fallbackAnnouncements);
   const [timeTick, setTimeTick] = useState(0);
+  const [heroImageIndex, setHeroImageIndex] = useState(0);
+  const [heroTransitionEnabled, setHeroTransitionEnabled] = useState(true);
+  const heroSlides = [...homeHeroCarouselImages, homeHeroCarouselImages[0]];
 
   useEffect(() => {
     const intervalId = window.setInterval(() => {
@@ -297,6 +323,42 @@ export default function Page() {
       });
   }, []);
 
+  useEffect(() => {
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReducedMotion) {
+      return;
+    }
+
+    const intervalId = window.setInterval(() => {
+      setHeroImageIndex((currentIndex) => currentIndex + 1);
+    }, 4500);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (heroImageIndex !== homeHeroCarouselImages.length) {
+      return;
+    }
+
+    const resetTimeout = window.setTimeout(() => {
+      setHeroTransitionEnabled(false);
+      setHeroImageIndex(0);
+
+      window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(() => {
+          setHeroTransitionEnabled(true);
+        });
+      });
+    }, 820);
+
+    return () => {
+      window.clearTimeout(resetTimeout);
+    };
+  }, [heroImageIndex]);
+
   const revealInView = {
     initial: { opacity: 0, y: 34 },
     whileInView: { opacity: 1, y: 0 },
@@ -307,14 +369,25 @@ export default function Page() {
   return (
     <div className="min-h-screen bg-stone-50 text-stone-900 dark:bg-stone-950 dark:text-stone-100">
       <section className="relative flex min-h-[100svh] items-center justify-center overflow-hidden pt-20">
-        <Image
-          src="/menEntranceAtNight.jpg"
-          alt="Masjid Al Kareem entrance at night"
-          fill
-          sizes="100vw"
-          className="object-cover"
-          priority
-        />
+        <motion.div
+          className="absolute inset-0 flex"
+          style={{ width: `${heroSlides.length * 100}%` }}
+          animate={{ x: `-${heroImageIndex * (100 / heroSlides.length)}%` }}
+          transition={heroTransitionEnabled ? { duration: 0.8, ease: "easeInOut" } : { duration: 0 }}
+        >
+          {heroSlides.map((image, index) => (
+            <div key={`${image.src}-${index}`} className="relative h-full shrink-0" style={{ width: `${100 / heroSlides.length}%` }}>
+              <Image
+                src={image.src}
+                alt={image.alt}
+                fill
+                sizes="100vw"
+                className="object-cover"
+                priority={index === 0 || index === 1}
+              />
+            </div>
+          ))}
+        </motion.div>
         <div className="absolute inset-0 bg-gradient-to-b from-emerald-950/55 via-emerald-900/45 to-emerald-950/65" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(16,185,129,0.2),transparent_45%),radial-gradient(circle_at_left,rgba(20,184,166,0.18),transparent_38%)]" />
 

@@ -319,14 +319,6 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
                   {mobileAboutOpen ? (
                     <div className="ml-2 space-y-1 border-l border-stone-200 pl-3 dark:border-stone-700">
                       <Link
-                        href="/about/imam"
-                        onClick={() => setMobileMenuOpen(false)}
-                        className={mobileLinkClass(pathname === "/about/imam")}
-                        aria-current={pathname === "/about/imam" ? "page" : undefined}
-                      >
-                        The Imam
-                      </Link>
-                      <Link
                         href="/about/leadership"
                         onClick={() => setMobileMenuOpen(false)}
                         className={mobileLinkClass(isLeadershipRoute)}

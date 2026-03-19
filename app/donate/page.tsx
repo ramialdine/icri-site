@@ -35,6 +35,8 @@ const supportAreas = [
   },
 ];
 
+const mohidEmbedVersion = "2026-03-19-2";
+
 export default function DonatePage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -47,7 +49,7 @@ export default function DonatePage() {
                 Donate to Masjid Al Kareem
               </p>
               <h1 className="mt-3 text-4xl font-bold leading-tight sm:text-5xl">
-                Support the masjid mission 💚
+                Support The Masjid Mission 💚
               </h1>
               <p className="mt-5 max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">
                 Every donation helps sustain worship, Islamic learning, and community support for families across Rhode Island.
@@ -61,7 +63,7 @@ export default function DonatePage() {
 
             <div className="relative min-h-[260px] overflow-hidden rounded-[28px] shadow-sm">
               <Image
-                src="/masjidExterior.png"
+                src="/ramadan2026/middleManlookingtoMic.jpg"
                 alt="Masjid Al Kareem exterior"
                 fill
                 sizes="(max-width: 1024px) 100vw, 480px"
@@ -85,46 +87,58 @@ export default function DonatePage() {
             Pick the method that works best for you. Every contribution supports the masjid and our community programs.
           </p>
 
-          <div className="mt-8 grid gap-4 md:grid-cols-3">
-            <div className="rounded-2xl border border-white/25 bg-white/10 p-5 backdrop-blur-sm">
-              <div className="mb-3 inline-flex h-12 w-28 items-center justify-center rounded-xl bg-white/95 p-2 shadow-sm ring-1 ring-black/5">
-                <Image
-                  src="/Zelle-Symbol-2638918023.png"
-                  alt="Zelle logo"
-                  width={96}
-                  height={28}
-                  className="h-7 w-auto object-contain"
-                />
+          <div className="mt-8 rounded-[28px] border border-white/25 bg-white/95 p-4 text-foreground shadow-lg sm:p-5">
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+              <div className="inline-flex items-center gap-3">
+                <div className="inline-flex h-12 w-28 items-center justify-center rounded-xl bg-emerald-950 p-2 shadow-sm ring-1 ring-white/25">
+                  <Image
+                    src="/mohid.png"
+                    alt="Mohid logo"
+                    width={96}
+                    height={28}
+                    className="h-7 w-auto object-contain"
+                  />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-700">Primary option</p>
+                  <p className="text-lg font-bold text-emerald-900">Give securely with Mohid</p>
+                </div>
               </div>
-              <p className="font-semibold">Zelle</p>
-              <p className="mt-2 text-sm text-emerald-50/90">Send directly to: icricenter@gmail.com.</p>
-              <p className="mt-4 rounded-lg bg-white/20 px-3 py-2 text-sm font-medium text-white">Memo: Sadaqah / Zakat / General Fund</p>
+              <p className="text-sm text-muted-foreground">One-time or recurring donations</p>
             </div>
 
-            <div className="rounded-2xl border border-white/25 bg-white/10 p-5 backdrop-blur-sm">
-              <div className="mb-3 inline-flex h-12 w-28 items-center justify-center rounded-xl bg-emerald-950 p-2 shadow-sm ring-1 ring-white/25">
-                <Image
-                  src="/mohid.png"
-                  alt="Mohid logo"
-                  width={96}
-                  height={28}
-                  className="h-7 w-auto object-contain"
-                />
-              </div>
-              <p className="font-semibold">Online Donation</p>
-              <p className="mt-2 text-sm text-emerald-50/90">Secure one-time or recurring donations via Mohid.</p>
-              <Button asChild className="mt-4 w-full rounded-xl bg-white text-emerald-800 hover:bg-emerald-50">
-                <a
-                  href="https://us.mohid.co/ri/providence/icri/masjid/online/vfr/campaign/10_nights_to_earn_1_000_months"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Donate Online
-                </a>
-              </Button>
+            <div className="overflow-hidden rounded-2xl border border-stone-200 bg-white">
+              <iframe
+                src={`https://us.mohid.co/ri/providence/icri/masjid/widget/api/index/?m=frgraph&v=${mohidEmbedVersion}`}
+                title="ICRI Mohid donation widget"
+                width="100%"
+                height="540"
+                frameBorder="0"
+                className="w-full"
+                loading="lazy"
+              />
             </div>
+          </div>
 
-            <div className="rounded-2xl border border-white/25 bg-white/10 p-5 backdrop-blur-sm">
+          <div className="mt-6">
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-100">Other ways to give</p>
+            <div className="mt-4 grid gap-4 md:grid-cols-2">
+              <div className="rounded-2xl border border-white/25 bg-white/10 p-5 backdrop-blur-sm">
+                <div className="mb-3 inline-flex h-12 w-28 items-center justify-center rounded-xl bg-white/95 p-2 shadow-sm ring-1 ring-black/5">
+                  <Image
+                    src="/Zelle-Symbol-2638918023.png"
+                    alt="Zelle logo"
+                    width={96}
+                    height={28}
+                    className="h-7 w-auto object-contain"
+                  />
+                </div>
+                <p className="font-semibold">Zelle</p>
+                <p className="mt-2 text-sm text-emerald-50/90">Send directly to: icricenter@gmail.com.</p>
+                <p className="mt-4 rounded-lg bg-white/20 px-3 py-2 text-sm font-medium text-white">Memo: Sadaqah / Zakat / General Fund</p>
+              </div>
+
+              <div className="rounded-2xl border border-white/25 bg-white/10 p-5 backdrop-blur-sm">
               <div className="mb-3 inline-flex h-12 w-28 items-center justify-center rounded-xl bg-white/95 p-2 shadow-sm ring-1 ring-black/5">
                 <Image
                   src="/Paypal-logo.png"
@@ -145,7 +159,7 @@ export default function DonatePage() {
                   Donate Online
                 </a>
               </Button>
-             
+              </div>
             </div>
           </div>
         </div>
