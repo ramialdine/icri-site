@@ -16,6 +16,7 @@ type EventDoc = {
   _id: string;
   title: string;
   summary?: string;
+  isPublished?: boolean;
   startAt: string;
   endAt?: string;
   location?: string;
@@ -115,6 +116,7 @@ const eventsQuery = groq`*[_type == "event" && coalesce(isPublished, true) == tr
   _id,
   title,
   summary,
+  isPublished,
   startAt,
   endAt,
   location,
@@ -129,6 +131,7 @@ const allEventsQuery = groq`*[_type == "event" && coalesce(isPublished, true) ==
   _id,
   title,
   summary,
+  isPublished,
   startAt,
   endAt,
   location,
@@ -290,7 +293,9 @@ export async function getHomeContentPayload(): Promise<HomeContentPayload | null
   ]);
 
   const now = Date.now();
-  const mappedEvents = (events || []).map((event) => ({
+  const mappedEvents = (events || [])
+    .filter((event) => event.isPublished !== false)
+    .map((event) => ({
     date: formatEventDate(event.startAt),
     title: event.title,
     detail: event.summary || "",
@@ -339,7 +344,9 @@ export async function getEventsPagePayload(): Promise<{
   const events = await sanityClient.fetch<EventDoc[]>(allEventsQuery);
   const now = Date.now();
 
-  const mapped = (events || []).map((event) => {
+  const mapped = (events || [])
+    .filter((event) => event.isPublished !== false)
+    .map((event) => {
     const { dateLabel, timeLabel } = formatEventDateTimeRange(event.startAt, event.endAt);
 
     return {

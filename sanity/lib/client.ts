@@ -13,7 +13,7 @@ export const sanityClient = hasSanityConfig
       dataset,
       apiVersion,
       token,
-      useCdn: token ? false : true,
+      useCdn: false,
       perspective: "published",
     })
   : null;
