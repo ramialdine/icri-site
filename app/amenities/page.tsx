@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
 
 export default function AmenitiesPage() {
-	redirect("/about/imam#amenities");
+	redirect("/about#amenities");
 }
-import { Button } from "@/components/ui/button";

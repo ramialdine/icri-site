@@ -53,15 +53,9 @@ export default async function ProgramsPage() {
               ICRI Programs
             </p>
             <h1 className="mt-2 text-4xl font-bold sm:text-5xl">Learning, Service, and Community</h1>
-            <p className="mt-4 max-w-3xl text-base leading-7 text-stone-600 dark:text-stone-300">
-              Program cards are managed in Sanity. Add or edit programs in Studio to keep this page fresh and useful.
-            </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Button asChild className="rounded-2xl bg-emerald-700 hover:bg-emerald-800">
                 <Link href="/">Back to Home</Link>
-              </Button>
-              <Button asChild variant="outline" className="rounded-2xl">
-                <Link href="/studio">Manage in Studio</Link>
               </Button>
             </div>
           </CardContent>

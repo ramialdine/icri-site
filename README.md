@@ -18,6 +18,17 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
+## Testing
+
+This project uses Vitest for unit/integration tests.
+
+- Run all tests: `npm run test`
+- Watch mode: `npm run test:watch`
+- Coverage report: `npm run test:coverage`
+- Type checks: `npm run typecheck`
+
+CI runs lint, typecheck, and tests on pull requests and pushes to `main`.
+
 ## Design Standard for New Pages
 
 For all new page builds and UI updates, follow:
