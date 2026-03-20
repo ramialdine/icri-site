@@ -5,6 +5,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { getAnnouncementsPagePayload, type AnnouncementListItem } from "@/sanity/lib/content";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 const fallbackAnnouncements: AnnouncementListItem[] = [
   {
     id: "fallback-1",
