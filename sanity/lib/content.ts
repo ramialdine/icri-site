@@ -305,11 +305,7 @@ export async function getHomeContentPayload(): Promise<HomeContentPayload | null
   }));
 
   const upcomingEvents = mappedEvents.filter((event) => event.startAtMs >= now);
-  const pastEvents = mappedEvents
-    .filter((event) => event.startAtMs < now)
-    .sort((a, b) => b.startAtMs - a.startAtMs);
-
-  const selectedEvents = [...upcomingEvents, ...pastEvents]
+  const selectedEvents = upcomingEvents
     .slice(0, 8)
     .map(({ startAtMs: _startAtMs, ...event }) => event);
 
