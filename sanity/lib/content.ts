@@ -100,6 +100,14 @@ export type AnnouncementListItem = {
   windowLabel?: string;
 };
 
+const PAST_EVENTS_VISIBLE_MONTHS = 4;
+
+function getIsoMonthsAgo(months: number): string {
+  const date = new Date();
+  date.setMonth(date.getMonth() - months);
+  return date.toISOString();
+}
+
 const announcementsQuery = groq`*[
   _type == "announcement" &&
   isActive == true &&
@@ -127,7 +135,11 @@ const eventsQuery = groq`*[_type == "event" && coalesce(isPublished, true) == tr
   }
 }`;
 
-const allEventsQuery = groq`*[_type == "event" && coalesce(isPublished, true) == true] | order(startAt asc) {
+const allEventsQuery = groq`*[
+  _type == "event" &&
+  coalesce(isPublished, true) == true &&
+  coalesce(endAt, startAt, _createdAt) >= $visibleAfter
+] | order(startAt asc) {
   _id,
   title,
   summary,
@@ -337,7 +349,8 @@ export async function getEventsPagePayload(): Promise<{
     return null;
   }
 
-  const events = await sanityClient.fetch<EventDoc[]>(allEventsQuery);
+  const visibleAfter = getIsoMonthsAgo(PAST_EVENTS_VISIBLE_MONTHS);
+  const events = await sanityClient.fetch<EventDoc[]>(allEventsQuery, { visibleAfter });
   const now = Date.now();
 
   const mapped = (events || [])

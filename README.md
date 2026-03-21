@@ -79,6 +79,26 @@ won't be prompted again until the cookie expires.
 - Iqama times are resolved from Sanity (date override first, then biweekly defaults).
 - If CMS data is missing/unavailable, fallback offsets are used.
 
+## Content retention defaults
+
+- Past events are hidden from the Events page once they are older than 4 months (based on `endAt`, fallback `startAt`).
+- A retention job can automatically:
+	- hide old events (`isPublished = false`) after 4 months,
+	- permanently delete events after 2 years,
+	- permanently delete announcements after 1 year.
+
+Run retention in dry-run mode:
+
+- `npm run content:retention`
+
+Apply retention changes:
+
+- `npm run content:retention:apply`
+
+Required env var for apply mode:
+
+- `SANITY_API_WRITE_TOKEN`
+
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
 ## Learn More

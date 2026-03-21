@@ -10,7 +10,9 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "content:retention": "node scripts/sanity-retention.mjs",
+    "content:retention:apply": "node scripts/sanity-retention.mjs --apply"
   },
   "dependencies": {
     "@sanity/icons": "^3.7.4",
