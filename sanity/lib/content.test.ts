@@ -19,7 +19,7 @@ describe("sanity/lib/content", () => {
     (vi.mocked(sanityClient!.fetch) as unknown as ChainedFetchMock).mockReset();
   });
 
-  it("maps and prioritizes upcoming events before recent past events", async () => {
+  it("returns only upcoming events for home payload", async () => {
     vi.spyOn(Date, "now").mockReturnValue(new Date("2026-03-19T12:00:00.000Z").getTime());
 
     const fetchMock = vi.mocked(sanityClient!.fetch) as unknown as ChainedFetchMock;
@@ -60,12 +60,8 @@ describe("sanity/lib/content", () => {
     const payload = await getHomeContentPayload();
 
     expect(payload).not.toBeNull();
-    expect(payload!.events.map((event) => event.title)).toEqual([
-      "Future Event",
-      "Newer Past Event",
-      "Older Past Event",
-    ]);
-    expect(payload!.events[1].imageAlt).toBe("Newer Past Event flyer");
+    expect(payload!.events.map((event) => event.title)).toEqual(["Future Event"]);
+    expect(payload!.events[0].imageAlt).toBe("Future flyer");
     expect(payload!.programs[0].iconKey).toBe("book");
     expect(payload!.programs[0].imageAlt).toBe("Program Title image");
   });
