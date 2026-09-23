@@ -208,6 +208,15 @@ function getProvidenceNowMinutes(): number {
   return hour * 60 + minute;
 }
 
+function getProvidenceDateKey(): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/New_York",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+}
+
 function getCurrentPrayerName(prayers: PrayerTime[]): string | null {
   if (!prayers.length) {
     return null;
@@ -245,6 +254,8 @@ export default function Page() {
   const [events, setEvents] = useState<EventCard[]>([]);
   const [announcements, setAnnouncements] = useState(fallbackAnnouncements);
   const [timeTick, setTimeTick] = useState(0);
+  // Changes at midnight in Providence (checked every minute) to trigger a prayer-times refetch.
+  const [prayerDateKey, setPrayerDateKey] = useState(getProvidenceDateKey);
   const [heroImageIndex, setHeroImageIndex] = useState(0);
   const [heroTransitionEnabled, setHeroTransitionEnabled] = useState(true);
   const [isPrayerHashNavigation, setIsPrayerHashNavigation] = useState(false);
@@ -272,6 +283,7 @@ export default function Page() {
   useEffect(() => {
     const intervalId = window.setInterval(() => {
       setTimeTick((value) => value + 1);
+      setPrayerDateKey(getProvidenceDateKey());
     }, 60_000);
 
     return () => window.clearInterval(intervalId);
@@ -279,10 +291,10 @@ export default function Page() {
 
   const currentPrayerName = useMemo(() => getCurrentPrayerName(prayerTimes), [prayerTimes, timeTick]);
 
-  // Fetch merged prayer payload (Adhan from API, Iqamah from CMS), refresh once daily
+  // Fetch merged prayer payload (monthly schedule / Adhan API + CMS iqamah), refetching when the day changes
   useEffect(() => {
-    const today = new Date().toDateString();
-    fetch("/api/prayers/today")
+    const today = prayerDateKey;
+    fetch(`/api/prayers/today?date=${today}`, { cache: "no-store" })
       .then((r) => r.json())
       .then((json) => {
         const prayers = Array.isArray(json?.prayers) ? json.prayers : fallbackPrayerTimes;
@@ -301,7 +313,7 @@ export default function Page() {
         } catch {}
       })
       .catch(() => {}); // silently keep fallback times
-  }, []);
+  }, [prayerDateKey]);
 
   useEffect(() => {
     fetch("/api/content/home", { cache: "no-store" })
