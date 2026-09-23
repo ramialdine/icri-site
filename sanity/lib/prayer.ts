@@ -1,5 +1,7 @@
 import { groq } from "next-sanity";
 
+import { getScheduledDay, type ScheduledDay } from "@/lib/prayer-schedule";
+
 import { sanityClient } from "./client";
 
 export type PrayerName = "Fajr" | "Dhuhr" | "Asr" | "Maghrib" | "Isha";
@@ -33,6 +35,25 @@ const PRAYER_KEY_MAP: Record<PrayerName, PrayerKey> = {
   Asr: "asr",
   Maghrib: "maghrib",
   Isha: "isha",
+};
+
+// Which printed-timetable columns to show when a monthly schedule is published.
+// The ICRI flyer lists Fajr at 18° (primary) and the North America angle,
+// and Asr by both Shafi and Hanafi; the site shows the primary columns.
+const SCHEDULE_ADHAN_COLUMNS: Record<PrayerKey, keyof ScheduledDay> = {
+  fajr: "fajr18",
+  dhuhr: "dhuhr",
+  asr: "asrShafi",
+  maghrib: "maghrib",
+  isha: "isha",
+};
+
+// The flyer has no Maghrib iqama column; Maghrib falls through to the usual rules.
+const SCHEDULE_IQAMAH_COLUMNS: Partial<Record<PrayerKey, keyof ScheduledDay>> = {
+  fajr: "fajrIqama",
+  dhuhr: "dhuhrIqama",
+  asr: "asrIqama",
+  isha: "ishaIqama",
 };
 
 const IQAMAH_FALLBACK_FIXED_24: Partial<Record<PrayerName, string>> = {
@@ -127,11 +148,13 @@ function getIqamahForPrayer({
   prayerName,
   adhan24,
   override,
+  scheduledDay,
   weekDefaults,
 }: {
   prayerName: PrayerName;
   adhan24: string;
   override: DateOverride | null;
+  scheduledDay: ScheduledDay | null;
   weekDefaults?: Record<PrayerKey, string>;
 }): string {
   const key = PRAYER_KEY_MAP[prayerName];
@@ -139,6 +162,11 @@ function getIqamahForPrayer({
   const overrideTime = normalizeCmsTime(override?.[key]);
   if (overrideTime) {
     return overrideTime;
+  }
+
+  const scheduleColumn = SCHEDULE_IQAMAH_COLUMNS[key];
+  if (scheduledDay && scheduleColumn) {
+    return scheduledDay[scheduleColumn];
   }
 
   const weeklyTime = normalizeCmsTime(weekDefaults?.[key]);
@@ -155,12 +183,12 @@ function getIqamahForPrayer({
   return addMinutes(adhan24, fallbackOffset);
 }
 
-export async function getTodayPrayerPayload() {
-  const timezone = "America/New_York";
+async function fetchAladhanTimings(date: string): Promise<Record<string, string>> {
+  // Pin the request to the masjid-local date so cached responses never carry over past midnight.
+  const [year, month, day] = date.split("-");
+  const adhanUrl = `https://api.aladhan.com/v1/timingsByCity/${day}-${month}-${year}?city=Providence&country=US&state=Rhode+Island&method=2`;
 
-  const adhanUrl = "https://api.aladhan.com/v1/timingsByCity?city=Providence&country=US&state=Rhode+Island&method=2";
-
-  const adhanResponse = await fetch(adhanUrl, { next: { revalidate: 600 } });
+  const adhanResponse = await fetch(adhanUrl, { next: { revalidate: 3600 } });
   const adhanJson = await adhanResponse.json();
   const timings = adhanJson?.data?.timings;
 
@@ -168,12 +196,22 @@ export async function getTodayPrayerPayload() {
     throw new Error("Unable to load Adhan timings");
   }
 
+  return timings;
+}
+
+export async function getTodayPrayerPayload() {
+  const timezone = "America/New_York";
+
   const config = sanityClient
     ? await sanityClient.fetch<PrayerConfig | null>(prayerConfigQuery)
     : null;
 
   const cmsTimezone = config?.timezone || timezone;
   const effectiveDate = getDateInTimezone(cmsTimezone);
+
+  // Published monthly timetable takes precedence; Aladhan covers months without one.
+  const scheduledDay = getScheduledDay(effectiveDate);
+  const timings = scheduledDay ? null : await fetchAladhanTimings(effectiveDate);
 
   const override = sanityClient
     ? await sanityClient.fetch<DateOverride | null>(dateOverrideQuery, {
@@ -184,11 +222,14 @@ export async function getTodayPrayerPayload() {
   const weeklyDefaults = config?.weeklyTemplate;
 
   const prayers = PRAYER_ORDER.map((prayerName) => {
-    const adhan24 = parseApiTime(timings[prayerName]);
+    const adhan24 = scheduledDay
+      ? scheduledDay[SCHEDULE_ADHAN_COLUMNS[PRAYER_KEY_MAP[prayerName]]]
+      : parseApiTime(timings?.[prayerName] ?? "");
     const iqamah24 = getIqamahForPrayer({
       prayerName,
       adhan24,
       override,
+      scheduledDay,
       weekDefaults: weeklyDefaults,
     });
 
@@ -211,8 +252,14 @@ export async function getTodayPrayerPayload() {
   return {
     date: effectiveDate,
     source: {
-      adhan: "aladhan",
-      iqamah: override ? "dateOverride" : weeklyDefaults ? "weeklyDefault" : "fallbackOffset",
+      adhan: scheduledDay ? "schedule" : "aladhan",
+      iqamah: override
+        ? "dateOverride"
+        : scheduledDay
+          ? "schedule"
+          : weeklyDefaults
+            ? "weeklyDefault"
+            : "fallbackOffset",
     },
     prayers,
     jumuahSessions: jumuahSessions.map((session) => ({
