@@ -1,23 +1,27 @@
 import { describe, expect, it } from "vitest";
 
-import { flyerTimeTo24, getScheduledDay } from ".";
+import { daysInMonth, flyerTimeTo24, parseFlyerRow } from ".";
+import { september2026 } from "./fixtures/september-2026";
 
 describe("flyerTimeTo24", () => {
   it("converts flyer times to 24-hour format", () => {
     expect(flyerTimeTo24("4:33a")).toBe("04:33");
     expect(flyerTimeTo24("12:46p")).toBe("12:46");
+    expect(flyerTimeTo24("12:05a")).toBe("00:05");
     expect(flyerTimeTo24("1:00p")).toBe("13:00");
-    expect(flyerTimeTo24("9:00p")).toBe("21:00");
+    expect(flyerTimeTo24("9:00 PM")).toBe("21:00");
   });
 
   it("rejects malformed times", () => {
     expect(() => flyerTimeTo24("25:00")).toThrow();
+    expect(() => flyerTimeTo24("13:00p")).toThrow();
+    expect(() => flyerTimeTo24("5:3a")).toThrow();
   });
 });
 
-describe("getScheduledDay", () => {
-  it("returns the printed row for a scheduled date", () => {
-    expect(getScheduledDay("2026-09-23")).toEqual({
+describe("parseFlyerRow", () => {
+  it("parses a printed row into named 24-hour columns", () => {
+    expect(parseFlyerRow(september2026[23])).toEqual({
       fajr18: "05:01",
       fajrNA: "05:18",
       fajrIqama: "05:30",
@@ -33,14 +37,21 @@ describe("getScheduledDay", () => {
     });
   });
 
-  it("parses every day of every published month", () => {
+  it("parses every row of the September 2026 flyer", () => {
     for (let day = 1; day <= 30; day += 1) {
-      expect(getScheduledDay(`2026-09-${String(day).padStart(2, "0")}`)).not.toBeNull();
+      expect(() => parseFlyerRow(september2026[day])).not.toThrow();
     }
   });
 
-  it("returns null for dates without a published schedule", () => {
-    expect(getScheduledDay("2026-10-01")).toBeNull();
-    expect(getScheduledDay("not-a-date")).toBeNull();
+  it("rejects rows with the wrong number of columns", () => {
+    expect(() => parseFlyerRow("4:33a 4:51a")).toThrow(/expected 12/);
+  });
+});
+
+describe("daysInMonth", () => {
+  it("handles month lengths and leap years", () => {
+    expect(daysInMonth("2026-09")).toBe(30);
+    expect(daysInMonth("2026-10")).toBe(31);
+    expect(daysInMonth("2028-02")).toBe(29);
   });
 });
