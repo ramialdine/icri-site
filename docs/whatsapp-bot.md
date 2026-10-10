@@ -53,7 +53,7 @@ Create an API token with **Editor** permissions (manage.sanity.io â†’ project â†
 
 ### 3. Anthropic
 
-Create an API key at [console.anthropic.com](https://console.anthropic.com). This is `ANTHROPIC_API_KEY`. API usage is billed separately from any Claude subscription. Reading one flyer costs a few cents.
+Create an API key at [console.anthropic.com](https://console.anthropic.com). This is `ANTHROPIC_API_KEY`. The bot reads messages with Claude Sonnet (`claude-sonnet-5-5`, set in `lib/updates/extract.ts`). API usage is billed separately from any Claude subscription. Reading one flyer costs a few cents.
 
 ### 4. Vercel environment variables
 

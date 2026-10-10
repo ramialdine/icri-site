@@ -131,7 +131,7 @@ describe("localTimeToUtcIso", () => {
 describe("extractUpdate", () => {
   it("sends the flyer and today's date to Claude and validates the answer", async () => {
     const parse = vi.fn().mockResolvedValue({ stop_reason: "end_turn", parsed_output: septemberExtraction() });
-    const client = { beta: { messages: { parse } } } as unknown as Anthropic;
+    const client = { messages: { parse } } as unknown as Anthropic;
 
     const result = await extractUpdate({
       text: "September schedule",
@@ -142,8 +142,11 @@ describe("extractUpdate", () => {
 
     expect(result.ok).toBe(true);
     const request = parse.mock.calls[0][0];
+    expect(EXTRACTION_MODEL).toBe("claude-sonnet-5-5");
     expect(request.model).toBe(EXTRACTION_MODEL);
-    expect(request.fallbacks).toBe("default");
+    // No fallback, so a declined request is never re-run on another model.
+    expect(request).not.toHaveProperty("fallbacks");
+    expect(request).not.toHaveProperty("betas");
     expect(request.output_config.format).toBeDefined();
     expect(request.messages[0].content[0]).toMatchObject({
       type: "image",
@@ -155,7 +158,7 @@ describe("extractUpdate", () => {
 
   it("reports a refusal instead of drafting anything", async () => {
     const parse = vi.fn().mockResolvedValue({ stop_reason: "refusal", parsed_output: null });
-    const client = { beta: { messages: { parse } } } as unknown as Anthropic;
+    const client = { messages: { parse } } as unknown as Anthropic;
 
     expect(await extractUpdate({ text: "hello", client })).toEqual({
       ok: false,

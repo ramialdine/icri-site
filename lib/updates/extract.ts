@@ -1,12 +1,12 @@
 import Anthropic from "@anthropic-ai/sdk";
-import { betaZodOutputFormat } from "@anthropic-ai/sdk/helpers/beta/zod";
+import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { z } from "zod";
 
 import { daysInMonth, parseFlyerRow, type ScheduledDay } from "@/lib/prayer-schedule";
 
 import { localTimeToUtcIso, masjidToday } from "./timezone";
 
-export const EXTRACTION_MODEL = "claude-opus-5-5";
+export const EXTRACTION_MODEL = "claude-sonnet-5-5";
 
 /** Media types Claude can read directly: images as image blocks, PDFs as document blocks. */
 export const SUPPORTED_MEDIA_TYPES = new Set(["image/jpeg", "image/png", "image/gif", "image/webp", "application/pdf"]);
@@ -83,7 +83,7 @@ export async function extractUpdate({
   client?: Anthropic;
 }): Promise<ExtractResult> {
   const today = masjidToday(now);
-  const content: Anthropic.Beta.BetaContentBlockParam[] = [];
+  const content: Anthropic.ContentBlockParam[] = [];
 
   if (media?.mimeType === "application/pdf") {
     content.push({
@@ -106,12 +106,11 @@ export async function extractUpdate({
     text: `Today is ${today.weekday}, ${today.date} (America/New_York).\n\nForwarded message text:\n<message>\n${text.trim() || "(no text)"}\n</message>`,
   });
 
-  const response = await client.beta.messages.parse({
+  // No refusal fallback: it can re-run the request on a different model.
+  const response = await client.messages.parse({
     model: EXTRACTION_MODEL,
     max_tokens: 16000,
-    betas: ["server-side-fallback-2026-07-01"],
-    fallbacks: "default",
-    output_config: { effort: "medium", format: betaZodOutputFormat(ExtractionSchema) },
+    output_config: { effort: "medium", format: zodOutputFormat(ExtractionSchema) },
     system: SYSTEM_PROMPT,
     messages: [{ role: "user", content }],
   });
