@@ -17,3 +17,12 @@ export const sanityClient = hasSanityConfig
       perspective: "published",
     })
   : null;
+
+const previewToken = token || process.env.SANITY_API_WRITE_TOKEN;
+
+// Server-side only: overlays unpublished drafts on published content for the
+// /preview pages. Without a token it falls back to published content.
+export const sanityPreviewClient =
+  sanityClient && previewToken
+    ? sanityClient.withConfig({ token: previewToken, perspective: "drafts" })
+    : sanityClient;

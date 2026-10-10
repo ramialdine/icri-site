@@ -1,4 +1,4 @@
-import { sanityClient } from "@/sanity/lib/client";
+import { sanityPreviewClient } from "@/sanity/lib/client";
 import { Card } from "@/components/ui/card";
 import { Clock3, Megaphone, Pin } from "lucide-react";
 import { formatAnnouncementWindow } from "@/sanity/lib/content";
@@ -8,6 +8,7 @@ export const revalidate = 0; // Disable caching for live previews
 
 interface PreviewAnnouncementDoc {
   _id: string;
+  isDraft?: boolean;
   title: string;
   message: string;
   isPinned?: boolean;
@@ -44,9 +45,10 @@ export default async function AnnouncementPreview({
     const publishedId = id.replace(/^drafts\./, "");
     const draftId = id.startsWith("drafts.") ? id : `drafts.${id}`;
 
-    const announcement: PreviewAnnouncementDoc | null = await sanityClient?.fetch(
+    const announcement: PreviewAnnouncementDoc | null = await sanityPreviewClient?.fetch(
       `*[_type == "announcement" && _id in [$id, $publishedId, $draftId]][0]{
         _id,
+        "isDraft": _originalId in path("drafts.**"),
         title,
         message,
         isPinned,
@@ -81,6 +83,11 @@ export default async function AnnouncementPreview({
     return (
       <div className="flex h-screen items-center justify-center bg-slate-50 p-4">
         <div className="max-w-2xl w-full">
+          {announcement.isDraft && (
+            <p className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+              Unpublished draft. This is not on the website until it is approved.
+            </p>
+          )}
           <Card className="overflow-hidden">
             <div className="p-6">
               <div className="flex items-start justify-between gap-4 mb-4">

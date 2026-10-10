@@ -1,4 +1,4 @@
-import { sanityClient } from "@/sanity/lib/client";
+import { sanityPreviewClient } from "@/sanity/lib/client";
 import { Card } from "@/components/ui/card";
 import { Calendar, Clock, MapPin, ExternalLink } from "lucide-react";
 
@@ -7,6 +7,7 @@ export const revalidate = 0;
 
 interface PreviewEventDoc {
   _id: string;
+  isDraft?: boolean;
   title: string;
   summary?: string;
   startAt: string;
@@ -101,9 +102,10 @@ export default async function EventPreview({ searchParams }: EventPreviewProps) 
     const publishedId = id.replace(/^drafts\./, "");
     const draftId = id.startsWith("drafts.") ? id : `drafts.${id}`;
 
-    const event: PreviewEventDoc | null = await sanityClient?.fetch(
+    const event: PreviewEventDoc | null = await sanityPreviewClient?.fetch(
       `*[_type == "event" && _id in [$id, $publishedId, $draftId]][0]{
         _id,
+        "isDraft": _originalId in path("drafts.**"),
         title,
         summary,
         startAt,
@@ -137,6 +139,11 @@ export default async function EventPreview({ searchParams }: EventPreviewProps) 
     return (
       <div className="flex h-screen items-center justify-center bg-slate-50 p-4">
         <div className="max-w-2xl w-full">
+          {event.isDraft && (
+            <p className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+              Unpublished draft. This is not on the website until it is approved.
+            </p>
+          )}
           <Card className="overflow-hidden">
             {event.flyerImage?.url && (
               <div className="relative w-full aspect-video">
