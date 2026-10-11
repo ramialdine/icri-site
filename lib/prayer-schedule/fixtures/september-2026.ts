@@ -1,7 +1,8 @@
-import type { MonthlyScheduleRows } from "./types";
+import type { MonthlyScheduleRows } from "../types";
 
-// ICRI "Prayers Daily Schedule - September 2026" printed timetable.
-// Columns (see ./types.ts): fajr18 fajrNA fajrIqama sunrise dhuhr dhuhrIqama
+// ICRI "Prayers Daily Schedule - September 2026" printed timetable, hand-checked
+// against the flyer. Kept as a fixture for the flyer-parsing tests.
+// Columns (see ../types.ts): fajr18 fajrNA fajrIqama sunrise dhuhr dhuhrIqama
 //                           asrShafi asrHanafi asrIqama maghrib isha ishaIqama
 export const september2026: MonthlyScheduleRows = {
   1: "4:33a 4:51a 5:15a 6:10a 12:46p 1:00p 4:28p 5:25p 5:45p 7:21p 8:42p 9:00p",

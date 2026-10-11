@@ -1,4 +1,4 @@
-import { sanityClient } from "@/sanity/lib/client";
+import { sanityPreviewClient } from "@/sanity/lib/client";
 import { Card } from "@/components/ui/card";
 import { BookOpen, Users, Calendar } from "lucide-react";
 
@@ -58,7 +58,7 @@ export default async function ProgramPreview({
     const publishedId = id.replace(/^drafts\./, "");
     const draftId = id.startsWith("drafts.") ? id : `drafts.${id}`;
 
-    const program: PreviewProgramDoc | null = await sanityClient?.fetch(
+    const program: PreviewProgramDoc | null = await sanityPreviewClient?.fetch(
       `*[_type == "program" && _id in [$id, $publishedId, $draftId]][0]{
         _id,
         title,

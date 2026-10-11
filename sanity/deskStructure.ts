@@ -2,7 +2,15 @@ import type { StructureResolver } from "sanity/structure";
 import { getPreviewUrl } from "./previewUrls";
 import { PreviewPane } from "./components/PreviewPane";
 
-const groupedTypes = new Set(["prayerConfig", "dateOverride", "announcement", "event", "program"]);
+const groupedTypes = new Set([
+  "prayerConfig",
+  "dateOverride",
+  "monthlySchedule",
+  "announcement",
+  "event",
+  "program",
+  "botLog",
+]);
 
 export const deskStructure: StructureResolver = (S) =>
   S.list()
@@ -24,6 +32,13 @@ export const deskStructure: StructureResolver = (S) =>
                   S.documentTypeList("dateOverride")
                     .title("Special Date Overrides")
                     .defaultOrdering([{ field: "date", direction: "desc" }]),
+                ),
+              S.listItem()
+                .title("Monthly Timetables")
+                .child(
+                  S.documentTypeList("monthlySchedule")
+                    .title("Monthly Timetables")
+                    .defaultOrdering([{ field: "month", direction: "desc" }]),
                 ),
             ]),
         ),
@@ -98,6 +113,14 @@ export const deskStructure: StructureResolver = (S) =>
                     ),
                 ),
             ]),
+        ),
+
+      S.listItem()
+        .title("3) 🤖 WhatsApp Bot Activity")
+        .child(
+          S.documentTypeList("botLog")
+            .title("WhatsApp Bot Activity")
+            .defaultOrdering([{ field: "receivedAt", direction: "desc" }]),
         ),
 
       S.divider(),

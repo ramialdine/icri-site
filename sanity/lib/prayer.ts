@@ -1,6 +1,6 @@
 import { groq } from "next-sanity";
 
-import { getScheduledDay, type ScheduledDay } from "@/lib/prayer-schedule";
+import { SCHEDULE_COLUMNS, type ScheduledDay } from "@/lib/prayer-schedule";
 
 import { sanityClient } from "./client";
 
@@ -72,6 +72,8 @@ const prayerConfigQuery = groq`*[_type == "prayerConfig"][0]{
   weeklyTemplate
 }`;
 
+const monthlyScheduleDaysQuery = groq`*[_type == "monthlySchedule" && month == $month][0].days`;
+
 const dateOverrideQuery = groq`*[_type == "dateOverride" && date == $date][0]{
   date,
   fajr,
@@ -91,7 +93,7 @@ function parseApiTime(rawValue: string): string {
   return `${match[1]}:${match[2]}`;
 }
 
-function to12Hour(time24: string): string {
+export function to12Hour(time24: string): string {
   const [h, m] = time24.split(":").map(Number);
   const period = h >= 12 ? "PM" : "AM";
   const hour = h % 12 || 12;
@@ -183,6 +185,38 @@ function getIqamahForPrayer({
   return addMinutes(adhan24, fallbackOffset);
 }
 
+/** Today's row from the published monthly timetable in Sanity, or null if none is published or it is malformed. */
+async function fetchScheduledDay(date: string): Promise<ScheduledDay | null> {
+  if (!sanityClient) {
+    return null;
+  }
+
+  const [, month, day] = date.match(/^(\d{4}-\d{2})-(\d{2})$/) ?? [];
+  if (!month) {
+    return null;
+  }
+
+  const days = await sanityClient.fetch<(Partial<ScheduledDay> & { day?: number })[] | null>(
+    monthlyScheduleDaysQuery,
+    { month }
+  );
+  const row = days?.find((entry) => entry.day === Number(day));
+  if (!row) {
+    return null;
+  }
+
+  const scheduledDay = {} as ScheduledDay;
+  for (const column of SCHEDULE_COLUMNS) {
+    const value = normalizeCmsTime(row[column]);
+    if (!value) {
+      return null;
+    }
+    scheduledDay[column] = value;
+  }
+
+  return scheduledDay;
+}
+
 async function fetchAladhanTimings(date: string): Promise<Record<string, string>> {
   // Pin the request to the masjid-local date so cached responses never carry over past midnight.
   const [year, month, day] = date.split("-");
@@ -210,7 +244,7 @@ export async function getTodayPrayerPayload() {
   const effectiveDate = getDateInTimezone(cmsTimezone);
 
   // Published monthly timetable takes precedence; Aladhan covers months without one.
-  const scheduledDay = getScheduledDay(effectiveDate);
+  const scheduledDay = await fetchScheduledDay(effectiveDate);
   const timings = scheduledDay ? null : await fetchAladhanTimings(effectiveDate);
 
   const override = sanityClient

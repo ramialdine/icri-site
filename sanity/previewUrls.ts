@@ -13,6 +13,11 @@ export const previewUrls = [
     types: ["event"],
   },
   {
+    title: "Monthly Timetable",
+    route: "/preview/schedule",
+    types: ["monthlySchedule"],
+  },
+  {
     title: "Programs Page",
     route: "/preview/programs",
     types: ["program"],
@@ -35,6 +40,8 @@ export function getPreviewUrl(doc: {
       return `/preview/events?id=${doc._id}`;
     case "program":
       return `/preview/programs?id=${doc._id}`;
+    case "monthlySchedule":
+      return `/preview/schedule?id=${doc._id}`;
     default:
       return undefined;
   }
