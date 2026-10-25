@@ -53,6 +53,7 @@ export type HomeEvent = {
   detail: string;
   imageUrl?: string;
   imageAlt: string;
+  isPast: boolean;
 };
 
 export type HomeProgram = {
@@ -71,6 +72,7 @@ export type HomeContentPayload = {
 
 export type EventListItem = {
   id: string;
+  isPast?: boolean;
   title: string;
   summary: string;
   location: string;
@@ -112,7 +114,8 @@ const announcementsQuery = groq`*[
   isPinned
 }`;
 
-const eventsQuery = groq`*[_type == "event" && coalesce(isPublished, true) == true] | order(startAt asc)[0...50] {
+// Home page: upcoming events plus ones that ended within the last month.
+const eventsQuery = groq`*[_type == "event" && coalesce(isPublished, true) == true && coalesce(endAt, startAt) >= $since] | order(startAt asc)[0...50] {
   _id,
   title,
   summary,
@@ -169,6 +172,22 @@ const allAnnouncementsQuery = groq`*[
   endAt,
   isActive
 }`;
+
+/** Past events stay on the home page (greyed out) for this long after they end. */
+export const RECENT_PAST_EVENT_MS = 30 * 24 * 60 * 60 * 1000;
+
+function toMs(iso?: string): number | undefined {
+  if (!iso) {
+    return undefined;
+  }
+  const ms = new Date(iso).getTime();
+  return Number.isNaN(ms) ? undefined : ms;
+}
+
+/** An event is past once it has ended, or once it has started if it has no end time. */
+function eventEndMs(event: Pick<EventDoc, "startAt" | "endAt">): number {
+  return toMs(event.endAt) ?? toMs(event.startAt) ?? Number.MIN_SAFE_INTEGER;
+}
 
 function formatEventDate(dateIso: string): string {
   const d = new Date(dateIso);
@@ -284,34 +303,39 @@ export async function getHomeContentPayload(): Promise<HomeContentPayload | null
     return null;
   }
 
-  const nowIso = new Date().toISOString();
+  const now = Date.now();
+  const nowIso = new Date(now).toISOString();
+  const sinceIso = new Date(now - RECENT_PAST_EVENT_MS).toISOString();
 
   const [announcements, events, programs] = await Promise.all([
     sanityClient.fetch<AnnouncementDoc[]>(announcementsQuery, { now: nowIso }),
-    sanityClient.fetch<EventDoc[]>(eventsQuery),
+    sanityClient.fetch<EventDoc[]>(eventsQuery, { since: sinceIso }),
     sanityClient.fetch<ProgramDoc[]>(programsQuery),
   ]);
 
-  const now = Date.now();
   const mappedEvents = (events || [])
     .filter((event) => event.isPublished !== false)
-    .map((event) => ({
-    date: formatEventDate(event.startAt),
-    title: event.title,
-    detail: event.summary || "",
-    imageUrl: event.flyerImage?.url,
-    imageAlt: event.flyerImage?.alt || `${event.title} flyer`,
-    startAtMs: Number.isNaN(new Date(event.startAt).getTime()) ? Number.MIN_SAFE_INTEGER : new Date(event.startAt).getTime(),
-  }));
+    .map((event) => {
+      const endMs = eventEndMs(event);
+      return {
+        date: formatEventDate(event.startAt),
+        title: event.title,
+        detail: event.summary || "",
+        imageUrl: event.flyerImage?.url,
+        imageAlt: event.flyerImage?.alt || `${event.title} flyer`,
+        isPast: endMs < now,
+        endMs,
+      };
+    })
+    // Events that ended more than a month ago only appear on /events.
+    .filter((event) => event.endMs >= now - RECENT_PAST_EVENT_MS);
 
-  const upcomingEvents = mappedEvents.filter((event) => event.startAtMs >= now);
-  const pastEvents = mappedEvents
-    .filter((event) => event.startAtMs < now)
-    .sort((a, b) => b.startAtMs - a.startAtMs);
+  const upcomingEvents = mappedEvents.filter((event) => !event.isPast);
+  const pastEvents = mappedEvents.filter((event) => event.isPast).sort((a, b) => b.endMs - a.endMs);
 
-  const selectedEvents = [...upcomingEvents, ...pastEvents]
+  const selectedEvents: HomeEvent[] = [...upcomingEvents, ...pastEvents]
     .slice(0, 8)
-    .map(({ startAtMs: _startAtMs, ...event }) => event);
+    .map(({ endMs: _endMs, ...event }) => event);
 
   const mappedAnnouncements: HomeAnnouncement[] = (announcements || []).map((announcement) => ({
       id: announcement._id,
@@ -359,18 +383,18 @@ export async function getEventsPagePayload(): Promise<{
       ctaUrl: event.ctaUrl,
       imageUrl: event.flyerImage?.url,
       imageAlt: event.flyerImage?.alt || `${event.title} flyer`,
-      startAtMs: Number.isNaN(new Date(event.startAt).getTime()) ? Number.MIN_SAFE_INTEGER : new Date(event.startAt).getTime(),
+      endMs: eventEndMs(event),
     };
   });
 
   const upcomingEvents = mapped
-    .filter((event) => event.startAtMs >= now)
-    .map(({ startAtMs: _startAtMs, ...event }) => event);
+    .filter((event) => event.endMs >= now)
+    .map(({ endMs: _endMs, ...event }) => ({ ...event, isPast: false }));
 
   const pastEvents = mapped
-    .filter((event) => event.startAtMs < now)
-    .sort((a, b) => b.startAtMs - a.startAtMs)
-    .map(({ startAtMs: _startAtMs, ...event }) => event);
+    .filter((event) => event.endMs < now)
+    .sort((a, b) => b.endMs - a.endMs)
+    .map(({ endMs: _endMs, ...event }) => ({ ...event, isPast: true }));
 
   return {
     upcomingEvents,
