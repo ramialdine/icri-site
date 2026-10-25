@@ -49,6 +49,7 @@ type EventCard = {
   detail: string;
   imageUrl?: string;
   imageAlt?: string;
+  isPast?: boolean;
 };
 
 type Announcement = {
@@ -339,6 +340,7 @@ export default function Page() {
               detail: event.detail,
               imageUrl: event.imageUrl,
               imageAlt: event.imageAlt,
+              isPast: event.isPast === true,
             }))
           );
         }
@@ -781,7 +783,9 @@ export default function Page() {
                     <Link
                       href="/events"
                       key={event.title}
-                      className="rounded-3xl border border-stone-200 p-4 transition hover:border-emerald-200 hover:bg-emerald-50/50 dark:border-stone-800 dark:hover:border-emerald-900 dark:hover:bg-emerald-950/20"
+                      className={`rounded-3xl border border-stone-200 p-4 transition hover:border-emerald-200 hover:bg-emerald-50/50 dark:border-stone-800 dark:hover:border-emerald-900 dark:hover:bg-emerald-950/20 ${
+                        event.isPast ? "opacity-60 grayscale hover:opacity-80" : ""
+                      }`}
                     >
                       {event.imageUrl ? (
                         <FlyerThumbnail
@@ -798,8 +802,15 @@ export default function Page() {
                         </div>
                       )}
 
-                      <div className="mb-2 inline-flex rounded-2xl bg-stone-100 px-3 py-1.5 text-sm font-semibold text-stone-800 dark:bg-emerald-900/45 dark:text-emerald-200 dark:ring-1 dark:ring-emerald-700/40">
-                        {event.date}
+                      <div className="mb-2 flex flex-wrap items-center gap-2">
+                        <span className="inline-flex rounded-2xl bg-stone-100 px-3 py-1.5 text-sm font-semibold text-stone-800 dark:bg-emerald-900/45 dark:text-emerald-200 dark:ring-1 dark:ring-emerald-700/40">
+                          {event.date}
+                        </span>
+                        {event.isPast ? (
+                          <span className="inline-flex rounded-2xl border border-stone-300 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.15em] text-stone-500 dark:border-stone-700 dark:text-stone-400">
+                            Past event
+                          </span>
+                        ) : null}
                       </div>
                       <div className="flex items-start justify-between gap-3">
                         <p className="text-lg font-semibold leading-6">{event.title}</p>

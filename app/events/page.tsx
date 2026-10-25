@@ -54,6 +54,11 @@ export default async function EventsPage() {
       </section>
 
       <section className="mx-auto mt-8 grid max-w-6xl gap-5">
+        {upcomingEvents.length === 0 ? (
+          <p className="text-base leading-7 text-stone-600 dark:text-stone-300">
+            No upcoming events right now. Check back soon, insha&apos;Allah.
+          </p>
+        ) : null}
         {upcomingEvents.map((event) => (
           <Card key={event.id} className="rounded-[24px] border-stone-200 shadow-sm dark:border-stone-800 dark:bg-stone-900/70">
             <CardContent className="p-6">
@@ -113,7 +118,10 @@ export default async function EventsPage() {
           </h3>
           <div className="grid gap-4">
             {pastEvents.slice(0, 8).map((event) => (
-              <Card key={event.id} className="rounded-2xl border-stone-200 dark:border-stone-800 dark:bg-stone-900/60">
+              <Card
+                key={event.id}
+                className="rounded-2xl border-stone-200 opacity-60 grayscale transition hover:opacity-90 dark:border-stone-800 dark:bg-stone-900/60"
+              >
                 <CardContent className="p-5">
                   <div className="grid gap-4 sm:grid-cols-[minmax(0,180px)_1fr] sm:items-start">
                     {event.imageUrl ? (
@@ -125,7 +133,7 @@ export default async function EventsPage() {
                       />
                     ) : null}
                     <div>
-                      <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-400">{event.dateLabel}</p>
+                      <p className="text-sm font-semibold text-stone-500 dark:text-stone-400">{event.dateLabel} · Ended</p>
                       <p className="mt-1 text-lg font-semibold">{event.title}</p>
                       <p className="mt-1 text-sm text-stone-600 dark:text-stone-300">{event.summary}</p>
                     </div>

@@ -12,7 +12,7 @@ describe("GET /api/content/home", () => {
   it("returns CMS payload when available", async () => {
     const payload = {
       announcements: [{ title: "A", message: "B", isPinned: true }],
-      events: [{ date: "Mar 20", title: "Event", detail: "Details", imageUrl: undefined, imageAlt: "Event flyer" }],
+      events: [{ date: "Mar 20", title: "Event", detail: "Details", imageUrl: undefined, imageAlt: "Event flyer", isPast: false }],
       programs: [{ iconKey: "book", title: "Program", text: "Description", imageUrl: undefined, imageAlt: "Program image" }],
     };
 

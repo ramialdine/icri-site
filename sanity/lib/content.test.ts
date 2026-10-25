@@ -48,6 +48,17 @@ describe("sanity/lib/content", () => {
           startAt: "2026-03-18T15:00:00.000Z",
           flyerImage: { url: "https://img/newer.jpg" },
         },
+        {
+          _id: "in-progress",
+          title: "In Progress Event",
+          startAt: "2026-03-19T10:00:00.000Z",
+          endAt: "2026-03-19T14:00:00.000Z",
+        },
+        {
+          _id: "long-past",
+          title: "Long Past Event",
+          startAt: "2026-02-01T15:00:00.000Z",
+        },
       ])
       .mockResolvedValueOnce([
         {
@@ -60,12 +71,14 @@ describe("sanity/lib/content", () => {
     const payload = await getHomeContentPayload();
 
     expect(payload).not.toBeNull();
-    expect(payload!.events.map((event) => event.title)).toEqual([
-      "Future Event",
-      "Newer Past Event",
-      "Older Past Event",
+    expect(payload!.events.map((event) => [event.title, event.isPast])).toEqual([
+      ["Future Event", false],
+      ["In Progress Event", false],
+      ["Newer Past Event", true],
+      ["Older Past Event", true],
     ]);
-    expect(payload!.events[1].imageAlt).toBe("Newer Past Event flyer");
+    expect(payload!.events[2].imageAlt).toBe("Newer Past Event flyer");
+    expect(vi.mocked(sanityClient!.fetch).mock.calls[1][1]).toEqual({ since: "2026-02-17T12:00:00.000Z" });
     expect(payload!.programs[0].iconKey).toBe("book");
     expect(payload!.programs[0].imageAlt).toBe("Program Title image");
   });

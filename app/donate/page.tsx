@@ -35,8 +35,6 @@ const supportAreas = [
   },
 ];
 
-const mohidDonationUrl = "https://us.mohid.co/ri/providence/icri/masjid/online/donation";
-
 export default function DonatePage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -110,7 +108,7 @@ export default function DonatePage() {
             <div className="rounded-2xl border border-stone-200 bg-white p-6 text-center sm:p-7">
 
               <Button asChild className="mt-5 h-12 w-full rounded-2xl bg-emerald-700 text-base font-semibold hover:bg-emerald-800 sm:h-14 sm:text-lg">
-                <a href={mohidDonationUrl} target="_blank" rel="noopener noreferrer">
+                <a href="/go/mohid" target="_blank" rel="noopener noreferrer nofollow">
                   Open Mohid Donation Page
                 </a>
               </Button>
@@ -148,11 +146,7 @@ export default function DonatePage() {
               <p className="font-semibold">PayPal</p>
               <p className="mt-2 text-sm text-emerald-50/90">Donate via PayPal and select specific donation cause.</p>
               <Button asChild className="mt-4 w-full rounded-xl bg-white text-emerald-800 hover:bg-emerald-50">
-                <a
-                  href="https://www.paypal.com/donate/?hosted_button_id=F7245FEM2SAUE"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
+                <a href="/go/paypal" target="_blank" rel="noopener noreferrer nofollow">
                   Donate Online
                 </a>
               </Button>

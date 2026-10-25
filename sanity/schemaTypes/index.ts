@@ -1,6 +1,7 @@
 import { announcementType } from "./announcement";
 import { botLogType } from "./botLog";
 import { dateOverrideType } from "./dateOverride";
+import { donateClickType } from "./donateClick";
 import { eventType } from "./event";
 import { monthlyScheduleType } from "./monthlySchedule";
 import { prayerConfigType } from "./prayerConfig";
@@ -14,4 +15,5 @@ export const schemaTypes = [
   eventType,
   programType,
   botLogType,
+  donateClickType,
 ];

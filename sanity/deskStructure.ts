@@ -10,6 +10,7 @@ const groupedTypes = new Set([
   "event",
   "program",
   "botLog",
+  "donateClick",
 ]);
 
 export const deskStructure: StructureResolver = (S) =>
@@ -121,6 +122,14 @@ export const deskStructure: StructureResolver = (S) =>
           S.documentTypeList("botLog")
             .title("WhatsApp Bot Activity")
             .defaultOrdering([{ field: "receivedAt", direction: "desc" }]),
+        ),
+
+      S.listItem()
+        .title("4) 💚 Donation Button Clicks")
+        .child(
+          S.documentTypeList("donateClick")
+            .title("Donation Button Clicks")
+            .defaultOrdering([{ field: "date", direction: "desc" }]),
         ),
 
       S.divider(),
