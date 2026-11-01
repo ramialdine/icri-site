@@ -15,7 +15,7 @@ What it understands:
 | Forwarded message | Becomes | Preview page |
 | --- | --- | --- |
 | Monthly prayer timetable (photo or PDF) | `monthlySchedule` for that month, which drives `/api/prayers/today` | `/preview/schedule?id=…` |
-| Event flyer or event details | `event`, with the flyer image attached | `/preview/events?id=…` |
+| Event flyer or event details | `event`, with the flyer image attached. If the message says it repeats ("every Saturday", "first Friday of each month", "6 weekly sessions"), the event gets a repeat rule and the site shows its next session. | `/preview/events?id=…` |
 | General notice | `announcement` | `/preview/announcements?id=…` |
 
 Safeguards:

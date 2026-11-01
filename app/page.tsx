@@ -16,6 +16,7 @@ import {
   BookOpen,
   Users,
   ChevronRight,
+  Repeat,
   X,
   Sunrise,
   Sun,
@@ -50,6 +51,7 @@ type EventCard = {
   imageUrl?: string;
   imageAlt?: string;
   isPast?: boolean;
+  repeatLabel?: string;
 };
 
 type Announcement = {
@@ -341,6 +343,7 @@ export default function Page() {
               imageUrl: event.imageUrl,
               imageAlt: event.imageAlt,
               isPast: event.isPast === true,
+              repeatLabel: event.repeatLabel,
             }))
           );
         }
@@ -809,6 +812,11 @@ export default function Page() {
                         {event.isPast ? (
                           <span className="inline-flex rounded-2xl border border-stone-300 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.15em] text-stone-500 dark:border-stone-700 dark:text-stone-400">
                             Past event
+                          </span>
+                        ) : event.repeatLabel ? (
+                          <span className="inline-flex items-center gap-1.5 rounded-2xl bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-200">
+                            <Repeat className="h-3.5 w-3.5" />
+                            {event.repeatLabel}
                           </span>
                         ) : null}
                       </div>

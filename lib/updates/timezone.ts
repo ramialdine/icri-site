@@ -49,3 +49,24 @@ export function masjidToday(now = new Date(), timeZone = MASJID_TIMEZONE): { dat
   const weekday = new Intl.DateTimeFormat("en-US", { timeZone, weekday: "long" }).format(now);
   return { date, weekday };
 }
+
+/** A UTC instant as masjid-local wall-clock parts: date "YYYY-MM-DD" and time "HH:mm". */
+export function utcToLocalParts(iso: string, timeZone = MASJID_TIMEZONE): { date: string; time: string } | null {
+  const instant = new Date(iso);
+  if (Number.isNaN(instant.getTime())) {
+    return null;
+  }
+
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    hourCycle: "h23",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).formatToParts(instant);
+  const get = (type: string) => parts.find((part) => part.type === type)?.value ?? "";
+
+  return { date: `${get("year")}-${get("month")}-${get("day")}`, time: `${get("hour")}:${get("minute")}` };
+}
