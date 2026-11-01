@@ -1,5 +1,7 @@
 import { groq } from "next-sanity";
 
+import { currentOccurrence, describeRecurrence, normalizeRecurrence } from "@/lib/events/recurrence";
+
 import { sanityClient } from "./client";
 
 type AnnouncementDoc = {
@@ -21,6 +23,7 @@ type EventDoc = {
   endAt?: string;
   location?: string;
   ctaUrl?: string;
+  recurrence?: unknown;
   flyerImage?: {
     alt?: string;
     url?: string;
@@ -54,6 +57,8 @@ export type HomeEvent = {
   imageUrl?: string;
   imageAlt: string;
   isPast: boolean;
+  /** For a repeating event, e.g. "Every Saturday"; `date` is then the next session. */
+  repeatLabel?: string;
 };
 
 export type HomeProgram = {
@@ -78,6 +83,8 @@ export type EventListItem = {
   location: string;
   dateLabel: string;
   timeLabel: string;
+  /** For a repeating event, e.g. "Every Saturday"; the labels are then the next session. */
+  repeatLabel?: string;
   ctaUrl?: string;
   imageUrl?: string;
   imageAlt?: string;
@@ -114,8 +121,12 @@ const announcementsQuery = groq`*[
   isPinned
 }`;
 
-// Home page: upcoming events plus ones that ended within the last month.
-const eventsQuery = groq`*[_type == "event" && coalesce(isPublished, true) == true && coalesce(endAt, startAt) >= $since] | order(startAt asc)[0...50] {
+// Home page: upcoming events plus ones that ended within the last month. A
+// repeating event's own dates are its first session, so it qualifies until its last date.
+const eventsQuery = groq`*[_type == "event" && coalesce(isPublished, true) == true && (
+  coalesce(endAt, startAt) >= $since ||
+  (defined(recurrence.frequency) && coalesce(recurrence.until, "9999-12-31") >= $sinceDate)
+)] | order(startAt asc)[0...50] {
   _id,
   title,
   summary,
@@ -124,6 +135,7 @@ const eventsQuery = groq`*[_type == "event" && coalesce(isPublished, true) == tr
   endAt,
   location,
   ctaUrl,
+  recurrence,
   flyerImage {
     alt,
     "url": asset->url
@@ -139,6 +151,7 @@ const allEventsQuery = groq`*[_type == "event" && coalesce(isPublished, true) ==
   endAt,
   location,
   ctaUrl,
+  recurrence,
   flyerImage {
     alt,
     "url": asset->url
@@ -187,6 +200,34 @@ function toMs(iso?: string): number | undefined {
 /** An event is past once it has ended, or once it has started if it has no end time. */
 function eventEndMs(event: Pick<EventDoc, "startAt" | "endAt">): number {
   return toMs(event.endAt) ?? toMs(event.startAt) ?? Number.MIN_SAFE_INTEGER;
+}
+
+type ShownSession = { startAt: string; endAt?: string; startMs: number; endMs: number; repeatLabel?: string };
+
+/**
+ * The dates to show for an event. A repeating event shows its current or next
+ * session, or its last one once the series is over.
+ */
+function shownSession(event: EventDoc, now: number): ShownSession {
+  const recurrence = normalizeRecurrence(event.recurrence, event.startAt);
+  const occurrence = recurrence && currentOccurrence(event.startAt, event.endAt, recurrence, now);
+
+  if (recurrence && occurrence) {
+    return {
+      startAt: new Date(occurrence.startMs).toISOString(),
+      endAt: event.endAt ? new Date(occurrence.endMs).toISOString() : undefined,
+      startMs: occurrence.startMs,
+      endMs: occurrence.endMs,
+      repeatLabel: describeRecurrence(recurrence, event.startAt),
+    };
+  }
+
+  return {
+    startAt: event.startAt,
+    endAt: event.endAt,
+    startMs: toMs(event.startAt) ?? Number.MIN_SAFE_INTEGER,
+    endMs: eventEndMs(event),
+  };
 }
 
 function formatEventDate(dateIso: string): string {
@@ -306,36 +347,36 @@ export async function getHomeContentPayload(): Promise<HomeContentPayload | null
   const now = Date.now();
   const nowIso = new Date(now).toISOString();
   const sinceIso = new Date(now - RECENT_PAST_EVENT_MS).toISOString();
+  const sinceDate = sinceIso.slice(0, 10);
 
   const [announcements, events, programs] = await Promise.all([
     sanityClient.fetch<AnnouncementDoc[]>(announcementsQuery, { now: nowIso }),
-    sanityClient.fetch<EventDoc[]>(eventsQuery, { since: sinceIso }),
+    sanityClient.fetch<EventDoc[]>(eventsQuery, { since: sinceIso, sinceDate }),
     sanityClient.fetch<ProgramDoc[]>(programsQuery),
   ]);
 
   const mappedEvents = (events || [])
     .filter((event) => event.isPublished !== false)
     .map((event) => {
-      const endMs = eventEndMs(event);
-      return {
-        date: formatEventDate(event.startAt),
+      const session = shownSession(event, now);
+      const item: HomeEvent = {
+        date: formatEventDate(session.startAt),
         title: event.title,
         detail: event.summary || "",
         imageUrl: event.flyerImage?.url,
         imageAlt: event.flyerImage?.alt || `${event.title} flyer`,
-        isPast: endMs < now,
-        endMs,
+        isPast: session.endMs < now,
+        ...(session.repeatLabel ? { repeatLabel: session.repeatLabel } : {}),
       };
+      return { item, startMs: session.startMs, endMs: session.endMs };
     })
     // Events that ended more than a month ago only appear on /events.
-    .filter((event) => event.endMs >= now - RECENT_PAST_EVENT_MS);
+    .filter((entry) => entry.endMs >= now - RECENT_PAST_EVENT_MS);
 
-  const upcomingEvents = mappedEvents.filter((event) => !event.isPast);
-  const pastEvents = mappedEvents.filter((event) => event.isPast).sort((a, b) => b.endMs - a.endMs);
+  const upcomingEvents = mappedEvents.filter((entry) => !entry.item.isPast).sort((a, b) => a.startMs - b.startMs);
+  const pastEvents = mappedEvents.filter((entry) => entry.item.isPast).sort((a, b) => b.endMs - a.endMs);
 
-  const selectedEvents: HomeEvent[] = [...upcomingEvents, ...pastEvents]
-    .slice(0, 8)
-    .map(({ endMs: _endMs, ...event }) => event);
+  const selectedEvents: HomeEvent[] = [...upcomingEvents, ...pastEvents].slice(0, 8).map((entry) => entry.item);
 
   const mappedAnnouncements: HomeAnnouncement[] = (announcements || []).map((announcement) => ({
       id: announcement._id,
@@ -371,30 +412,33 @@ export async function getEventsPagePayload(): Promise<{
   const mapped = (events || [])
     .filter((event) => event.isPublished !== false)
     .map((event) => {
-    const { dateLabel, timeLabel } = formatEventDateTimeRange(event.startAt, event.endAt);
-
-    return {
+    const session = shownSession(event, now);
+    const { dateLabel, timeLabel } = formatEventDateTimeRange(session.startAt, session.endAt);
+    const item: EventListItem = {
       id: event._id,
       title: event.title,
       summary: event.summary || "Details coming soon.",
       location: event.location || "Masjid Al Kareem, Providence",
       dateLabel,
       timeLabel,
+      ...(session.repeatLabel ? { repeatLabel: session.repeatLabel } : {}),
       ctaUrl: event.ctaUrl,
       imageUrl: event.flyerImage?.url,
       imageAlt: event.flyerImage?.alt || `${event.title} flyer`,
-      endMs: eventEndMs(event),
     };
+
+    return { item, startMs: session.startMs, endMs: session.endMs };
   });
 
   const upcomingEvents = mapped
-    .filter((event) => event.endMs >= now)
-    .map(({ endMs: _endMs, ...event }) => ({ ...event, isPast: false }));
+    .filter((entry) => entry.endMs >= now)
+    .sort((a, b) => a.startMs - b.startMs)
+    .map((entry) => ({ ...entry.item, isPast: false }));
 
   const pastEvents = mapped
-    .filter((event) => event.endMs < now)
+    .filter((entry) => entry.endMs < now)
     .sort((a, b) => b.endMs - a.endMs)
-    .map(({ endMs: _endMs, ...event }) => ({ ...event, isPast: true }));
+    .map((entry) => ({ ...entry.item, isPast: true }));
 
   return {
     upcomingEvents,

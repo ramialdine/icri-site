@@ -60,6 +60,7 @@ export async function createDraft(input: DraftInput, options: { flyerAssetId?: s
         startAt: input.startAt,
         endAt: input.endAt,
         location: input.location,
+        recurrence: input.recurrence,
         isPublished: true,
         ...(options.flyerAssetId
           ? {
