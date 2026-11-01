@@ -1,4 +1,3 @@
-import { describeRecurrence } from "@/lib/events/recurrence";
 import { to12Hour } from "@/sanity/lib/prayer";
 
 import type { DraftInput } from "./extract";
@@ -43,10 +42,6 @@ export function describeDraft(draft: DraftInput): string {
       const until = draft.endAt ? `–${formatDateTime(draft.endAt, { hour: "numeric", minute: "2-digit" })}` : "";
       const where = draft.location ? ` at ${draft.location}` : "";
       const summary = draft.summary ? ` ${truncate(draft.summary, 300)}` : "";
-      if (draft.recurrence) {
-        const repeats = describeRecurrence(draft.recurrence, draft.startAt);
-        return `Repeating event "${draft.title}": ${repeats}. First session ${when}${until}${where}.${summary}`;
-      }
       return `Event "${draft.title}", ${when}${until}${where}.${summary}`;
     }
     case "announcement": {

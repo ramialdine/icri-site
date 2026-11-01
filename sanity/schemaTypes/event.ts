@@ -47,89 +47,6 @@ export const eventType = defineType({
         }),
     }),
     defineField({
-      name: "recurrence",
-      title: "Repeats",
-      description:
-        "Leave empty for a one-time event. For a repeating event, set Start/End to the first session; the website shows the next session.",
-      type: "object",
-      options: { collapsible: true, collapsed: true },
-      fields: [
-        defineField({
-          name: "frequency",
-          title: "How often",
-          type: "string",
-          options: {
-            list: [
-              { title: "Weekly", value: "weekly" },
-              { title: "Monthly", value: "monthly" },
-            ],
-            layout: "radio",
-            direction: "horizontal",
-          },
-        }),
-        defineField({
-          name: "interval",
-          title: "Every how many weeks",
-          description: "1 = every week, 2 = every other week.",
-          type: "number",
-          initialValue: 1,
-          hidden: ({ parent }) => parent?.frequency !== "weekly",
-          validation: (rule) => rule.integer().min(1).max(4),
-        }),
-        defineField({
-          name: "weekdays",
-          title: "Days of the week",
-          description: "Optional. The first session's day is always included.",
-          type: "array",
-          of: [{ type: "string" }],
-          options: {
-            list: [
-              { title: "Sun", value: "sun" },
-              { title: "Mon", value: "mon" },
-              { title: "Tue", value: "tue" },
-              { title: "Wed", value: "wed" },
-              { title: "Thu", value: "thu" },
-              { title: "Fri", value: "fri" },
-              { title: "Sat", value: "sat" },
-            ],
-            layout: "grid",
-          },
-          hidden: ({ parent }) => parent?.frequency !== "weekly",
-        }),
-        defineField({
-          name: "monthlyWeek",
-          title: "Which week of the month",
-          description: "On the same weekday as the first session.",
-          type: "string",
-          options: {
-            list: [
-              { title: "First", value: "1" },
-              { title: "Second", value: "2" },
-              { title: "Third", value: "3" },
-              { title: "Fourth", value: "4" },
-              { title: "Last", value: "last" },
-            ],
-            layout: "radio",
-            direction: "horizontal",
-          },
-          hidden: ({ parent }) => parent?.frequency !== "monthly",
-          validation: (rule) =>
-            rule.custom((value, context) =>
-              (context.parent as { frequency?: string } | undefined)?.frequency === "monthly" && !value
-                ? "Choose which week of the month."
-                : true
-            ),
-        }),
-        defineField({
-          name: "until",
-          title: "Last date (optional)",
-          description: "Leave empty if it repeats until further notice.",
-          type: "date",
-          hidden: ({ parent }) => !parent?.frequency,
-        }),
-      ],
-    }),
-    defineField({
       name: "location",
       title: "Location",
       description: "Optional location (e.g., Main Prayer Hall).",
@@ -169,11 +86,10 @@ export const eventType = defineType({
       title: "title",
       startAt: "startAt",
       isPublished: "isPublished",
-      frequency: "recurrence.frequency",
     },
-    prepare: ({ title, startAt, isPublished, frequency }) => ({
+    prepare: ({ title, startAt, isPublished }) => ({
       title: title || "Untitled event",
-      subtitle: `${startAt ? new Date(startAt).toLocaleDateString() : "No date"}${frequency ? ` • Repeats ${frequency}` : ""} • ${isPublished ? "Visible" : "Hidden"}`,
+      subtitle: `${startAt ? new Date(startAt).toLocaleDateString() : "No date"} • ${isPublished ? "Visible" : "Hidden"}`,
     }),
   },
 });

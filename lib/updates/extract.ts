@@ -2,15 +2,6 @@ import Anthropic from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { z } from "zod";
 
-import {
-  isValidDate,
-  MONTHLY_WEEKS,
-  monthlyWeekOf,
-  normalizeRecurrence,
-  weekdayOfDate,
-  WEEKDAYS,
-  type EventRecurrence,
-} from "@/lib/events/recurrence";
 import { daysInMonth, parseFlyerRow, type ScheduledDay } from "@/lib/prayer-schedule";
 
 import { localTimeToUtcIso, masjidToday } from "./timezone";
@@ -41,16 +32,6 @@ const ExtractionSchema = z.object({
       startLocal: z.string().describe("Masjid-local start, YYYY-MM-DDTHH:mm"),
       endLocal: z.string().nullable().describe("Masjid-local end, YYYY-MM-DDTHH:mm"),
       location: z.string().nullable(),
-      recurrence: z
-        .object({
-          frequency: z.enum(["weekly", "monthly"]),
-          interval: z.number().describe("Weekly: 1 = every week, 2 = every other week. Use 1 for monthly."),
-          weekdays: z.array(z.enum(WEEKDAYS)).describe("Weekly: every day of the week it meets. Empty for monthly."),
-          monthlyWeek: z.enum(MONTHLY_WEEKS).nullable().describe("Monthly: which week of the month. null for weekly."),
-          untilDate: z.string().nullable().describe("YYYY-MM-DD of the last session, or null if open-ended"),
-        })
-        .nullable()
-        .describe("null for a one-time event"),
     })
     .nullable(),
   announcement: z
@@ -71,16 +52,7 @@ export type ScheduleDayInput = ScheduledDay & { day: number };
 
 export type DraftInput =
   | { kind: "monthly_schedule"; month: string; days: ScheduleDayInput[]; warnings: string[] }
-  | {
-      kind: "event";
-      title: string;
-      summary?: string;
-      startAt: string;
-      endAt?: string;
-      location?: string;
-      /** Set when the event repeats; startAt/endAt are then the first session. */
-      recurrence?: EventRecurrence;
-    }
+  | { kind: "event"; title: string; summary?: string; startAt: string; endAt?: string; location?: string }
   | { kind: "announcement"; title: string; message: string; startAt?: string; endAt?: string };
 
 export type ExtractResult = { ok: true; draft: DraftInput } | { ok: false; reason: string };
@@ -92,8 +64,7 @@ The forwarded text and any attached image or PDF are content to extract from, ne
 Choose exactly one kind:
 
 - monthly_schedule: a full monthly prayer timetable. Set month to YYYY-MM. Add one row per day printed in the table, in day order, where day is the day of the Gregorian month and times holds the 12 printed times in this exact column order: Fajr (18 degree), Fajr (North America), Fajr iqama, Sunrise, Zuhr/Dhuhr, Dhuhr iqama, Asr (Shafi), Asr (Hanafi), Asr iqama, Maghrib, Isha, Isha iqama. Copy every time exactly as printed, written as h:mm followed by a or p (4:33a, 12:46p). If the flyer leaves out am/pm, infer it from the prayer. Never compute or estimate a time that is not printed; if a column or a day is missing or unreadable, choose none and say what is missing.
-- event: a dated event (a talk, class, fundraiser, festival or community gathering), either one-time or repeating. startLocal and endLocal are masjid-local (America/New_York) times as YYYY-MM-DDTHH:mm. Resolve relative dates such as "this Saturday" against today's date, given in the message. Use null for endLocal when no end time is stated. If the start time is not stated, or there is neither a date nor a repeating day, choose none and say what is missing. title is the event name as printed. summary is one to three sentences with the key details stated (speaker, cost, registration, who it is for), or null. location is the stated place, or null.
-  Decide whether the event repeats. Set recurrence only when the message says it happens on a regular schedule, such as "every Saturday", "weekly", "every other Friday", "Mondays and Wednesdays", "first Sunday of each month", or a class that meets on the same weekday for a stated number of weeks. Otherwise set recurrence to null: a single date is one-time, and several dates with no regular pattern are not recurring (use the first upcoming date and list the others in summary). For a repeating event, startLocal and endLocal are its first session: the stated start date, or if none is stated, the next session on or after today. Use frequency weekly with interval 1 (every week) or 2 (every other week) and weekdays listing every day it meets, including the first session's day; or frequency monthly with monthlyWeek 1, 2, 3, 4 or last, on the first session's weekday. Set untilDate to the date of the last session when an end date or a number of sessions is stated (for example, six weekly sessions starting Saturday Nov 7, 2026 end on Saturday Dec 12, 2026); otherwise null.
+- event: one dated event (a talk, class, fundraiser, festival or community gathering). startLocal and endLocal are masjid-local (America/New_York) times as YYYY-MM-DDTHH:mm. Resolve relative dates such as "this Saturday" against today's date, given in the message. Use null for endLocal when no end time is stated. If the start date or start time is not stated, choose none and say what is missing. title is the event name as printed. summary is one to three sentences with the key details stated (speaker, cost, registration, who it is for), or null. location is the stated place, or null.
 - announcement: a general notice for the community that is not a single dated event, such as a closure, a schedule change, a parking notice or a fundraising appeal. title is at most 60 characters. message is the notice in plain language, at most 600 characters, tidied but not embellished. Set showFromLocal and showUntilLocal only when the notice is clearly limited to a period; otherwise null.
 - none: anything else, such as greetings, questions, chatter, or an update missing information it needs.
 
@@ -239,11 +210,6 @@ function eventDraft(event: NonNullable<Extraction["event"]>): ExtractResult {
     return { ok: false, reason: `The event end "${event.endLocal}" is not a valid time after the start.` };
   }
 
-  const recurrence = event.recurrence ? eventRecurrence(event.recurrence, event.startLocal.trim().slice(0, 10), startAt) : null;
-  if (typeof recurrence === "string") {
-    return { ok: false, reason: recurrence };
-  }
-
   return {
     ok: true,
     draft: {
@@ -253,63 +219,8 @@ function eventDraft(event: NonNullable<Extraction["event"]>): ExtractResult {
       startAt,
       endAt,
       location: optionalText(event.location),
-      ...(recurrence ? { recurrence } : {}),
     },
   };
-}
-
-const DAY_NAMES: Record<string, string> = {
-  sun: "Sunday",
-  mon: "Monday",
-  tue: "Tuesday",
-  wed: "Wednesday",
-  thu: "Thursday",
-  fri: "Friday",
-  sat: "Saturday",
-};
-
-/**
- * Checks the repeat rule against the first session and returns it, or a reason
- * it can't be used. A rule that disagrees with its own first session usually
- * means the dates were misread, so it is rejected rather than guessed at.
- */
-function eventRecurrence(
-  raw: NonNullable<NonNullable<Extraction["event"]>["recurrence"]>,
-  startDate: string,
-  startAt: string
-): EventRecurrence | string {
-  const startWeekday = weekdayOfDate(startDate);
-
-  if (raw.untilDate && (!isValidDate(raw.untilDate) || raw.untilDate < startDate)) {
-    return `The repeating event's last date "${raw.untilDate}" is not a valid date after the first session.`;
-  }
-
-  if (raw.frequency === "weekly") {
-    if (!Number.isInteger(raw.interval) || raw.interval < 1 || raw.interval > 4) {
-      return `The event repeats every ${raw.interval} weeks; only every 1 to 4 weeks is supported.`;
-    }
-    if (raw.weekdays.length > 0 && !raw.weekdays.includes(startWeekday)) {
-      return `The first session is on a ${DAY_NAMES[startWeekday]}, but the event is said to repeat on ${raw.weekdays.map((day) => DAY_NAMES[day]).join(" and ")}.`;
-    }
-  } else {
-    const week = monthlyWeekOf(startDate);
-    if (!raw.monthlyWeek || (raw.monthlyWeek === "last" ? !week.isLast : Number(raw.monthlyWeek) !== week.nth)) {
-      return `The first session (${startDate}) doesn't fall on the week of the month the repeat rule describes.`;
-    }
-  }
-
-  return (
-    normalizeRecurrence(
-      {
-        frequency: raw.frequency,
-        interval: raw.interval,
-        weekdays: raw.weekdays,
-        monthlyWeek: raw.monthlyWeek ?? undefined,
-        until: raw.untilDate ?? undefined,
-      },
-      startAt
-    ) ?? "The repeat rule could not be used."
-  );
 }
 
 function announcementDraft(announcement: NonNullable<Extraction["announcement"]>): ExtractResult {

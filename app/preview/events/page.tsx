@@ -1,7 +1,6 @@
 import { sanityPreviewClient } from "@/sanity/lib/client";
 import { Card } from "@/components/ui/card";
-import { Calendar, Clock, MapPin, ExternalLink, Repeat } from "lucide-react";
-import { describeRecurrence, normalizeRecurrence } from "@/lib/events/recurrence";
+import { Calendar, Clock, MapPin, ExternalLink } from "lucide-react";
 
 export const runtime = "nodejs";
 export const revalidate = 0;
@@ -16,7 +15,6 @@ interface PreviewEventDoc {
   location?: string;
   ctaUrl?: string;
   isPublished?: boolean;
-  recurrence?: unknown;
   flyerImage?: {
     alt?: string;
     url?: string;
@@ -115,7 +113,6 @@ export default async function EventPreview({ searchParams }: EventPreviewProps) 
         location,
         ctaUrl,
         isPublished,
-        recurrence,
         flyerImage {
           alt,
           "url": asset->url
@@ -138,8 +135,6 @@ export default async function EventPreview({ searchParams }: EventPreviewProps) 
     }
 
     const { date, time } = formatEventDateTime(event.startAt, event.endAt);
-    const recurrence = normalizeRecurrence(event.recurrence, event.startAt);
-    const repeatLabel = recurrence ? describeRecurrence(recurrence, event.startAt) : null;
 
     return (
       <div className="flex h-screen items-center justify-center bg-slate-50 p-4">
@@ -178,14 +173,8 @@ export default async function EventPreview({ searchParams }: EventPreviewProps) 
               <div className="space-y-3 mb-4">
                 <div className="flex items-center gap-2 text-slate-600">
                   <Calendar className="h-4 w-4 flex-shrink-0" />
-                  <span className="text-sm">{repeatLabel ? `First session: ${date}` : date}</span>
+                  <span className="text-sm">{date}</span>
                 </div>
-                {repeatLabel && (
-                  <div className="flex items-center gap-2 text-slate-600">
-                    <Repeat className="h-4 w-4 flex-shrink-0" />
-                    <span className="text-sm">{repeatLabel}</span>
-                  </div>
-                )}
                 <div className="flex items-center gap-2 text-slate-600">
                   <Clock className="h-4 w-4 flex-shrink-0" />
                   <span className="text-sm">{time}</span>
@@ -225,7 +214,6 @@ export default async function EventPreview({ searchParams }: EventPreviewProps) 
                 Status: {event.isPublished ? "✓ Published on website" : "✗ Draft (not visible)"}
               </li>
               <li>Date: {date}</li>
-              {repeatLabel && <li>Repeats: {repeatLabel}</li>}
               <li>Time: {time}</li>
               {event.location && <li>Location: {event.location}</li>}
             </ul>

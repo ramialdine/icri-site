@@ -79,7 +79,6 @@ describe("toDraftInput", () => {
         startLocal: "2026-09-12T13:00",
         endLocal: "2026-09-12T19:00",
         location: "",
-        recurrence: null,
       },
       announcement: null,
     });
@@ -102,89 +101,11 @@ describe("toDraftInput", () => {
       kind: "event",
       reason: "An event flyer.",
       monthlySchedule: null,
-      event: {
-        title: "Talk",
-        summary: null,
-        startLocal: "2026-11-01T19:00",
-        endLocal: "2026-11-01T18:00",
-        location: null,
-        recurrence: null,
-      },
+      event: { title: "Talk", summary: null, startLocal: "2026-11-01T19:00", endLocal: "2026-11-01T18:00", location: null },
       announcement: null,
     });
 
     expect(result.ok).toBe(false);
-  });
-
-  describe("repeating events", () => {
-    // Youth halaqa, Saturdays 7:00-8:30 PM starting Nov 7, 2026 (after the clocks change).
-    const halaqa = (recurrence: NonNullable<Extraction["event"]>["recurrence"]): Extraction => ({
-      kind: "event",
-      reason: "A weekly class.",
-      monthlySchedule: null,
-      event: {
-        title: "Youth Halaqa",
-        summary: null,
-        startLocal: "2026-11-07T19:00",
-        endLocal: "2026-11-07T20:30",
-        location: null,
-        recurrence,
-      },
-      announcement: null,
-    });
-
-    it("keeps a weekly series with its last date", () => {
-      const result = toDraftInput(
-        halaqa({ frequency: "weekly", interval: 1, weekdays: ["sat"], monthlyWeek: null, untilDate: "2026-12-12" })
-      );
-
-      expect(result).toEqual({
-        ok: true,
-        draft: expect.objectContaining({
-          kind: "event",
-          startAt: "2026-11-08T00:00:00.000Z",
-          recurrence: { frequency: "weekly", interval: 1, weekdays: ["sat"], until: "2026-12-12" },
-        }),
-      });
-    });
-
-    it("keeps a monthly rule that matches the first session", () => {
-      const result = toDraftInput(
-        halaqa({ frequency: "monthly", interval: 1, weekdays: [], monthlyWeek: "1", untilDate: null })
-      );
-
-      expect(result.ok && result.draft.kind === "event" && result.draft.recurrence).toEqual({
-        frequency: "monthly",
-        monthlyWeek: "1",
-      });
-    });
-
-    it("rejects rules that contradict the first session", () => {
-      const wrongDay = toDraftInput(
-        halaqa({ frequency: "weekly", interval: 1, weekdays: ["fri"], monthlyWeek: null, untilDate: null })
-      );
-      const wrongWeek = toDraftInput(
-        halaqa({ frequency: "monthly", interval: 1, weekdays: [], monthlyWeek: "last", untilDate: null })
-      );
-      const endsBeforeStart = toDraftInput(
-        halaqa({ frequency: "weekly", interval: 1, weekdays: ["sat"], monthlyWeek: null, untilDate: "2026-11-01" })
-      );
-
-      expect(wrongDay).toEqual({
-        ok: false,
-        reason: "The first session is on a Saturday, but the event is said to repeat on Friday.",
-      });
-      expect(wrongWeek.ok).toBe(false);
-      expect(endsBeforeStart.ok).toBe(false);
-    });
-
-    it("rejects intervals the site can't show", () => {
-      const result = toDraftInput(
-        halaqa({ frequency: "weekly", interval: 6, weekdays: ["sat"], monthlyWeek: null, untilDate: null })
-      );
-
-      expect(result).toEqual({ ok: false, reason: "The event repeats every 6 weeks; only every 1 to 4 weeks is supported." });
-    });
   });
 
   it("passes the model's reason through when the message is not an update", () => {
