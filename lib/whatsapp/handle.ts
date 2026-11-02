@@ -142,8 +142,11 @@ async function handleUpdate(message: WhatsAppMessage, sender: string): Promise<v
   }
 
   const { draft } = result;
+  // Event flyers and program images are shown on the site; attach the forwarded picture.
   const flyerAssetId =
-    draft.kind === "event" && media?.mimeType.startsWith("image/") ? await uploadFlyer(media, draft.title) : undefined;
+    (draft.kind === "event" || draft.kind === "program") && media?.mimeType.startsWith("image/")
+      ? await uploadFlyer(media, draft.title)
+      : undefined;
   const created = await createDraft(draft, { flyerAssetId });
   const summary = describeDraft(draft);
 

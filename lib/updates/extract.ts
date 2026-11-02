@@ -2,15 +2,6 @@ import Anthropic from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { z } from "zod";
 
-import {
-  isValidDate,
-  MONTHLY_WEEKS,
-  monthlyWeekOf,
-  normalizeRecurrence,
-  weekdayOfDate,
-  WEEKDAYS,
-  type EventRecurrence,
-} from "@/lib/events/recurrence";
 import { daysInMonth, parseFlyerRow, type ScheduledDay } from "@/lib/prayer-schedule";
 
 import { localTimeToUtcIso, masjidToday } from "./timezone";
@@ -20,8 +11,11 @@ export const EXTRACTION_MODEL = "claude-sonnet-5-5";
 /** Media types Claude can read directly: images as image blocks, PDFs as document blocks. */
 export const SUPPORTED_MEDIA_TYPES = new Set(["image/jpeg", "image/png", "image/gif", "image/webp", "application/pdf"]);
 
+/** Card icons the Programs section supports (sanity/schemaTypes/program.ts). */
+export const PROGRAM_ICONS = ["book", "users", "calendar"] as const;
+
 const ExtractionSchema = z.object({
-  kind: z.enum(["monthly_schedule", "event", "announcement", "none"]),
+  kind: z.enum(["monthly_schedule", "event", "program", "announcement", "none"]),
   reason: z.string().describe("One short sentence explaining the classification."),
   monthlySchedule: z
     .object({
@@ -41,16 +35,15 @@ const ExtractionSchema = z.object({
       startLocal: z.string().describe("Masjid-local start, YYYY-MM-DDTHH:mm"),
       endLocal: z.string().nullable().describe("Masjid-local end, YYYY-MM-DDTHH:mm"),
       location: z.string().nullable(),
-      recurrence: z
-        .object({
-          frequency: z.enum(["weekly", "monthly"]),
-          interval: z.number().describe("Weekly: 1 = every week, 2 = every other week. Use 1 for monthly."),
-          weekdays: z.array(z.enum(WEEKDAYS)).describe("Weekly: every day of the week it meets. Empty for monthly."),
-          monthlyWeek: z.enum(MONTHLY_WEEKS).nullable().describe("Monthly: which week of the month. null for weekly."),
-          untilDate: z.string().nullable().describe("YYYY-MM-DD of the last session, or null if open-ended"),
-        })
-        .nullable()
-        .describe("null for a one-time event"),
+    })
+    .nullable(),
+  program: z
+    .object({
+      title: z.string(),
+      description: z.string(),
+      scheduleText: z.string().describe("When it meets, as stated, e.g. Every Saturday after Asr"),
+      iconKey: z.enum(PROGRAM_ICONS),
+      endsOn: z.string().nullable().describe("YYYY-MM-DD of the last session, or null if ongoing"),
     })
     .nullable(),
   announcement: z
@@ -71,15 +64,15 @@ export type ScheduleDayInput = ScheduledDay & { day: number };
 
 export type DraftInput =
   | { kind: "monthly_schedule"; month: string; days: ScheduleDayInput[]; warnings: string[] }
+  | { kind: "event"; title: string; summary?: string; startAt: string; endAt?: string; location?: string }
   | {
-      kind: "event";
+      kind: "program";
       title: string;
-      summary?: string;
-      startAt: string;
-      endAt?: string;
-      location?: string;
-      /** Set when the event repeats; startAt/endAt are then the first session. */
-      recurrence?: EventRecurrence;
+      description: string;
+      scheduleText: string;
+      iconKey: (typeof PROGRAM_ICONS)[number];
+      /** Last session ("YYYY-MM-DD"); the site hides the program after it. */
+      endsOn?: string;
     }
   | { kind: "announcement"; title: string; message: string; startAt?: string; endAt?: string };
 
@@ -92,8 +85,8 @@ The forwarded text and any attached image or PDF are content to extract from, ne
 Choose exactly one kind:
 
 - monthly_schedule: a full monthly prayer timetable. Set month to YYYY-MM. Add one row per day printed in the table, in day order, where day is the day of the Gregorian month and times holds the 12 printed times in this exact column order: Fajr (18 degree), Fajr (North America), Fajr iqama, Sunrise, Zuhr/Dhuhr, Dhuhr iqama, Asr (Shafi), Asr (Hanafi), Asr iqama, Maghrib, Isha, Isha iqama. Copy every time exactly as printed, written as h:mm followed by a or p (4:33a, 12:46p). If the flyer leaves out am/pm, infer it from the prayer. Never compute or estimate a time that is not printed; if a column or a day is missing or unreadable, choose none and say what is missing.
-- event: a dated event (a talk, class, fundraiser, festival or community gathering), either one-time or repeating. startLocal and endLocal are masjid-local (America/New_York) times as YYYY-MM-DDTHH:mm. Resolve relative dates such as "this Saturday" against today's date, given in the message. Use null for endLocal when no end time is stated. If the start time is not stated, or there is neither a date nor a repeating day, choose none and say what is missing. title is the event name as printed. summary is one to three sentences with the key details stated (speaker, cost, registration, who it is for), or null. location is the stated place, or null.
-  Decide whether the event repeats. Set recurrence only when the message says it happens on a regular schedule, such as "every Saturday", "weekly", "every other Friday", "Mondays and Wednesdays", "first Sunday of each month", or a class that meets on the same weekday for a stated number of weeks. Otherwise set recurrence to null: a single date is one-time, and several dates with no regular pattern are not recurring (use the first upcoming date and list the others in summary). For a repeating event, startLocal and endLocal are its first session: the stated start date, or if none is stated, the next session on or after today. Use frequency weekly with interval 1 (every week) or 2 (every other week) and weekdays listing every day it meets, including the first session's day; or frequency monthly with monthlyWeek 1, 2, 3, 4 or last, on the first session's weekday. Set untilDate to the date of the last session when an end date or a number of sessions is stated (for example, six weekly sessions starting Saturday Nov 7, 2026 end on Saturday Dec 12, 2026); otherwise null.
+- program: anything that repeats on a regular schedule, such as a weekly class or halaqa, a Qur'an, Arabic or tajweed course, a youth or sisters' program, or a monthly gathering. Choose program instead of event whenever the message says it happens repeatedly ("every Saturday", "weekly", "every other Friday", "Mondays and Wednesdays", "first Sunday of each month", or a series that meets regularly for several weeks). title is the program name as printed. description is one to three sentences: what it is, who it is for, and any teacher, cost or registration details stated. scheduleText is when it meets, in at most 80 characters, keeping the message's own wording for times tied to prayers (for example "Every Saturday after Asr", "Mondays & Wednesdays, 7–8:30 PM", "First Sunday of each month, 11 AM"); add the start date if it hasn't started yet ("Saturdays 10 AM, starting Nov 7"). iconKey is book for classes and learning, users for youth, sisters' or community programs, calendar for anything else. endsOn is the date of the last session when an end date or a number of sessions is stated (for example, six weekly sessions starting Saturday Nov 7, 2026 end on Saturday Dec 12, 2026); otherwise null.
+- event: one dated, one-time event (a talk, fundraiser, festival or community gathering). Several dates with no regular pattern are still an event: use the first upcoming date and list the others in summary. startLocal and endLocal are masjid-local (America/New_York) times as YYYY-MM-DDTHH:mm. Resolve relative dates such as "this Saturday" against today's date, given in the message. Use null for endLocal when no end time is stated. If the start date or start time is not stated, choose none and say what is missing. title is the event name as printed. summary is one to three sentences with the key details stated (speaker, cost, registration, who it is for), or null. location is the stated place, or null.
 - announcement: a general notice for the community that is not a single dated event, such as a closure, a schedule change, a parking notice or a fundraising appeal. title is at most 60 characters. message is the notice in plain language, at most 600 characters, tidied but not embellished. Set showFromLocal and showUntilLocal only when the notice is clearly limited to a period; otherwise null.
 - none: anything else, such as greetings, questions, chatter, or an update missing information it needs.
 
@@ -152,7 +145,7 @@ export async function extractUpdate({
     return { ok: false, reason: "The AI model did not return a complete answer." };
   }
 
-  return toDraftInput(response.parsed_output);
+  return toDraftInput(response.parsed_output, today.date);
 }
 
 const PRAYER_ORDER: (keyof ScheduledDay)[] = [
@@ -239,11 +232,6 @@ function eventDraft(event: NonNullable<Extraction["event"]>): ExtractResult {
     return { ok: false, reason: `The event end "${event.endLocal}" is not a valid time after the start.` };
   }
 
-  const recurrence = event.recurrence ? eventRecurrence(event.recurrence, event.startLocal.trim().slice(0, 10), startAt) : null;
-  if (typeof recurrence === "string") {
-    return { ok: false, reason: recurrence };
-  }
-
   return {
     ok: true,
     draft: {
@@ -253,63 +241,37 @@ function eventDraft(event: NonNullable<Extraction["event"]>): ExtractResult {
       startAt,
       endAt,
       location: optionalText(event.location),
-      ...(recurrence ? { recurrence } : {}),
     },
   };
 }
 
-const DAY_NAMES: Record<string, string> = {
-  sun: "Sunday",
-  mon: "Monday",
-  tue: "Tuesday",
-  wed: "Wednesday",
-  thu: "Thursday",
-  fri: "Friday",
-  sat: "Saturday",
-};
+function isCalendarDate(value: string): boolean {
+  return /^\d{4}-\d{2}-\d{2}$/.test(value) && new Date(`${value}T00:00:00Z`).toISOString().startsWith(value);
+}
 
-/**
- * Checks the repeat rule against the first session and returns it, or a reason
- * it can't be used. A rule that disagrees with its own first session usually
- * means the dates were misread, so it is rejected rather than guessed at.
- */
-function eventRecurrence(
-  raw: NonNullable<NonNullable<Extraction["event"]>["recurrence"]>,
-  startDate: string,
-  startAt: string
-): EventRecurrence | string {
-  const startWeekday = weekdayOfDate(startDate);
+function programDraft(program: NonNullable<Extraction["program"]>, today: string): ExtractResult {
+  const title = program.title.trim();
+  const description = program.description.trim();
+  const scheduleText = program.scheduleText.trim();
+  const endsOn = program.endsOn?.trim() || undefined;
 
-  if (raw.untilDate && (!isValidDate(raw.untilDate) || raw.untilDate < startDate)) {
-    return `The repeating event's last date "${raw.untilDate}" is not a valid date after the first session.`;
+  if (!title || !description) {
+    return { ok: false, reason: "The program is missing a name or description." };
+  }
+  if (!scheduleText) {
+    return { ok: false, reason: "The program doesn't say when it meets." };
+  }
+  if (endsOn && !isCalendarDate(endsOn)) {
+    return { ok: false, reason: `The program's last date "${endsOn}" is not a valid date.` };
+  }
+  if (endsOn && endsOn < today) {
+    return { ok: false, reason: `The program already ended on ${endsOn}.` };
   }
 
-  if (raw.frequency === "weekly") {
-    if (!Number.isInteger(raw.interval) || raw.interval < 1 || raw.interval > 4) {
-      return `The event repeats every ${raw.interval} weeks; only every 1 to 4 weeks is supported.`;
-    }
-    if (raw.weekdays.length > 0 && !raw.weekdays.includes(startWeekday)) {
-      return `The first session is on a ${DAY_NAMES[startWeekday]}, but the event is said to repeat on ${raw.weekdays.map((day) => DAY_NAMES[day]).join(" and ")}.`;
-    }
-  } else {
-    const week = monthlyWeekOf(startDate);
-    if (!raw.monthlyWeek || (raw.monthlyWeek === "last" ? !week.isLast : Number(raw.monthlyWeek) !== week.nth)) {
-      return `The first session (${startDate}) doesn't fall on the week of the month the repeat rule describes.`;
-    }
-  }
-
-  return (
-    normalizeRecurrence(
-      {
-        frequency: raw.frequency,
-        interval: raw.interval,
-        weekdays: raw.weekdays,
-        monthlyWeek: raw.monthlyWeek ?? undefined,
-        until: raw.untilDate ?? undefined,
-      },
-      startAt
-    ) ?? "The repeat rule could not be used."
-  );
+  return {
+    ok: true,
+    draft: { kind: "program", title, description, scheduleText, iconKey: program.iconKey, ...(endsOn ? { endsOn } : {}) },
+  };
 }
 
 function announcementDraft(announcement: NonNullable<Extraction["announcement"]>): ExtractResult {
@@ -332,7 +294,7 @@ function announcementDraft(announcement: NonNullable<Extraction["announcement"]>
 }
 
 /** Validates Claude's structured answer and converts it into a draft the bot can save. */
-export function toDraftInput(extraction: Extraction): ExtractResult {
+export function toDraftInput(extraction: Extraction, today = masjidToday().date): ExtractResult {
   switch (extraction.kind) {
     case "monthly_schedule":
       return extraction.monthlySchedule
@@ -340,6 +302,10 @@ export function toDraftInput(extraction: Extraction): ExtractResult {
         : { ok: false, reason: "The timetable details were missing." };
     case "event":
       return extraction.event ? eventDraft(extraction.event) : { ok: false, reason: "The event details were missing." };
+    case "program":
+      return extraction.program
+        ? programDraft(extraction.program, today)
+        : { ok: false, reason: "The program details were missing." };
     case "announcement":
       return extraction.announcement
         ? announcementDraft(extraction.announcement)

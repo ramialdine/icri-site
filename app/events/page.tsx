@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CalendarDays, Clock3, ExternalLink, MapPin, Repeat } from "lucide-react";
+import { CalendarDays, Clock3, ExternalLink, MapPin } from "lucide-react";
 
 import FlyerThumbnail from "@/components/FlyerThumbnail";
 import { Card, CardContent } from "@/components/ui/card";
@@ -75,17 +75,9 @@ export default async function EventsPage() {
                 </div>
 
                 <div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <div className="inline-flex items-center rounded-xl bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-200">
-                      <CalendarDays className="mr-2 h-4 w-4" />
-                      {event.repeatLabel ? `Next: ${event.dateLabel}` : event.dateLabel}
-                    </div>
-                    {event.repeatLabel ? (
-                      <div className="inline-flex items-center rounded-xl border border-emerald-200 px-3 py-2 text-sm font-semibold text-emerald-800 dark:border-emerald-800 dark:text-emerald-200">
-                        <Repeat className="mr-2 h-4 w-4" />
-                        {event.repeatLabel}
-                      </div>
-                    ) : null}
+                  <div className="inline-flex items-center rounded-xl bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-200">
+                    <CalendarDays className="mr-2 h-4 w-4" />
+                    {event.dateLabel}
                   </div>
                   <h2 className="mt-3 text-2xl font-bold">{event.title}</h2>
                   <p className="mt-2 max-w-2xl leading-7 text-stone-600 dark:text-stone-300">{event.summary}</p>
@@ -141,9 +133,7 @@ export default async function EventsPage() {
                       />
                     ) : null}
                     <div>
-                      <p className="text-sm font-semibold text-stone-500 dark:text-stone-400">
-                        {event.repeatLabel ? `${event.repeatLabel} · Last session ${event.dateLabel}` : `${event.dateLabel} · Ended`}
-                      </p>
+                      <p className="text-sm font-semibold text-stone-500 dark:text-stone-400">{event.dateLabel} · Ended</p>
                       <p className="mt-1 text-lg font-semibold">{event.title}</p>
                       <p className="mt-1 text-sm text-stone-600 dark:text-stone-300">{event.summary}</p>
                     </div>

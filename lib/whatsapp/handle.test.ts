@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { createDraft, discardDraft, publishDraft } from "@/lib/updates/drafts";
+import { createDraft, discardDraft, publishDraft, uploadFlyer } from "@/lib/updates/drafts";
 import { extractUpdate } from "@/lib/updates/extract";
 
 import { downloadMedia, sendApprovalRequest, sendText } from "./client";
@@ -121,6 +121,37 @@ describe("handleWebhookPayload", () => {
     expect(extractUpdate).toHaveBeenCalledWith({ text: "October", media });
     expect(sendText).toHaveBeenCalledWith(APPROVER, "I couldn't turn that into a website update: A greeting.");
     expect(createDraft).not.toHaveBeenCalled();
+  });
+
+  it("attaches a forwarded photo to a recurring program as its card image", async () => {
+    const media = { data: Buffer.from("jpg"), mimeType: "image/jpeg" };
+    vi.mocked(downloadMedia).mockResolvedValue(media);
+    vi.mocked(uploadFlyer).mockResolvedValue("image-asset-1");
+    vi.mocked(extractUpdate).mockResolvedValue({
+      ok: true,
+      draft: {
+        kind: "program",
+        title: "Youth Halaqa",
+        description: "Weekly halaqa for ages 12-18.",
+        scheduleText: "Every Saturday after Maghrib",
+        iconKey: "users",
+      },
+    });
+    vi.mocked(createDraft).mockResolvedValue({
+      draftId: "drafts.wa-program-1",
+      rev: "rev1",
+      previewPath: "/preview/programs?id=drafts.wa-program-1",
+    });
+
+    await handleWebhookPayload(
+      payload({ id: "wamid.photo", from: ADMIN, type: "image", image: { id: "media-2", mime_type: "image/jpeg" } })
+    );
+
+    expect(uploadFlyer).toHaveBeenCalledWith(media, "Youth Halaqa");
+    expect(createDraft).toHaveBeenCalledWith(expect.objectContaining({ kind: "program" }), { flyerAssetId: "image-asset-1" });
+    expect(sendApprovalRequest).toHaveBeenCalledWith(
+      expect.objectContaining({ previewUrl: "https://example.org/preview/programs?id=drafts.wa-program-1" })
+    );
   });
 
   it("ignores senders who are not on the allowlist", async () => {

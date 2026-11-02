@@ -40,6 +40,12 @@ export const programType = defineType({
       type: "string",
     }),
     defineField({
+      name: "endsOn",
+      title: "Last Date (optional)",
+      description: "For a series that ends, such as a 6-week course. The program is hidden from the website after this date.",
+      type: "date",
+    }),
+    defineField({
       name: "cardImage",
       title: "Card Image",
       description: "Optional image for this program card.",

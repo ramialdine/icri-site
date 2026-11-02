@@ -71,60 +71,17 @@ describe("sanity/lib/content", () => {
     const payload = await getHomeContentPayload();
 
     expect(payload).not.toBeNull();
-    // Upcoming events run soonest first, past ones most recent first.
     expect(payload!.events.map((event) => [event.title, event.isPast])).toEqual([
-      ["In Progress Event", false],
       ["Future Event", false],
+      ["In Progress Event", false],
       ["Newer Past Event", true],
       ["Older Past Event", true],
     ]);
     expect(payload!.events[2].imageAlt).toBe("Newer Past Event flyer");
-    expect(vi.mocked(sanityClient!.fetch).mock.calls[1][1]).toEqual({
-      since: "2026-02-17T12:00:00.000Z",
-      sinceDate: "2026-02-17",
-    });
+    expect(vi.mocked(sanityClient!.fetch).mock.calls[1][1]).toEqual({ since: "2026-02-17T12:00:00.000Z" });
+    expect(vi.mocked(sanityClient!.fetch).mock.calls[2][1]).toEqual({ today: "2026-03-19" });
     expect(payload!.programs[0].iconKey).toBe("book");
     expect(payload!.programs[0].imageAlt).toBe("Program Title image");
-  });
-
-  it("shows a repeating event's next session and keeps it upcoming until the series ends", async () => {
-    vi.spyOn(Date, "now").mockReturnValue(new Date("2026-11-02T12:00:00.000Z").getTime());
-
-    const fetchMock = vi.mocked(sanityClient!.fetch) as unknown as ChainedFetchMock;
-    fetchMock
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([
-        {
-          _id: "weekly-halaqa",
-          title: "Youth Halaqa",
-          // First session Sat Oct 3, 7:00-8:30 PM EDT.
-          startAt: "2026-10-03T23:00:00.000Z",
-          endAt: "2026-10-04T00:30:00.000Z",
-          recurrence: { frequency: "weekly", interval: 1, weekdays: ["sat"] },
-        },
-        {
-          _id: "ended-series",
-          title: "Tajweed Series",
-          startAt: "2026-09-05T23:00:00.000Z",
-          recurrence: { frequency: "weekly", interval: 1, until: "2026-10-24" },
-        },
-        { _id: "one-off", title: "Open House", startAt: "2026-11-20T17:00:00.000Z" },
-      ])
-      .mockResolvedValueOnce([]);
-
-    const payload = await getHomeContentPayload();
-
-    expect(payload!.events).toEqual([
-      expect.objectContaining({ title: "Youth Halaqa", date: "Nov 07", isPast: false, repeatLabel: "Every Saturday" }),
-      expect.objectContaining({ title: "Open House", isPast: false }),
-      expect.objectContaining({
-        title: "Tajweed Series",
-        date: "Oct 24",
-        isPast: true,
-        repeatLabel: "Every Saturday until Oct 24, 2026",
-      }),
-    ]);
-    expect(payload!.events[1]).not.toHaveProperty("repeatLabel");
   });
 
   it("formats announcement windows with expected labels", () => {

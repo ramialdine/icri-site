@@ -3,7 +3,7 @@ import { createHash } from "node:crypto";
 import { sanityWriteClient } from "@/sanity/lib/writeClient";
 
 export type BotLogFields = {
-  kind?: "monthly_schedule" | "event" | "announcement" | "decision" | "none";
+  kind?: "monthly_schedule" | "event" | "program" | "announcement" | "decision" | "none";
   status?: "received" | "drafted" | "approved" | "rejected" | "ignored" | "failed";
   draftId?: string;
   note?: string;

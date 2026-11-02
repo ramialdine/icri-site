@@ -15,6 +15,7 @@ export type DecisionResult =
 const LIVE_PATHS: Record<string, string> = {
   monthlySchedule: "/#prayers",
   event: "/events",
+  program: "/programs",
   announcement: "/announcements",
 };
 
@@ -60,7 +61,6 @@ export async function createDraft(input: DraftInput, options: { flyerAssetId?: s
         startAt: input.startAt,
         endAt: input.endAt,
         location: input.location,
-        recurrence: input.recurrence,
         isPublished: true,
         ...(options.flyerAssetId
           ? {
@@ -87,6 +87,30 @@ export async function createDraft(input: DraftInput, options: { flyerAssetId?: s
         isActive: true,
       });
       return { draftId, rev: doc._rev, previewPath: `/preview/announcements?id=${draftId}` };
+    }
+    case "program": {
+      const draftId = `drafts.wa-program-${randomUUID()}`;
+      const doc = await client.createOrReplace({
+        _id: draftId,
+        _type: "program",
+        title: input.title,
+        description: input.description,
+        scheduleText: input.scheduleText,
+        iconKey: input.iconKey,
+        endsOn: input.endsOn,
+        order: 0,
+        isActive: true,
+        ...(options.flyerAssetId
+          ? {
+              cardImage: {
+                _type: "image",
+                asset: { _type: "reference", _ref: options.flyerAssetId },
+                alt: `${input.title} flyer`,
+              },
+            }
+          : {}),
+      });
+      return { draftId, rev: doc._rev, previewPath: `/preview/programs?id=${draftId}` };
     }
   }
 }

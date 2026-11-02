@@ -1,4 +1,3 @@
-import { describeRecurrence } from "@/lib/events/recurrence";
 import { to12Hour } from "@/sanity/lib/prayer";
 
 import type { DraftInput } from "./extract";
@@ -43,10 +42,6 @@ export function describeDraft(draft: DraftInput): string {
       const until = draft.endAt ? `–${formatDateTime(draft.endAt, { hour: "numeric", minute: "2-digit" })}` : "";
       const where = draft.location ? ` at ${draft.location}` : "";
       const summary = draft.summary ? ` ${truncate(draft.summary, 300)}` : "";
-      if (draft.recurrence) {
-        const repeats = describeRecurrence(draft.recurrence, draft.startAt);
-        return `Repeating event "${draft.title}": ${repeats}. First session ${when}${until}${where}.${summary}`;
-      }
       return `Event "${draft.title}", ${when}${until}${where}.${summary}`;
     }
     case "announcement": {
@@ -55,6 +50,12 @@ export function describeDraft(draft: DraftInput): string {
           ? ` Shown ${draft.startAt ? `from ${formatDateTime(draft.startAt, DATE_TIME)} ` : ""}${draft.endAt ? `until ${formatDateTime(draft.endAt, DATE_TIME)}` : ""}.`.replace(" .", ".")
           : "";
       return `Announcement "${draft.title}": ${truncate(draft.message, 400)}${window}`;
+    }
+    case "program": {
+      const until = draft.endsOn
+        ? ` Shown on the website until ${new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" }).format(new Date(`${draft.endsOn}T00:00:00Z`))}.`
+        : "";
+      return `Program "${draft.title}" (${draft.scheduleText}): ${truncate(draft.description, 400)}${until}`;
     }
   }
 }

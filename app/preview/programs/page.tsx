@@ -7,6 +7,8 @@ export const revalidate = 0;
 
 interface PreviewProgramDoc {
   _id: string;
+  isDraft?: boolean;
+  endsOn?: string;
   title: string;
   description: string;
   iconKey?: string;
@@ -61,6 +63,8 @@ export default async function ProgramPreview({
     const program: PreviewProgramDoc | null = await sanityPreviewClient?.fetch(
       `*[_type == "program" && _id in [$id, $publishedId, $draftId]][0]{
         _id,
+        "isDraft": _originalId in path("drafts.**"),
+        endsOn,
         title,
         description,
         iconKey,
@@ -90,6 +94,11 @@ export default async function ProgramPreview({
     return (
       <div className="flex h-screen items-center justify-center bg-slate-50 p-4">
         <div className="max-w-2xl w-full">
+          {program.isDraft && (
+            <p className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+              Unpublished draft. This is not on the website until it is approved.
+            </p>
+          )}
           <Card className="overflow-hidden">
             {program.cardImage?.url ? (
               <div className="relative w-full aspect-video">
@@ -132,6 +141,9 @@ export default async function ProgramPreview({
                     Schedule
                   </h3>
                   <p className="text-sm text-slate-600">{program.scheduleText}</p>
+                  {program.endsOn && (
+                    <p className="mt-1 text-sm text-slate-500">Shown on the website until {program.endsOn}</p>
+                  )}
                 </div>
               )}
             </div>

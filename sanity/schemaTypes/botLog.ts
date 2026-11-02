@@ -13,7 +13,7 @@ export const botLogType = defineType({
       name: "kind",
       title: "Kind",
       type: "string",
-      options: { list: ["monthly_schedule", "event", "announcement", "decision", "none"] },
+      options: { list: ["monthly_schedule", "event", "program", "announcement", "decision", "none"] },
     }),
     defineField({
       name: "status",
