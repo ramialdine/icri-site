@@ -79,6 +79,7 @@ describe("sanity/lib/content", () => {
     ]);
     expect(payload!.events[2].imageAlt).toBe("Newer Past Event flyer");
     expect(vi.mocked(sanityClient!.fetch).mock.calls[1][1]).toEqual({ since: "2026-02-17T12:00:00.000Z" });
+    expect(vi.mocked(sanityClient!.fetch).mock.calls[2][1]).toEqual({ today: "2026-03-19" });
     expect(payload!.programs[0].iconKey).toBe("book");
     expect(payload!.programs[0].imageAlt).toBe("Program Title image");
   });

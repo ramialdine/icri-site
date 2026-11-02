@@ -15,7 +15,8 @@ What it understands:
 | Forwarded message | Becomes | Preview page |
 | --- | --- | --- |
 | Monthly prayer timetable (photo or PDF) | `monthlySchedule` for that month, which drives `/api/prayers/today` | `/preview/schedule?id=…` |
-| Event flyer or event details | `event`, with the flyer image attached | `/preview/events?id=…` |
+| Flyer or details for a one-time event | `event`, with the flyer image attached | `/preview/events?id=…` |
+| Anything that repeats, such as a weekly class, halaqa, course or monthly gathering | `program` on the Programs section, with the schedule as written ("Every Saturday after Asr") and the flyer as its image. A series with a stated end gets a last date and disappears from the site after it. | `/preview/programs?id=…` |
 | General notice | `announcement` | `/preview/announcements?id=…` |
 
 Safeguards:

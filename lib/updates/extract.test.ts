@@ -19,6 +19,7 @@ function septemberExtraction(): Extraction {
       })),
     },
     event: null,
+    program: null,
     announcement: null,
   };
 }
@@ -80,7 +81,8 @@ describe("toDraftInput", () => {
         endLocal: "2026-09-12T19:00",
         location: "",
       },
-      announcement: null,
+      program: null,
+    announcement: null,
     });
 
     expect(result).toEqual({
@@ -102,15 +104,65 @@ describe("toDraftInput", () => {
       reason: "An event flyer.",
       monthlySchedule: null,
       event: { title: "Talk", summary: null, startLocal: "2026-11-01T19:00", endLocal: "2026-11-01T18:00", location: null },
-      announcement: null,
+      program: null,
+    announcement: null,
     });
 
     expect(result.ok).toBe(false);
   });
 
+  describe("recurring programs", () => {
+    const program = (overrides: Partial<NonNullable<Extraction["program"]>>): Extraction => ({
+      kind: "program",
+      reason: "A weekly class.",
+      monthlySchedule: null,
+      event: null,
+      program: {
+        title: " Youth Halaqa ",
+        description: "Weekly halaqa for boys and girls aged 12-18.",
+        scheduleText: "Every Saturday after Maghrib",
+        iconKey: "users",
+        endsOn: null,
+        ...overrides,
+      },
+      announcement: null,
+    });
+
+    it("turns a recurring activity into a program draft", () => {
+      expect(toDraftInput(program({ endsOn: "2026-12-12" }), "2026-11-02")).toEqual({
+        ok: true,
+        draft: {
+          kind: "program",
+          title: "Youth Halaqa",
+          description: "Weekly halaqa for boys and girls aged 12-18.",
+          scheduleText: "Every Saturday after Maghrib",
+          iconKey: "users",
+          endsOn: "2026-12-12",
+        },
+      });
+    });
+
+    it("leaves out the last date for an ongoing program", () => {
+      const result = toDraftInput(program({}), "2026-11-02");
+      expect(result.ok && result.draft).not.toHaveProperty("endsOn");
+    });
+
+    it("rejects a program that already ended or has no schedule", () => {
+      expect(toDraftInput(program({ endsOn: "2026-10-31" }), "2026-11-02")).toEqual({
+        ok: false,
+        reason: "The program already ended on 2026-10-31.",
+      });
+      expect(toDraftInput(program({ endsOn: "2026-02-30" }), "2026-11-02").ok).toBe(false);
+      expect(toDraftInput(program({ scheduleText: " " }), "2026-11-02")).toEqual({
+        ok: false,
+        reason: "The program doesn't say when it meets.",
+      });
+    });
+  });
+
   it("passes the model's reason through when the message is not an update", () => {
     expect(
-      toDraftInput({ kind: "none", reason: "A greeting.", monthlySchedule: null, event: null, announcement: null })
+      toDraftInput({ kind: "none", reason: "A greeting.", monthlySchedule: null, event: null, program: null, announcement: null })
     ).toEqual({ ok: false, reason: "A greeting." });
   });
 });

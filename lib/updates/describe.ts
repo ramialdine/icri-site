@@ -51,5 +51,11 @@ export function describeDraft(draft: DraftInput): string {
           : "";
       return `Announcement "${draft.title}": ${truncate(draft.message, 400)}${window}`;
     }
+    case "program": {
+      const until = draft.endsOn
+        ? ` Shown on the website until ${new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" }).format(new Date(`${draft.endsOn}T00:00:00Z`))}.`
+        : "";
+      return `Program "${draft.title}" (${draft.scheduleText}): ${truncate(draft.description, 400)}${until}`;
+    }
   }
 }

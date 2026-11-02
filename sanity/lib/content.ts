@@ -1,5 +1,7 @@
 import { groq } from "next-sanity";
 
+import { masjidToday } from "@/lib/updates/timezone";
+
 import { sanityClient } from "./client";
 
 type AnnouncementDoc = {
@@ -145,7 +147,8 @@ const allEventsQuery = groq`*[_type == "event" && coalesce(isPublished, true) ==
   }
 }`;
 
-const programsQuery = groq`*[_type == "program" && isActive == true] | order(order asc, _createdAt asc) {
+// A program with a last date is hidden once that date has passed (masjid-local).
+const programsQuery = groq`*[_type == "program" && isActive == true && coalesce(endsOn, "9999-12-31") >= $today] | order(order asc, _createdAt asc) {
   _id,
   title,
   description,
@@ -310,7 +313,7 @@ export async function getHomeContentPayload(): Promise<HomeContentPayload | null
   const [announcements, events, programs] = await Promise.all([
     sanityClient.fetch<AnnouncementDoc[]>(announcementsQuery, { now: nowIso }),
     sanityClient.fetch<EventDoc[]>(eventsQuery, { since: sinceIso }),
-    sanityClient.fetch<ProgramDoc[]>(programsQuery),
+    sanityClient.fetch<ProgramDoc[]>(programsQuery, { today: masjidToday(new Date(now)).date }),
   ]);
 
   const mappedEvents = (events || [])
@@ -407,7 +410,7 @@ export async function getProgramsPagePayload(): Promise<ProgramListItem[] | null
     return null;
   }
 
-  const programs = await sanityClient.fetch<ProgramDoc[]>(programsQuery);
+  const programs = await sanityClient.fetch<ProgramDoc[]>(programsQuery, { today: masjidToday().date });
 
   return (programs || []).map((program) => ({
     id: program._id,
