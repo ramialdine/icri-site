@@ -6,6 +6,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { getProgramsPagePayload, type ProgramListItem } from "@/sanity/lib/content";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 const fallbackPrograms: ProgramListItem[] = [
   {
     id: "fallback-1",
